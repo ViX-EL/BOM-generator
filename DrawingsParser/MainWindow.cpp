@@ -91,7 +91,7 @@ void MainWindow::OnAbout(wxCommandEvent& event)
 {
 	wxAboutDialogInfo info;
 	info.SetName(_("Bom generator"));
-	info.SetVersion(_("0.3.3 Beta"));
+	info.SetVersion(_("0.4.0 Beta"));
 	info.SetDescription(_(aboutStr));
 	info.SetCopyright("(C) 2024 Dmitriy Zelenev <Dmitry22_s@cc7.cn>");
 	wxAboutBox(info);

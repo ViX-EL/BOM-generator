@@ -165,6 +165,7 @@
     <ClCompile Include="DialogPrinter.cpp" />
     <ClCompile Include="TextParserMEN.cpp" />
     <ClCompile Include="TextParserNAG.cpp" />
+    <ClCompile Include="TextParserPTE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseTextParser.h" />
@@ -185,6 +186,7 @@
     <ClInclude Include="DialogPrinter.h" />
     <ClInclude Include="TextParserMEN.h" />
     <ClInclude Include="TextParserNAG.h" />
+    <ClInclude Include="TextParserPTE.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

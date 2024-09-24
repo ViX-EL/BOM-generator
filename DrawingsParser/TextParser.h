@@ -27,11 +27,11 @@ public:
 private:
 	enum class DesignerIndex
 	{
-		LGN, ASP, MEN, IOT, NAG
+		LGN, ASP, MEN, IOT, NAG, PTE
 	};
 	DesignerIndex designerIdx = DesignerIndex::LGN;
 
-	const std::vector<std::wstring> designersNames {L"LGN", L"ASP", L"MEN", L"IOT", L"NAG"};
+	const std::vector<std::wstring> designersNames {L"LGN", L"ASP", L"MEN", L"IOT", L"NAG", L"PTE"};
 
 	const std::wstring* text{ nullptr };
 	BaseTextParser::Columns columns;
@@ -42,7 +42,7 @@ private:
 
 	std::shared_ptr<BaseTextParser> currentParser;
 
-	std::shared_ptr<BaseTextParser> parsers[5];
+	std::shared_ptr<BaseTextParser> parsers[6];
 };
 
 #endif // TEXTPARSER_H

@@ -8,7 +8,7 @@
 
 #include <wx/wx.h>
 #include "DialogPrinter.h"
-#include "DOCXPrinter.h"
+//#include "DOCXPrinter.h"
 #include "DWGTextLoader.h"
 #include "PDFTextLoader.h"
 #include "TextParser.h"
@@ -26,9 +26,9 @@ bool DrawingsParserApp::OnInit()
 
 	//ASP%ISO%
 
-	std::string fileName = "GCC-PGZ-DDD-00011-06-1100-TK-ISO-00001_03_2_source" ".dwg";
+	std::string fileName = "GCC-PTE-DDD-00043-10-4300-TK-ISO-00036 (3)" ".dwg";
 
-	processingOneFile(fileName, LOAD);
+	processingOneFile(fileName, NONE);
 
 	return true;
 }
@@ -39,7 +39,7 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 		return;
 	}
 
-	DWGTextLoader textLoader(new DOCXPrinter);
+	DWGTextLoader textLoader(new DialogPrinter);
 	if (state & LOAD || state & LOAD_PARSE || state & LOAD_PARSE_WRITE)
 	{
 		textLoader.loadFile(fileName);

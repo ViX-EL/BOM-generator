@@ -1,13 +1,14 @@
 #pragma once
 #include "BaseTextParser.h"
-class TextParserNAG : public BaseTextParser
+class TextParserPTE : public BaseTextParser
 {
 private:
 	bool readLastComponentNumber() override;
+	bool readComponent(Columns* columns) override;
 	void readTablePartData();
 
 public:
-	TextParserNAG(const std::wstring& text, Columns& columns,
+	TextParserPTE(const std::wstring& text, Columns& columns,
 		std::vector<int>& componentsCountPerList, wchar_t separator);
 	void parse(const std::wstring& fileName) override;
 };

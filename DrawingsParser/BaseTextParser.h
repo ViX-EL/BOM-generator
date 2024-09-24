@@ -26,7 +26,7 @@ protected:
 	int lastComponentNumber{ 0 };
 
 	virtual bool readLastComponentNumber() = 0;
-	bool readComponent(Columns* columns);
+	virtual bool readComponent(Columns* columns);
 
 	std::pair<size_t, size_t> moveToNextSubString();
 	std::pair<size_t, size_t> moveToNextSubString(size_t& positionInText) const;

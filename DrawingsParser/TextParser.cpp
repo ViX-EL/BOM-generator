@@ -1,7 +1,19 @@
 ﻿#include "TextParser.h"
 
-#include <regex>
+#include "TextParserLGN.h"
+#include "TextParserASP.h"
+#include "TextParserMEN.h"
+#include "TextParserIOT.h"
+#include "TextParserNAG.h"
+#include "TextParserPTE.h"
+#include "IMessagePrinter.h"
+
+#include <string>
+#include <map>
 #include <vector>
+#include <memory>
+#include <regex>
+
 
 TextParser::TextParser(const std::wstring& text, wchar_t separator,IMessagePrinter* printer) : 
 	text(&text), separator(separator), printer(printer)
@@ -80,6 +92,12 @@ void TextParser::parse(const std::wstring& fileName)
 	case DesignerIndex::NAG:
 		if (!parsers[index]) {
 			parsers[index] = std::make_shared<TextParserNAG>(*text, columns, componentsCountPerList, separator);
+		}
+		currentParser = parsers[index];
+		break;
+	case DesignerIndex::PTE:
+		if (!parsers[index]) {
+			parsers[index] = std::make_shared<TextParserPTE>(*text, columns, componentsCountPerList, separator);
 		}
 		currentParser = parsers[index];
 		break;

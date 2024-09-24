@@ -32,6 +32,7 @@ int DWGTextLoader::loadFile(const std::string& filename)
 	char* text_value{ nullptr };
 	int found{ 0 };
 	int isnew{ 0 };
+	std::wstring text2;
 	for (BITCODE_BL i = 0; i < dwg.num_objects; i++)
 	{
 		if (dwg.object[i].type == DWG_TYPE_TEXT)
