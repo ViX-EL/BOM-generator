@@ -3,13 +3,17 @@
 #include "BaseTextParser.h"
 
 #include "xlsxwriter.h"
+#include "IMessagePrinter.h"
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class TableWriter
 {
 private:
+	size_t currentList = 0;
+	std::unique_ptr<IMessagePrinter> printer;
 	const BaseTextParser::Columns* columns;
 	const std::vector<std::wstring> columnsNames { 
 		L"Описание компонента", L"Условный диаметр", L"Документ", 
@@ -29,13 +33,12 @@ private:
 	std::string tableFileName{"IsoBOM"};
 
 	void writeHeders() const;
-	void writeListsLines(uint16_t startRow) const;
+	void writeListsLines(uint16_t startRow);
 	void changeFileNameIfAlreadyExists(const std::string& tableDirectoryName);
 
 public:
-	TableWriter(const BaseTextParser::Columns& columns, const std::vector<int>&
-		componentsCountPerList);
-	void writeTable() const;
+	TableWriter(const BaseTextParser::Columns& columns, const std::vector<int>& componentsCountPerList, IMessagePrinter* printer);
+	void writeTable();
 	void createNewTableFile(const std::string& tableDirectoryName);
 	const std::string& getFileName();
 };

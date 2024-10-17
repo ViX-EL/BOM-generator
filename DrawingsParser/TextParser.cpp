@@ -13,6 +13,7 @@
 #include <vector>
 #include <memory>
 #include <regex>
+#include "StringConvert.h"
 
 
 TextParser::TextParser(const std::wstring& text, wchar_t separator,IMessagePrinter* printer) : 
@@ -107,5 +108,10 @@ void TextParser::parse(const std::wstring& fileName)
 		return;
 	}
 
-	currentParser->parse(newfileNameStr);
+	try {
+		currentParser->parse(newfileNameStr);
+	}
+	catch (const std::exception& ex) {
+		printer->printError(L"Ошибка парсинга: " + utf8_decode(ex.what()) + L" \nВ файле " + fileName);
+	}
 }

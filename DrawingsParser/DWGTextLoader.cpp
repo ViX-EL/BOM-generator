@@ -44,6 +44,8 @@ int DWGTextLoader::loadFile(const std::string& filename)
 		}
 	}
 
+	text = text + separator;
+
 	if (!found) {
 		printer->printError(L"Text not found!");
 		return 0;

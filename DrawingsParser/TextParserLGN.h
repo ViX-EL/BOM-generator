@@ -15,13 +15,18 @@ public:
 	void parse(const std::wstring& fileName) override;
 
 private:
+
 	bool readComponent();
 	bool readLastComponentNumber() override;
 	bool readDescriptionAndDiameter(const std::wstring& descriptionStr,
 		std::wstring& diameterStr);
 	void readDocument();
+	
+	bool findCountStr();
 	bool readList();
 	bool isHaveOnlyOneList();
+
+	bool lineBreak = false;
 };
 
 #endif // TEXTPARSERLGN_H

@@ -80,7 +80,7 @@ void MainWindow::OnCreateXlsxTable(wxCommandEvent& event)
 		parser.parse(textLoader.getFileName());
 	}
 
-	TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList());
+	TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList(), new DialogPrinter);
 	tableWriter.createNewTableFile(outputFolderTextField->GetLabelText().ToStdString());
 	tableWriter.writeTable();
 

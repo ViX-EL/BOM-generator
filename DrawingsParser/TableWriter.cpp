@@ -3,6 +3,7 @@
 #include "xlsxwriter.h"
 
 #include "StringConvert.h"
+#include "IMessagePrinter.h"
 
 #include <string>
 #include <vector>
@@ -17,39 +18,34 @@ void TableWriter::writeHeders() const
 	}
 }
 
-void TableWriter::writeListsLines(uint16_t startRow) const
+void TableWriter::writeListsLines(uint16_t startRow)
 {
-	size_t currentList{ 0 };
+	currentList = 0;
 	uint16_t currentRow{ startRow };
 	for (size_t i = 0; i < componentsCountPerList->size(); i++)
 	{
 		for (size_t j = 0; j < componentsCountPerList->at(currentList); j++)
 		{
 			const size_t componentsFieldsCount{ 5 };
-			for (uint16_t compFieldIdx = 0; compFieldIdx <
-				componentsFieldsCount; compFieldIdx++)
+			for (uint16_t compFieldIdx = 0; compFieldIdx < componentsFieldsCount; compFieldIdx++)
 			{
-				worksheet_write_string(worksheet, currentRow + 1,
-					compFieldIdx, utf8_encode(
-					columns->at(columnsNames[compFieldIdx])
-					.at(currentRow)).c_str(), NULL);
+				std::wstring currentCellValue = columns->at(columnsNames[compFieldIdx]).at(currentRow);
+				worksheet_write_string(worksheet, currentRow + 1, compFieldIdx, utf8_encode(currentCellValue).c_str(), NULL);
 			}
 
-			for (uint16_t colIdx = componentsFieldsCount; colIdx <
-				columnsNames.size(); colIdx++)
+			for (uint16_t colIdx = componentsFieldsCount; colIdx < columnsNames.size(); colIdx++)
 			{
-				worksheet_write_string(worksheet, currentRow + 1, 
-					colIdx, utf8_encode(columns->at(columnsNames[colIdx])
-					.at(currentList)).c_str(), NULL);
+				std::wstring currentCellValue = columns->at(columnsNames[colIdx]).at(currentList);
+				worksheet_write_string(worksheet, currentRow + 1, colIdx, utf8_encode(currentCellValue).c_str(), NULL);
 			}
 			currentRow++;
 		}
 		currentList++;
 	}
+	//printer->printText(columns->at(L"Имя файла").at(currentList), L"Log");
 }
 
-void TableWriter::changeFileNameIfAlreadyExists(const std::string&
-	tableDirectoryName)
+void TableWriter::changeFileNameIfAlreadyExists(const std::string& tableDirectoryName)
 {
 	namespace fs = std::filesystem;
 
@@ -69,8 +65,7 @@ void TableWriter::changeFileNameIfAlreadyExists(const std::string&
 	if (alreadyExistsCount > 0) {
 		std::string currFileName;
 		do {
-			currFileName = tableFileName + " (" 
-				+ std::to_string(alreadyExistsCount) + ')' + ".xlsx";
+			currFileName = tableFileName + " (" + std::to_string(alreadyExistsCount) + ')' + ".xlsx";
 			alreadyExistsCount++;
 		} while (fs::exists(tableDirectoryName + '\\' + currFileName));
 		tableFileName = currFileName;
@@ -86,20 +81,26 @@ const std::string& TableWriter::getFileName()
 }
 
 TableWriter::TableWriter(const BaseTextParser::Columns& columns, const 
-	std::vector<int>& componentsCountPerList) :
+	std::vector<int>& componentsCountPerList, IMessagePrinter* printer) :
 	columns(&columns), componentsCountPerList(&componentsCountPerList),
-	workbook(nullptr), worksheet(nullptr)
+	workbook(nullptr), worksheet(nullptr), printer(printer)
 {
 
 }
 
-void TableWriter::writeTable() const
+void TableWriter::writeTable()
 {
-	writeHeders();
+	try {
+		writeHeders();
 
-	writeListsLines(0);
+		writeListsLines(0);
 
-	workbook_close(workbook);
+		workbook_close(workbook);
+	}
+	catch (const std::exception& ex) {
+		printer->printError(L"Ошибка заполнения файла таблицы: " + utf8_decode(ex.what()) + L" \nВ файле " 
+			+ columns->at(L"Имя файла").at(currentList));
+	}
 }
 
 void TableWriter::createNewTableFile(const std::string& tableDirectoryName)

@@ -58,7 +58,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wstring& su
 	return std::pair(beginIdx, endIdx);
 }
 
-// »щет предыдущую подстроку дл¤ строки, котора¤ ищетс¤ далее по тексту от
+// ищет предыдущую подстроку для строки, которая ищется далее по тексту от
 // текущей позиции в тексте
 std::wstring BaseTextParser::getPreviouslySubString(const std::wstring& subString, bool reverseFind)
 {
@@ -67,7 +67,7 @@ std::wstring BaseTextParser::getPreviouslySubString(const std::wstring& subStrin
 }
 
 
-// ¬озвращает следующую подстроку дл¤ подстроки, котора¤ ищетс¤ дальше по тексту или назад
+// возвращает следующую подстроку для подстроки, которая ищется дальше по тексту или назад
 // по тексту, в зависимости от reverseFind, относительно текущей позиции в тексте
 std::wstring BaseTextParser::getNextSubString(const std::wstring& subString, bool reverseFind)
 {

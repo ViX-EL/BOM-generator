@@ -26,7 +26,7 @@ bool DrawingsParserApp::OnInit()
 
 	//ASP%ISO%
 
-	std::string fileName = "GCC-PTE-DDD-00043-10-4300-TK-ISO-00036 (3)" ".dwg";
+	std::string fileName = "GCC-LGN-DDD-12510-06-0000-TK-ISO-00032_04_2_source" ".dwg";
 
 	processingOneFile(fileName, NONE);
 
@@ -57,7 +57,7 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 	{
 		if (!parser.getColumns().empty())
 		{
-			TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList());
+			TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList(), new DialogPrinter);
 			tableWriter.createNewTableFile(".\\");
 			tableWriter.writeTable();
 		}

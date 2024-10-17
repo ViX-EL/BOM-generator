@@ -6,6 +6,11 @@
 #include <wx/wx.h>
 #include <string>
 
+DialogPrinter::DialogPrinter()
+{
+	textDialog = new TextDialog(L"");
+}
+
 void DialogPrinter::printError(const std::wstring& message) const
 {
 	wxMessageBox(message, "Ошибка", wxOK | wxICON_ERROR);
@@ -13,8 +18,9 @@ void DialogPrinter::printError(const std::wstring& message) const
 
 void DialogPrinter::printText(const std::wstring& text, const std::wstring& label)
 {
-	//wxMessageBox(message, "Информация", wxOK | wxICON_INFORMATION);
-	TextDialog* textDialog = new TextDialog(utf8_encode(label));
+	textDialog->SetLabel(label);
 	textDialog->setText(text);
-	textDialog->Show(true);
+	if (!textDialog->IsVisible()) {
+		textDialog->Show(true);
+	}
 }
