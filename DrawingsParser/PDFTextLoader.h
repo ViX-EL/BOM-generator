@@ -22,7 +22,7 @@ private:
 public:
 
 	PDFTextLoader(IMessagePrinter* printer);
-	int loadFile(const std::string& filename) override;
+	int loadFile(const std::string& filePath) override;
 	void setBoundings(const Boundings& boundings);
 };
 

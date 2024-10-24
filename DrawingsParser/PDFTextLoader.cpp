@@ -19,15 +19,16 @@ PDFTextLoader::PDFTextLoader(IMessagePrinter* printer) : TextLoader(printer)
 
 }
 
-int PDFTextLoader::loadFile(const std::string& filename)
+int PDFTextLoader::loadFile(const std::string& filePath)
 {
 	using namespace PoDoFo;
 
 	text.clear();
-	this->filename = utf8_decode(filename);
+	setFilePath(filePath);
+	setFileName(getFilePath());
 
 	PdfMemDocument doc;
-	doc.Load(filename);
+	doc.Load(filePath);
 
 	auto& pages = doc.GetPages();
 

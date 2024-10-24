@@ -7,7 +7,10 @@
 #include "TextParserNAG.h"
 #include "TextParserPTE.h"
 #include "IMessagePrinter.h"
+#include "StringConvert.h"
 
+//#include <boost/log/trivial.hpp>
+#include <wx/log.h> 
 #include <string>
 #include <map>
 #include <vector>
@@ -33,14 +36,8 @@ void TextParser::parse(const std::wstring& fileName)
 
 	std::wstring currentDesignerStr;
 
-	size_t fileNameStartIdx = fileName.find_last_of(L'\\');
-	std::wstring newfileNameStr = fileName;
-	if (fileNameStartIdx != std::wstring::npos) {
-		newfileNameStr = fileName.substr(fileNameStartIdx + 1);
-	}
-
-	if (std::regex_search(newfileNameStr, cipherDocumentPattern)) {
-		currentDesignerStr = newfileNameStr.substr(4, 3);
+	if (std::regex_search(fileName, cipherDocumentPattern)) {
+		currentDesignerStr = fileName.substr(4, 3);
 	}
 	else
 	{
@@ -109,7 +106,13 @@ void TextParser::parse(const std::wstring& fileName)
 	}
 
 	try {
-		currentParser->parse(newfileNameStr);
+		wxLogMessage("[Парсинг] Начало парсинга файла %s", wxString(fileName));
+		//BOOST_LOG_TRIVIAL(trace) << "Начало парсинга файла " << utf8_encode(newfileNameStr);
+
+		currentParser->parse(fileName);
+
+		wxLogMessage("[Парсинг] Конец парсинга файла %s", wxString(fileName));
+		//BOOST_LOG_TRIVIAL(trace) << "Конец парсинга файла " << utf8_encode(newfileNameStr);
 	}
 	catch (const std::exception& ex) {
 		printer->printError(L"Ошибка парсинга: " + utf8_decode(ex.what()) + L" \nВ файле " + fileName);

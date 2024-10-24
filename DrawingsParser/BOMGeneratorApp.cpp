@@ -1,4 +1,4 @@
-//Используемые сторонние библиотеки:
+﻿//Используемые сторонние библиотеки:
 //https://github.com/LibreDWG/libredwg
 //https://github.com/jmcnamara/libxlsxwriter
 //https://github.com/wxWidgets/wxWidgets
@@ -7,6 +7,14 @@
 #include <string>
 
 #include <wx/wx.h>
+#include <wx/log.h>
+
+//#include <boost/log/core.hpp>
+//#include <boost/log/trivial.hpp>
+//#include <boost/log/expressions.hpp>
+//#include <boost/log/utility/setup/file.hpp>
+//#include <boost/log/utility/setup/common_attributes.hpp>
+
 #include "DialogPrinter.h"
 //#include "DOCXPrinter.h"
 #include "DWGTextLoader.h"
@@ -26,12 +34,46 @@ bool DrawingsParserApp::OnInit()
 
 	//ASP%ISO%
 
-	std::string fileName = "GCC-LGN-DDD-12510-06-0000-TK-ISO-00032_04_2_source" ".dwg";
+	//AllocConsole();
 
-	processingOneFile(fileName, NONE);
+	//logger = new wxLogStream();
+	//wxLog::SetActiveTarget(logger);
+
+	//initLogging();
+
+	std::string fileName = "GCC-NAG-DDD-12470-12-1400-TKM-ISO-00082-00_002" ".dwg";
+
+	processingOneFile(fileName, LOAD_PARSE_WRITE);
 
 	return true;
 }
+
+DrawingsParserApp::~DrawingsParserApp()
+{
+	//wxLog::SetActiveTarget(nullptr);
+	//delete logger;
+}
+
+//void DrawingsParserApp::initLogging()
+//{
+//	namespace logging = boost::log;
+//	namespace keywords = boost::log::keywords;
+//
+//	logging::register_simple_formatter_factory<logging::trivial::severity_level, char>("Severity");
+//
+//	//logging::core::get()->set_filter
+//	//(
+//	//	logging::trivial::severity >= logging::trivial::trace
+//	//);
+//
+//	logging::add_file_log
+//	(
+//		keywords::file_name = "GeneratorLog.log",
+//		keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%"
+//	);
+//
+//	logging::add_common_attributes();
+//}
 
 void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int state)
 {
@@ -60,6 +102,9 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 			TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList(), new DialogPrinter);
 			tableWriter.createNewTableFile(".\\");
 			tableWriter.writeTable();
+		}
+		else {
+			wxLogMessage("[Запись] Отсутствуют записываемые листы в файле %s", fileName);
 		}
 	}
 }

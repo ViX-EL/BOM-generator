@@ -8,8 +8,7 @@ private:
 	void readTablePartData();
 
 public:
-	TextParserPTE(const std::wstring& text, Columns& columns,
-		std::vector<int>& componentsCountPerList, wchar_t separator);
+	TextParserPTE(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList, wchar_t separator);
 	void parse(const std::wstring& fileName) override;
 };
 

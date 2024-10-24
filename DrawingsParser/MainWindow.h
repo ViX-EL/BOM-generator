@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/log.h> 
 #include <vector>
 #include <string>
 
@@ -13,12 +14,16 @@ public:
 	void OnSelectOutputFolder(wxCommandEvent& event);
 	void OnCreateXlsxTable(wxCommandEvent& event);
 
+	~MainWindow();
+
 private:
 	void OnAbout(wxCommandEvent& event);
 
 	void selectPath(wxTextCtrl* textField);
 	bool isPathCorrect(wxTextCtrl* textField, const wxString& errMessage);
 	void getFileNames();
+
+	wxLog* logger = nullptr;
 
 	wxTextCtrl* inputFolderTextField;
 	wxTextCtrl* outputFolderTextField;

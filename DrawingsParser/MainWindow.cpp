@@ -6,16 +6,24 @@
 #include "DialogPrinter.h"
 
 #include <wx/wx.h>
+#include <wx/log.h> 
 #include <wx/dir.h>
 #include <wx/aboutdlg.h> 
 #include <regex>
 
 
-MainWindow::MainWindow(const wxString& title, const wxSize& size) :
-	wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size, 
+MainWindow::MainWindow(const wxString& title, const wxSize& size) : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size, 
 		wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
 	Centre();
+
+	//AllocConsole();
+
+	wxLogWindow* logWindow = new wxLogWindow(this, "Log", true, false);
+	logWindow->GetFrame()->SetClientSize(650, 400);
+	logger = logWindow;
+	wxLog::SetActiveTarget(logger);
+	wxLog::SetLogLevel(wxLOG_Trace);
 
 	wxMenu* menuAbout = new wxMenu;
 	menuAbout->Append(wxID_ABOUT, "О программе");
@@ -27,8 +35,7 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) :
 
 	Bind(wxEVT_MENU, &MainWindow::OnAbout, this, wxID_ABOUT);
 
-	wxStaticText* inputFolderLabel = new wxStaticText(this, wxID_ANY, "Выберите папку с dwg файлами",
-		wxPoint(10, 5));
+	wxStaticText* inputFolderLabel = new wxStaticText(this, wxID_ANY, "Выберите папку с dwg файлами", wxPoint(10, 5));
 
 	inputFolderTextField = new wxTextCtrl(this, wxID_ANY, "", wxPoint(10,25), wxSize(300, 20));
 	inputFolderTextField->AutoCompleteDirectories();
@@ -36,19 +43,23 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) :
 	wxButton* buttonInputFolder = new wxButton(this, 1, wxT("Выбор папки"), wxPoint(320, 23));
 	buttonInputFolder->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnSelectInputFolder, this);
 
-	wxStaticText* outputFolderLabel = new wxStaticText(this, wxID_ANY,
-		"Выберите папку, куда сохранить таблицу", wxPoint(10, 50));
+	wxStaticText* outputFolderLabel = new wxStaticText(this, wxID_ANY, "Выберите папку, куда сохранить таблицу", wxPoint(10, 50));
 
 	outputFolderTextField = new wxTextCtrl(this, wxID_ANY, "", wxPoint(10, 70), wxSize(300, 20));
 
 	wxButton* buttonOutputFolder = new wxButton(this, 2, wxT("Выбор папки"), wxPoint(320, 68));
 	buttonOutputFolder->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnSelectOutputFolder, this);
 
-	wxButton* buttonCreateTable = new wxButton(this, 3, wxT("Создать Excel таблицу"),
-		wxPoint(150, 102));
+	wxButton* buttonCreateTable = new wxButton(this, 3, wxT("Создать Excel таблицу"), wxPoint(150, 102));
 	buttonCreateTable->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnCreateXlsxTable, this);
 
 	CreateStatusBar();
+}
+
+MainWindow::~MainWindow()
+{
+	wxLog::SetActiveTarget(nullptr);
+	delete logger;
 }
 
 void MainWindow::OnSelectInputFolder(wxCommandEvent& event)
@@ -111,8 +122,7 @@ bool MainWindow::isPathCorrect(wxTextCtrl* textField, const wxString& errMessage
 	std::wstring textFolderField = textField->GetLabel().ToStdWstring();
 	if (!(textFolderField != "" && std::regex_match(textFolderField, textFieldPathPattern)))
 	{
-		wxMessageBox("Путь к " + errMessage + " не выбран или указан не верно!",
-			"Выберите путь к папке", wxOK | wxICON_EXCLAMATION);
+		wxMessageBox("Путь к " + errMessage + " не выбран или указан не верно!", "Выберите путь к папке", wxOK | wxICON_EXCLAMATION);
 		return false;
 	}
 	return true;
@@ -129,8 +139,7 @@ void MainWindow::getFileNames()
 	wxString fileName;
 	bool contains = dir.GetFirst(&fileName, wxEmptyString, wxDIR_FILES);
 	if (!contains) {
-		wxMessageBox("В папке отсутствуют файлы или путь к папке указан не" 
-			" верно!", "Файлы не найдены", wxOK | wxICON_EXCLAMATION);
+		wxMessageBox("В папке отсутствуют файлы или путь к папке указан не верно!", "Файлы не найдены", wxOK | wxICON_EXCLAMATION);
 		return;
 	}
 	while (contains) {
@@ -141,7 +150,6 @@ void MainWindow::getFileNames()
 	}
 
 	if (filesNames.size() == 0) {
-		wxMessageBox("В папке отсутствуют файлы dwg!", "Файлы не найдены",
-			wxOK | wxICON_EXCLAMATION);
+		wxMessageBox("В папке отсутствуют файлы dwg!", "Файлы не найдены", wxOK | wxICON_EXCLAMATION);
 	}
 }

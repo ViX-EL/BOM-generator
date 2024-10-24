@@ -6,6 +6,8 @@
 #include "IMessagePrinter.h"
 #include "StringConvert.h"
 
+#include <boost/log/trivial.hpp>
+#include <wx/log.h> 
 #include <string>
 #include <iostream>
 #include <vector>
@@ -15,15 +17,20 @@ DWGTextLoader::DWGTextLoader(IMessagePrinter* printer) : TextLoader(printer)
 	
 }
 
-int DWGTextLoader::loadFile(const std::string& filename)
+int DWGTextLoader::loadFile(const std::string& filePath)
 {
+	/*BOOST_LOG_TRIVIAL(trace) << "Начало чтения файла " << filename;*/
+
 	text.clear();
-	this->filename = utf8_decode(filename);
+	setFilePath(filePath);
+	setFileName(getFilePath());
+
+	wxLogMessage("[Чтение] Начало чтения файла %s", wxString(filePath));
 
 	Dwg_Data dwg;
 
 	memset(&dwg, 0, sizeof(Dwg_Data));
-	int success = dwg_read_file(filename.c_str(), &dwg);
+	int success = dwg_read_file(filePath.c_str(), &dwg);
 	if (!(success < DWG_ERR_CRITICAL)) {
 		printer->printError(L"Wrong file!");
 		return success;
@@ -52,5 +59,9 @@ int DWGTextLoader::loadFile(const std::string& filename)
 	}
 
 	dwg_free(&dwg);
+
+	//BOOST_LOG_TRIVIAL(trace) << "Конец чтения файла " << filename;
+	wxLogMessage("[Чтение] Конец чтения файла %s", wxString(filePath));
+
 	return success;
 }

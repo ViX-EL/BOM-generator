@@ -5,6 +5,8 @@
 #include "StringConvert.h"
 #include "IMessagePrinter.h"
 
+#include <wx/log.h>
+#include <boost/log/trivial.hpp>
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -22,9 +24,15 @@ void TableWriter::writeListsLines(uint16_t startRow)
 {
 	currentList = 0;
 	uint16_t currentRow{ startRow };
-	for (size_t i = 0; i < componentsCountPerList->size(); i++)
+
+	for (size_t i = 0; i < componentsCountPerList->size(); i++) //Запись листов со всех файлов последовательно
 	{
-		for (size_t j = 0; j < componentsCountPerList->at(currentList); j++)
+		wxString currentFileName(columns->at(L"Имя файла").at(currentList));
+		wxString currentListNumber(columns->at(L"Лист").at(currentList));
+		wxLogMessage("[Запись] Начало записи листа %s файла %s", currentListNumber, currentFileName);
+		//BOOST_LOG_TRIVIAL(trace) << "Начало записи листов файла " << utf8_encode(currentFileName);
+
+		for (size_t j = 0; j < componentsCountPerList->at(currentList); j++) //Запись строк текущего листа
 		{
 			const size_t componentsFieldsCount{ 5 };
 			for (uint16_t compFieldIdx = 0; compFieldIdx < componentsFieldsCount; compFieldIdx++)
@@ -38,11 +46,15 @@ void TableWriter::writeListsLines(uint16_t startRow)
 				std::wstring currentCellValue = columns->at(columnsNames[colIdx]).at(currentList);
 				worksheet_write_string(worksheet, currentRow + 1, colIdx, utf8_encode(currentCellValue).c_str(), NULL);
 			}
+
 			currentRow++;
 		}
+
+		//BOOST_LOG_TRIVIAL(trace) << "Записан лист " << utf8_encode(*lastListNumberIter) << " файла " << utf8_encode(currentFileName);
+		wxLogMessage("[Запись] Конец записи листа %s файла %s", currentListNumber, currentFileName);
+
 		currentList++;
 	}
-	//printer->printText(columns->at(L"Имя файла").at(currentList), L"Log");
 }
 
 void TableWriter::changeFileNameIfAlreadyExists(const std::string& tableDirectoryName)
@@ -80,10 +92,8 @@ const std::string& TableWriter::getFileName()
 	return tableFileName;
 }
 
-TableWriter::TableWriter(const BaseTextParser::Columns& columns, const 
-	std::vector<int>& componentsCountPerList, IMessagePrinter* printer) :
-	columns(&columns), componentsCountPerList(&componentsCountPerList),
-	workbook(nullptr), worksheet(nullptr), printer(printer)
+TableWriter::TableWriter(const BaseTextParser::Columns& columns, const  std::vector<int>& componentsCountPerList, IMessagePrinter* printer) :
+	columns(&columns), componentsCountPerList(&componentsCountPerList), workbook(nullptr), worksheet(nullptr), printer(printer)
 {
 
 }
@@ -108,8 +118,7 @@ void TableWriter::createNewTableFile(const std::string& tableDirectoryName)
 	changeFileNameIfAlreadyExists(tableDirectoryName);
 
 	if (tableDirectoryName != ".\\") {
-		workbook = workbook_new((tableDirectoryName + "\\" 
-			+ tableFileName).c_str());
+		workbook = workbook_new((tableDirectoryName + "\\" + tableFileName).c_str());
 	}
 	else {
 		workbook = workbook_new(tableFileName.c_str());
