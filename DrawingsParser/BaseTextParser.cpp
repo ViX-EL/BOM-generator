@@ -75,7 +75,7 @@ std::wstring BaseTextParser::getNextSubString(const std::wstring& subString, boo
 	return returnSubString(beginEndIndexes);
 }
 
-std::wstring BaseTextParser::returnSubString(std::pair<size_t, size_t> beginEndIndexes)
+std::wstring BaseTextParser::returnSubString(std::pair<size_t, size_t> beginEndIndexes) const
 {
 	if (beginEndIndexes.first != size_tMax && beginEndIndexes.second != size_tMax) {
 		return std::wstring(text->begin() + beginEndIndexes.first, text->begin() + beginEndIndexes.second);
@@ -194,6 +194,17 @@ bool BaseTextParser::readComponent(Columns* columns)
 		}
 
 		if (!cases[0] && !cases[1]) {
+			subStrBuffer.emplace_back(getNextSubString());
+			descriptionSubStrCount++;
+		}
+	}
+
+	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ')) {
+		size_t currentPos = currentPositionInText;
+		std::vector<std::wstring> buffer; 
+		buffer.emplace_back(getNextSubString(currentPos));
+		buffer.emplace_back(getNextSubString(currentPos));
+		if ((buffer.end() - 1)->starts_with(L"CUT PIPE")) {
 			subStrBuffer.emplace_back(getNextSubString());
 			descriptionSubStrCount++;
 		}

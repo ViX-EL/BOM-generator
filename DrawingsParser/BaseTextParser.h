@@ -34,7 +34,7 @@ protected:
 	std::pair<size_t, size_t> moveToPreviouslySubString();
 	std::pair<size_t, size_t> moveToPreviouslySubString(const std::wstring& subString, bool reverseFind = false);
 	std::pair<size_t, size_t> moveToSubString(const std::wstring& subString, bool reverseFind = false);
-	std::wstring returnSubString(std::pair<size_t, size_t> beginEndIndexes);
+	std::wstring returnSubString(std::pair<size_t, size_t> beginEndIndexes) const;
 	std::wstring getSubString(const std::wstring& subString, bool reverseFind = false);
 	std::wstring getNextSubString();
 	std::wstring getNextSubString(size_t& positionInText) const;

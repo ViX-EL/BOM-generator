@@ -25,7 +25,7 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	setFilePath(filePath);
 	setFileName(getFilePath());
 
-	wxLogMessage("[Чтение] Начало чтения файла %s", wxString(filePath));
+	wxLogMessage("[Чтение] Начало чтения файла %s", wxString(getFileName()));
 
 	Dwg_Data dwg;
 
@@ -61,7 +61,7 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	dwg_free(&dwg);
 
 	//BOOST_LOG_TRIVIAL(trace) << "Конец чтения файла " << filename;
-	wxLogMessage("[Чтение] Конец чтения файла %s", wxString(filePath));
+	wxLogMessage("[Чтение] Конец чтения файла %s", wxString(getFileName()));
 
 	return success;
 }

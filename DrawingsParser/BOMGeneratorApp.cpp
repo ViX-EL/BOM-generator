@@ -41,39 +41,12 @@ bool DrawingsParserApp::OnInit()
 
 	//initLogging();
 
-	std::string fileName = "GCC-NAG-DDD-12470-12-1400-TKM-ISO-00082-00_002" ".dwg";
+	std::string fileName = "16150-11-2200_031-W12-0013-ESB1B01BN-01_Sht_4" ".dwg";
 
-	processingOneFile(fileName, LOAD_PARSE_WRITE);
+	processingOneFile(fileName, LOAD);
 
 	return true;
 }
-
-DrawingsParserApp::~DrawingsParserApp()
-{
-	//wxLog::SetActiveTarget(nullptr);
-	//delete logger;
-}
-
-//void DrawingsParserApp::initLogging()
-//{
-//	namespace logging = boost::log;
-//	namespace keywords = boost::log::keywords;
-//
-//	logging::register_simple_formatter_factory<logging::trivial::severity_level, char>("Severity");
-//
-//	//logging::core::get()->set_filter
-//	//(
-//	//	logging::trivial::severity >= logging::trivial::trace
-//	//);
-//
-//	logging::add_file_log
-//	(
-//		keywords::file_name = "GeneratorLog.log",
-//		keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%"
-//	);
-//
-//	logging::add_common_attributes();
-//}
 
 void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int state)
 {
@@ -103,8 +76,32 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 			tableWriter.createNewTableFile(".\\");
 			tableWriter.writeTable();
 		}
-		else {
-			wxLogMessage("[Запись] Отсутствуют записываемые листы в файле %s", fileName);
-		}
 	}
 }
+
+DrawingsParserApp::~DrawingsParserApp()
+{
+	//wxLog::SetActiveTarget(nullptr);
+	//delete logger;
+}
+
+//void DrawingsParserApp::initLogging()
+//{
+//	namespace logging = boost::log;
+//	namespace keywords = boost::log::keywords;
+//
+//	logging::register_simple_formatter_factory<logging::trivial::severity_level, char>("Severity");
+//
+//	//logging::core::get()->set_filter
+//	//(
+//	//	logging::trivial::severity >= logging::trivial::trace
+//	//);
+//
+//	logging::add_file_log
+//	(
+//		keywords::file_name = "GeneratorLog.log",
+//		keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%"
+//	);
+//
+//	logging::add_common_attributes();
+//}
