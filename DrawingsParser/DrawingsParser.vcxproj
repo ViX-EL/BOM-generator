@@ -147,10 +147,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BuildComponentASP.cpp" />
+    <ClCompile Include="DrawingListASP.cpp" />
     <ClCompile Include="BaseTextParser.cpp" />
+    <ClCompile Include="BuildComponent.cpp" />
     <ClCompile Include="ConsolPrinter.cpp" />
     <ClCompile Include="BOMGeneratorApp.cpp" />
     <ClCompile Include="DOCXPrinter.cpp" />
+    <ClCompile Include="DrawingList.cpp" />
     <ClCompile Include="DWGTextLoader.cpp" />
     <ClCompile Include="PDFTextLoader.cpp" />
     <ClCompile Include="TextDialog.cpp" />
@@ -169,10 +173,14 @@
     <ClCompile Include="TextParserPTE.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BuildComponentASP.h" />
+    <ClInclude Include="DrawingListASP.h" />
     <ClInclude Include="BaseTextParser.h" />
+    <ClInclude Include="BuildComponent.h" />
     <ClInclude Include="ConsolPrinter.h" />
     <ClInclude Include="BOMGeneratorApp.h" />
     <ClInclude Include="DOCXPrinter.h" />
+    <ClInclude Include="DrawingList.h" />
     <ClInclude Include="DWGTextLoader.h" />
     <ClInclude Include="PDFTextLoader.h" />
     <ClInclude Include="TextDialog.h" />

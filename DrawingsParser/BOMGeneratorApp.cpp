@@ -9,12 +9,6 @@
 #include <wx/wx.h>
 #include <wx/log.h>
 
-//#include <boost/log/core.hpp>
-//#include <boost/log/trivial.hpp>
-//#include <boost/log/expressions.hpp>
-//#include <boost/log/utility/setup/file.hpp>
-//#include <boost/log/utility/setup/common_attributes.hpp>
-
 #include "DialogPrinter.h"
 //#include "DOCXPrinter.h"
 #include "DWGTextLoader.h"
@@ -32,18 +26,9 @@ bool DrawingsParserApp::OnInit()
 	window->SetBackgroundColour(*wxWHITE);
 	window->Show(true);
 
-	//ASP%ISO%
+	std::string fileName = "16150-11-2200_005-IA-0711-GCB2B01BN-02_Sht_1" ".dwg";
 
-	//AllocConsole();
-
-	//logger = new wxLogStream();
-	//wxLog::SetActiveTarget(logger);
-
-	//initLogging();
-
-	std::string fileName = "16150-11-2200_031-W12-0013-ESB1B01BN-01_Sht_4" ".dwg";
-
-	processingOneFile(fileName, LOAD);
+	processingOneFile(fileName, NONE);
 
 	return true;
 }
@@ -70,11 +55,14 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 
 	if (state & LOAD_PARSE_WRITE) 
 	{
-		if (!parser.getColumns().empty())
+		if (parser.getComponentsCountPerList().size() != 0)
 		{
 			TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList(), new DialogPrinter);
 			tableWriter.createNewTableFile(".\\");
 			tableWriter.writeTable();
+		}
+		else {
+			wxLogMessage("[Запись] Нет записываемых листов в файле %s", fileName);
 		}
 	}
 }

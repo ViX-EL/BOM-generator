@@ -6,11 +6,9 @@
 #include "IMessagePrinter.h"
 #include "StringConvert.h"
 
-#include <boost/log/trivial.hpp>
+//#include <boost/log/trivial.hpp>
 #include <wx/log.h> 
 #include <string>
-#include <iostream>
-#include <vector>
 
 DWGTextLoader::DWGTextLoader(IMessagePrinter* printer) : TextLoader(printer)
 {
@@ -39,7 +37,7 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	char* text_value{ nullptr };
 	int found{ 0 };
 	int isnew{ 0 };
-	std::wstring text2;
+	bool containsCyrillic = false;
 	for (BITCODE_BL i = 0; i < dwg.num_objects; i++)
 	{
 		if (dwg.object[i].type == DWG_TYPE_TEXT)
@@ -47,6 +45,8 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 			Dwg_Entity_TEXT* _obj = dwg.object[i].tio.entity->tio.TEXT;
 			found++;
 			dwg_dynapi_entity_utf8text(_obj, "TEXT", "text_value", &text_value, &isnew, NULL);
+			//wxString subString(text_value);
+			//text.append(separator + subString.ToStdWstring());
 			text.append(separator + utf8_decode(text_value));
 		}
 	}
@@ -64,4 +64,17 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	wxLogMessage("[Чтение] Конец чтения файла %s", wxString(getFileName()));
 
 	return success;
+}
+
+bool DWGTextLoader::isContainsCyrillicLetters(char* subString)
+{
+	size_t size = strlen(subString);
+	for (size_t i = 0; i < size; i++)
+	{
+		if (subString[i] >= 'А' && subString[i] <= 'я')
+		{
+			return true;
+		}
+	}
+	return false;
 }

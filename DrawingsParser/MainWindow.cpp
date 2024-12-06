@@ -21,8 +21,8 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) : wxFrame(NULL
 
 	wxLogWindow* logWindow = new wxLogWindow(this, "Log", true, false);
 	logWindow->GetFrame()->SetClientSize(650, 400);
-	logger = logWindow;
-	wxLog::SetActiveTarget(logger);
+	logger.reset(logWindow);
+	wxLog::SetActiveTarget(logger.get());
 	wxLog::SetLogLevel(wxLOG_Trace);
 
 	wxMenu* menuAbout = new wxMenu;
@@ -59,7 +59,6 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) : wxFrame(NULL
 MainWindow::~MainWindow()
 {
 	wxLog::SetActiveTarget(nullptr);
-	delete logger;
 }
 
 void MainWindow::OnSelectInputFolder(wxCommandEvent& event)
@@ -102,7 +101,7 @@ void MainWindow::OnAbout(wxCommandEvent& event)
 {
 	wxAboutDialogInfo info;
 	info.SetName(_("Bom generator"));
-	info.SetVersion(_("0.4.0 Beta"));
+	info.SetVersion(_("0.6.0"));
 	info.SetDescription(_(aboutStr));
 	info.SetCopyright("(C) 2024 Dmitriy Zelenev <Dmitry22_s@cc7.cn>");
 	wxAboutBox(info);

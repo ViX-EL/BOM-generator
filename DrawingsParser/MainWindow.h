@@ -4,6 +4,7 @@
 #include <wx/log.h> 
 #include <vector>
 #include <string>
+#include <memory>
 
 class MainWindow : public wxFrame
 {
@@ -23,7 +24,7 @@ private:
 	bool isPathCorrect(wxTextCtrl* textField, const wxString& errMessage);
 	void getFileNames();
 
-	wxLog* logger = nullptr;
+	std::unique_ptr<wxLog> logger;
 
 	wxTextCtrl* inputFolderTextField;
 	wxTextCtrl* outputFolderTextField;

@@ -4,9 +4,8 @@
 #include <regex>
 #include <string>
 
-TextParserIOT::TextParserIOT(const std::wstring& text, Columns& columns,
-	std::vector<int>& componentsCountPerList, wchar_t separator) : BaseTextParser(text, columns,
-	componentsCountPerList, separator)
+TextParserIOT::TextParserIOT(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList, wchar_t separator) : 
+	BaseTextParser(text, columns, componentsCountPerList, separator)
 {
 
 }
@@ -58,12 +57,17 @@ bool TextParserIOT::readComponent()
 
 bool TextParserIOT::readLastComponentNumber()
 {
+	if (componentsEnded) {
+		return false;
+	}
+
 	std::wstring componentNumberStr(getNextSubString());
 	//Если не найден номер компонента
 	std::wregex componentNumberPattern(LR"( *\d+)");
 	if (!std::regex_match(componentNumberStr, componentNumberPattern)) {
-		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH")) {
+		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") || componentNumberStr.starts_with(L"GCC-IOT-DDD")) {
 			componentsCountPerList->push_back(lastComponentNumber);
+			componentsEnded = true;
 		}
 		return false;
 	}
@@ -87,7 +91,7 @@ void TextParserIOT::readTablePartData()
 	(*columns)[L"Расчет. Давление"].emplace_back(getPreviouslySubString());
 	moveToPreviouslySubString();
 	(*columns)[L"Номер схемы"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Изометрический чертеж"].emplace_back(getSubString(L"Isometric drawing", true).erase(0, 18)); // TODO need test
+	(*columns)[L"Изометрический чертеж"].emplace_back(getSubString(L"Isometric drawing", true).erase(0, 18));
 	moveToPreviouslySubString();
 	(*columns)[L"Имя файла"].emplace_back(getPreviouslySubString());
 	moveOnCountSubStr(8, true);

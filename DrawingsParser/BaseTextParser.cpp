@@ -58,6 +58,38 @@ std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wstring& su
 	return std::pair(beginIdx, endIdx);
 }
 
+std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wregex& pattern)
+{
+	std::wsmatch match;
+	if (std::regex_search(*text, match, pattern))
+	{
+		size_t beginIdx = match.position(0);
+		size_t endIdx = text->find(separator, beginIdx);
+		beginIdx = text->rfind(separator, beginIdx) + 1;
+		currentPositionInText = endIdx - 1;
+		return std::pair(beginIdx, endIdx);
+	}
+	else {
+		return std::pair(size_tMax, size_tMax);
+	}
+}
+
+std::pair<size_t, size_t> BaseTextParser::moveToLastSubString()
+{
+	size_t endIdx = text->size() - 1;
+	size_t beginIdx = text->rfind(separator, endIdx - 1) + 1;
+	currentPositionInText = endIdx - 1;
+	return std::pair(beginIdx, endIdx);
+}
+
+std::pair<size_t, size_t> BaseTextParser::moveToFirstSubString()
+{
+	size_t beginIdx = 1;
+	size_t endIdx = text->find(separator, beginIdx);
+	currentPositionInText = endIdx;
+	return std::pair(beginIdx, endIdx);
+}
+
 // ищет предыдущую подстроку для строки, которая ищется далее по тексту от
 // текущей позиции в тексте
 std::wstring BaseTextParser::getPreviouslySubString(const std::wstring& subString, bool reverseFind)
@@ -91,6 +123,12 @@ std::wstring BaseTextParser::getSubString(const std::wstring& subString, bool re
 	return returnSubString(beginEndIndexes);
 }
 
+std::wstring BaseTextParser::getSubString(const std::wregex& pattern)
+{
+	std::pair<size_t, size_t> beginEndIndexes = moveToSubString(pattern);
+	return returnSubString(beginEndIndexes);
+}
+
 std::wstring BaseTextParser::getNextSubString()
 {
 	std::pair<size_t, size_t> beginEndIndxes = moveToNextSubString();
@@ -109,7 +147,21 @@ std::pair<size_t, size_t> BaseTextParser::moveToNextSubString(size_t& positionIn
 {
 	size_t beginIdx = text->find_first_of(separator, positionInText) + 1;
 	size_t endIdx = text->find_first_of(separator, beginIdx);
+	if (beginIdx == std::string::npos || endIdx == std::string::npos) {
+		return std::pair(size_tMax, size_tMax);
+	}
 	positionInText = endIdx;
+	return std::pair(beginIdx, endIdx);
+}
+
+std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString(size_t& positionInText) const
+{
+	size_t endIdx = text->rfind(separator, positionInText);
+	size_t beginIdx = text->rfind(separator, endIdx - 1) + 1;
+	if (beginIdx == std::string::npos || endIdx == std::string::npos) {
+		return std::pair(size_tMax, size_tMax);
+	}
+	positionInText = endIdx - 1;
 	return std::pair(beginIdx, endIdx);
 }
 
@@ -121,16 +173,90 @@ std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString()
 	return std::pair(beginIdx, endIdx);
 }
 
+bool BaseTextParser::tryMoveToNextSubString(size_t& positionInText) const
+{
+	std::pair<size_t, size_t> subStrBegiEnd = moveToNextSubString(positionInText);
+	if (subStrBegiEnd.second != std::string::npos) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool BaseTextParser::tryMoveToPreviouslySubString(size_t& positionInText) const
+{
+	std::pair<size_t, size_t> subStrBegiEnd = moveToPreviouslySubString(positionInText);
+	if (subStrBegiEnd.first != std::string::npos) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool BaseTextParser::tryMoveOnCountSubStr(size_t& positionInText, int count, bool reverse) const
+{
+	bool subStrExist = false;
+	if (reverse)
+	{
+		for (int i = 0; i < count; i++) {
+			subStrExist = tryMoveToPreviouslySubString(positionInText);
+			if (!subStrExist) {
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < count; i++) {
+			subStrExist = tryMoveToNextSubString(positionInText);
+			if (!subStrExist) {
+				break;
+			}
+		}
+	}
+	return subStrExist;
+}
+
+bool BaseTextParser::searchForMatchesInFollowing(const std::wregex& pattern, int subStrsCount)
+{
+	size_t positionInText = currentPositionInText;
+	for (int i = 0; i < subStrsCount; i++) {
+		if (std::regex_search(getNextSubString(positionInText), pattern)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 std::wstring BaseTextParser::getNextSubString(size_t& positionInText) const
 {
 	std::pair<size_t, size_t> beginEndIndxes = moveToNextSubString(positionInText);
 	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
 }
 
+std::wstring BaseTextParser::getPreviouslySubString(size_t& positionInText) const
+{
+	std::pair<size_t, size_t> beginEndIndxes = moveToPreviouslySubString(positionInText);
+	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+}
+
 std::wstring BaseTextParser::getPreviouslySubString()
 {
 	std::pair<size_t, size_t> beginEndIndxes = moveToPreviouslySubString();
-	
+	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+}
+
+std::wstring BaseTextParser::getLastSubString()
+{
+	std::pair<size_t, size_t> beginEndIndxes = moveToLastSubString();
+	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+}
+
+std::wstring BaseTextParser::getFirstSubString()
+{
+	std::pair<size_t, size_t> beginEndIndxes = moveToFirstSubString();
 	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
 }
 
@@ -150,10 +276,30 @@ void BaseTextParser::moveOnCountSubStr(int count, bool reverse)
 	}
 }
 
+std::pair<size_t, size_t> BaseTextParser::moveOnCountSubStr(size_t& positionInText, int count, bool reverse) const
+{
+	std::pair<size_t, size_t> subStrBegiEnd;
+	if (reverse)
+	{
+		for (int i = 0; i < count; i++) {
+			subStrBegiEnd = moveToPreviouslySubString(positionInText);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < count; i++) {
+			subStrBegiEnd = moveToNextSubString(positionInText);
+		}
+	}
+	return subStrBegiEnd;
+}
+
 void BaseTextParser::reset()
 {
 	currentPositionInText = 0;
 	lastComponentNumber = 0;
+	componentsEnded = false;
+	listsCountBeforeStart = componentsCountPerList->size();
 }
 
 BaseTextParser::BaseTextParser(const std::wstring& text, Columns& columns,
@@ -176,15 +322,22 @@ bool BaseTextParser::readComponent(Columns* columns)
 	}
 
 	std::wregex diameterPattern(LR"(\d{1,4} x( \d+)?|\d{1,4})");
-	std::wregex itemCodePattern(LR"([a-zA-Z0-9()]+)");
+	std::wregex itemCodePattern(LR"([a-zA-Z0-9()_]+)");
 	std::wregex countPattern(LR"( {0,2}\d{1,3}M?| {0,2}\d{1,3}\.\d{1,4}M)");
 	bool cases[]{ false, false };
 
 	int descriptionSubStrCount{ 1 };
 	while (!cases[0] && !cases[1])
 	{
-		cases[0] = std::regex_match(*(subStrBuffer.end() - 2), diameterPattern);
-		cases[0] = cases[0] && std::regex_match(*(subStrBuffer.end() - 1), countPattern);
+		cases[0] = std::regex_match(*(subStrBuffer.begin()), diameterPattern);
+		cases[0] = cases[0] && std::regex_match(*(subStrBuffer.begin() + 1), countPattern);
+		if (cases[0]) {
+			descriptionSubStrCount = 0;
+		}
+		else {
+			cases[0] = std::regex_match(*(subStrBuffer.end() - 2), diameterPattern);
+			cases[0] = cases[0] && std::regex_match(*(subStrBuffer.end() - 1), countPattern);
+		}
 
 		if (!cases[0])
 		{
@@ -199,7 +352,15 @@ bool BaseTextParser::readComponent(Columns* columns)
 		}
 	}
 
-	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ')) {
+	std::wregex componentNumberPattern(LR"( *\d+)");
+	if (!cases[1] && std::regex_match(*(subStrBuffer.begin()), componentNumberPattern) && !std::regex_match(*(subStrBuffer.begin() + 1), countPattern))
+	{
+		nextComponentNumberMissing = true;
+		descriptionSubStrCount--;
+		subStrBuffer.erase(subStrBuffer.begin());
+	}
+
+	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ') && !cases[1]) {
 		size_t currentPos = currentPositionInText;
 		std::vector<std::wstring> buffer; 
 		buffer.emplace_back(getNextSubString(currentPos));
@@ -210,40 +371,62 @@ bool BaseTextParser::readComponent(Columns* columns)
 		}
 	}
 
-	if (cases[0])
-	{
-		if ((subStrBuffer.end() - 2)->ends_with(L"x")) {
-			subStrBuffer.emplace_back(getNextSubString());
-		}
+	if (cases[0] && (subStrBuffer.end() - 2)->ends_with(L"x")) {
+		subStrBuffer.emplace_back(getNextSubString());
 	}
 
 	if (cases[1] && (subStrBuffer.end() - 3)->ends_with(L"x")) {
 		descriptionSubStrCount--;
 	}
+
+	if (cases[1]) {
+		descriptionSubStrCount--;
+	}
+
 	std::wstring descriptionStr;
-	for (int i = 0; i < descriptionSubStrCount; i++)
-	{
-		descriptionStr += subStrBuffer[i];
+	if (!(cases[1] && subStrBuffer.size() == 3)) {
+		for (int i = 0; i < descriptionSubStrCount; i++)
+		{
+			descriptionStr += subStrBuffer[i];
+		}
+	}
+	else {
+		descriptionStr = L"-";
+	}
+	if (descriptionSubStrCount == 0) {
+		descriptionStr = L"-";
 	}
 	(*columns)[L"Описание компонента"].emplace_back(descriptionStr);
 
 	if (cases[0])
 	{
 		if ((subStrBuffer.end() - 3)->ends_with(L"x")) {
-			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 3) 
-				+ L' ' + (*(subStrBuffer.end() - 2))));
+			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 3) + L' ' + (*(subStrBuffer.end() - 2))));
 		}
-		else {
-			(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 2));
+		else 
+		{
+			if (descriptionSubStrCount != 0) {
+				(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 2));
+			}
+			else {
+				(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.begin() + 1));
+			}
 		}
+		if (descriptionSubStrCount != 0) {
+			(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
+		}
+		else 
+		{
+			(*columns)[L"Кол-во"].emplace_back(*subStrBuffer.begin());
+			moveToPreviouslySubString();
+		}
+
 		(*columns)[L"Код позиции"].emplace_back(L"-");
-		(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
 	}
 	else if (cases[1])
 	{
-		if ((subStrBuffer.end() - 4)->ends_with(L"x")) {
-			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 4)
-				+ L' ' + (*(subStrBuffer.end() - 3))));
+		if (subStrBuffer.size() != 3 && (subStrBuffer.end() - 4)->ends_with(L"x")) {
+			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
 		}
 		else {
 			(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 3));
