@@ -2,7 +2,7 @@
 
 #include <regex>
 
-bool TextParserPTE::readLastComponentNumber()
+bool TextParserPTE::readComponentNumber()
 {
 	std::wstring componentNumberStr(getNextSubString());
 	//Если не найден номер компонента
@@ -14,9 +14,9 @@ bool TextParserPTE::readLastComponentNumber()
 	bool isListNumberFurther = std::regex_match(getNextSubString(positionInText), componentNumberPattern);
 	if (!isComponentNumber || isLineNumber)
 	{
-		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") && (lastComponentNumber != 0) || isLineNumber) {
-			componentsCountPerList->push_back(lastComponentNumber);
-		}
+		//if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") && (lastComponentNumber != 0) || isLineNumber) {
+		//	componentsCountPerList->push_back(lastComponentNumber);
+		//}
 		return false;
 	}
 	else
@@ -24,14 +24,14 @@ bool TextParserPTE::readLastComponentNumber()
 		if (isListNumberFurther) {
 			return false;
 		}
-		lastComponentNumber++;
+		//lastComponentNumber++;
 		return true;
 	}
 }
 
-bool TextParserPTE::readComponent(Columns* columns)
+bool TextParserPTE::readComponent()
 {
-	if (!readLastComponentNumber()) {
+	if (!readComponentNumber()) {
 		return false;
 	}
 
@@ -88,73 +88,70 @@ bool TextParserPTE::readComponent(Columns* columns)
 	{
 		descriptionStr += subStrBuffer[i];
 	}
-	(*columns)[L"Описание компонента"].emplace_back(descriptionStr);
+	//(*columns)[L"Описание компонента"].emplace_back(descriptionStr);
 
 	if (cases[0])
 	{
 		if ((subStrBuffer.end() - 3)->ends_with(L"x")) {
-			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 3) + L' ' + (*(subStrBuffer.end() - 2))));
+			//(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 3) + L' ' + (*(subStrBuffer.end() - 2))));
 		}
 		else {
-			(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 2));
+			//(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 2));
 		}
 	}
 	else if (cases[1])
 	{
 		if ((subStrBuffer.end() - 4)->ends_with(L"x")) {
-			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
+			//(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
 		}
 		else {
 			if (materialStrLength > 1) {
-				(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 4));
+				//(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 4));
 			}
 			else {
-				(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 3));
+				//(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 3));
 			}
 		}
 	}
-	(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
-	(*columns)[L"Код позиции"].emplace_back(L"-");
-	(*columns)[L"Документ"].emplace_back(L"-");
+	//(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
 	return true;
 }
 
 void TextParserPTE::readTablePartData()
 {
 	moveToPreviouslySubString(L"Prep/Разраб.");
-	(*columns)[L"Листов"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Лист"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Номер линии"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Номер схемы"].emplace_back(getSubString(L"Номер схемы").erase(0, 14));
-	(*columns)[L"Изометрический чертеж"].emplace_back(getSubString(L"Изометрический чертеж").erase(0, 22));
-	(*columns)[L"Шифр документа"].emplace_back(getNextSubString());
+	//(*columns)[L"Листов"].emplace_back(getPreviouslySubString());
+	//(*columns)[L"Лист"].emplace_back(getPreviouslySubString());
+	//(*columns)[L"Номер линии"].emplace_back(getPreviouslySubString());
+	//(*columns)[L"Номер схемы"].emplace_back(getSubString(L"Номер схемы").erase(0, 14));
+	//(*columns)[L"Изометрический чертеж"].emplace_back(getSubString(L"Изометрический чертеж").erase(0, 22));
+	//(*columns)[L"Шифр документа"].emplace_back(getNextSubString());
 	moveOnCountSubStr(3);
-	(*columns)[L"Расчет. Давление"].emplace_back(getNextSubString());
-	(*columns)[L"Расчет. Темп"].emplace_back(getNextSubString());
-	(*columns)[L"Рабочее давление"].emplace_back(getNextSubString());
-	(*columns)[L"Рабочая температура"].emplace_back(getNextSubString());
-	(*columns)[L"Давление испыт"].emplace_back(getNextSubString());
-	(*columns)[L"Среда испытаний"].emplace_back(getNextSubString());
-	(*columns)[L"Контроль сварных швов"].emplace_back(getNextSubString());
-	(*columns)[L"Послесвар. Термообраб"].emplace_back(getNextSubString());
-	(*columns)[L"Расчет напряжений"].emplace_back(getNextSubString());
-	(*columns)[L"Система покраски"].emplace_back(getNextSubString());
-	(*columns)[L"Спутниковый обогрев"].emplace_back(getNextSubString());
-	(*columns)[L"Изоляция"].emplace_back(getNextSubString());
-	(*columns)[L"Технологическая среда"].emplace_back(getNextSubString());
-	(*columns)[L"Категория трубопр. ТР ТС"].emplace_back(getNextSubString());
-	(*columns)[L"Категория трубопр. Гост"].emplace_back(getNextSubString());
-	(*columns)[L"Диаметр трубопровода"].emplace_back(getNextSubString());
-	(*columns)[L"Класс трубопровода"].emplace_back(getNextSubString());
+	//(*columns)[L"Расчет. Давление"].emplace_back(getNextSubString());
+	//(*columns)[L"Расчет. Темп"].emplace_back(getNextSubString());
+	//(*columns)[L"Рабочее давление"].emplace_back(getNextSubString());
+	//(*columns)[L"Рабочая температура"].emplace_back(getNextSubString());
+	//(*columns)[L"Давление испыт"].emplace_back(getNextSubString());
+	//(*columns)[L"Среда испытаний"].emplace_back(getNextSubString());
+	//(*columns)[L"Контроль сварных швов"].emplace_back(getNextSubString());
+	//(*columns)[L"Послесвар. Термообраб"].emplace_back(getNextSubString());
+	//(*columns)[L"Расчет напряжений"].emplace_back(getNextSubString());
+	//(*columns)[L"Система покраски"].emplace_back(getNextSubString());
+	//(*columns)[L"Спутниковый обогрев"].emplace_back(getNextSubString());
+	//(*columns)[L"Изоляция"].emplace_back(getNextSubString());
+	//(*columns)[L"Технологическая среда"].emplace_back(getNextSubString());
+	//(*columns)[L"Категория трубопр. ТР ТС"].emplace_back(getNextSubString());
+	//(*columns)[L"Категория трубопр. Гост"].emplace_back(getNextSubString());
+	//(*columns)[L"Диаметр трубопровода"].emplace_back(getNextSubString());
+	//(*columns)[L"Класс трубопровода"].emplace_back(getNextSubString());
 }
 
-TextParserPTE::TextParserPTE(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList, wchar_t separator) :
-	BaseTextParser(text, columns, componentsCountPerList, separator)
+TextParserPTE::TextParserPTE(const std::wstring& text, wchar_t separator) : BaseTextParser(text, separator)
 {
 
 }
 
-void TextParserPTE::parse(const std::wstring& fileName)
+void TextParserPTE::parse(const std::wstring& fileName, std::vector<Drawing>& drawings)
 {
 	reset();
 
@@ -167,18 +164,18 @@ void TextParserPTE::parse(const std::wstring& fileName)
 
 	while (true) //Чтение всех компонентов
 	{
-		if (!readComponent(columns))
+		if (!readComponent())
 		{
-			if (!readComponent(columns)) {
+			if (!readComponent()) {
 				break;
 			}
 		}
 	}
 
-	if (!componentsCountPerList->empty())
-	{
-		readTablePartData();
+	//if (!componentsCountPerList->empty())
+	//{
+	//	readTablePartData();
 
-		(*columns)[L"Имя файла"].emplace_back(fileName);
-	}
+	//	(*columns)[L"Имя файла"].emplace_back(fileName);
+	//}
 }

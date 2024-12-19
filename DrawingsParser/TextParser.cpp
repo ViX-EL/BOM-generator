@@ -9,25 +9,18 @@
 #include "IMessagePrinter.h"
 #include "StringConvert.h"
 
-//#include <boost/log/trivial.hpp>
 #include <wx/log.h> 
 #include <string>
 #include <map>
 #include <vector>
 #include <memory>
 #include <regex>
-#include "StringConvert.h"
 
 
 TextParser::TextParser(const std::wstring& text, wchar_t separator,IMessagePrinter* printer) : 
 	text(&text), separator(separator), printer(printer)
 {
 	
-}
-
-const std::vector<int>& TextParser::getComponentsCountPerList() const
-{
-	return componentsCountPerList;
 }
 
 void TextParser::parse(const std::wstring& fileName)
@@ -58,63 +51,66 @@ void TextParser::parse(const std::wstring& fileName)
 		}
 	}
 
-	switch (designerIdx)
+	switch (designerIdx) //TODO переписать все конструкторы текстовых парсеров
 	{
 	case DesignerIndex::LGN:
 		if (!parsers[index]) {
-			parsers[index] = std::make_shared<TextParserLGN>(*text, columns, componentsCountPerList, separator);
+			parsers[index] = std::make_shared<TextParserLGN>(*text, separator);
 		}
 		currentParser = parsers[index];
 		break;
 	case DesignerIndex::ASP:
 		if (!parsers[index]) {
-			parsers[index] = std::make_shared<TextParserASP>(*text, columns, componentsCountPerList, separator);
+			parsers[index] = std::make_shared<TextParserASP>(*text, separator);
 		}
 		currentParser = parsers[index];
 		break;
 	case DesignerIndex::MEN:
 		if (!parsers[index])
 		{
-			printer->printError(L"Обработка файлов проектировщика " + currentDesignerStr +
-				L" находится в разработке!");
-			parsers[index] = std::make_shared<TextParserMEN>(*text, columns, componentsCountPerList, separator);
+			printer->printError(L"Обработка файлов проектировщика " + currentDesignerStr + L" находится в разработке!");
+			/*parsers[index] = std::make_shared<TextParserMEN>(*text, columns, componentsCountPerList, separator);*/
 		}
 		currentParser = parsers[index];
 		break;
 	case DesignerIndex::IOT:
 		if (!parsers[index]) {
-			parsers[index] = std::make_shared<TextParserIOT>(*text, columns, componentsCountPerList, separator);
+			parsers[index] = std::make_shared<TextParserIOT>(*text, separator);
 		}
 		currentParser = parsers[index];
 		break;
 	case DesignerIndex::NAG:
 		if (!parsers[index]) {
-			parsers[index] = std::make_shared<TextParserNAG>(*text, columns, componentsCountPerList, separator);
+			parsers[index] = std::make_shared<TextParserNAG>(*text, separator);
 		}
 		currentParser = parsers[index];
 		break;
 	case DesignerIndex::PTE:
 		if (!parsers[index]) {
-			parsers[index] = std::make_shared<TextParserPTE>(*text, columns, componentsCountPerList, separator);
+		/*	parsers[index] = std::make_shared<TextParserPTE>(*text, columns, componentsCountPerList, separator);*/
 		}
 		currentParser = parsers[index];
 		break;
 	default:
-		printer->printError(L"Обработка файлов проектировщика " + currentDesignerStr +
-			L" пока не поддерживается приложением!");
+		printer->printError(L"Обработка файлов проектировщика " + currentDesignerStr + L" пока не поддерживается приложением!");
 		return;
 	}
 
 	try {
 		wxLogMessage("[Парсинг] Начало парсинга файла %s", wxString(fileName));
-		//BOOST_LOG_TRIVIAL(trace) << "Начало парсинга файла " << utf8_encode(newfileNameStr);
 
-		currentParser->parse(fileName);
+		if (currentParser != nullptr) {
+			currentParser->parse(fileName, drawings);
+		}
 
-		wxLogMessage("[Парсинг] Конец парсинга файла %s", wxString(fileName));
-		//BOOST_LOG_TRIVIAL(trace) << "Конец парсинга файла " << utf8_encode(newfileNameStr);
+		wxLogMessage("[Парсинг] Конец парсинга файла %s", wxString(fileName + L" " + std::to_wstring(drawings.size())));
 	}
 	catch (const std::exception& ex) {
 		printer->printError(L"Ошибка парсинга: " + utf8_decode(ex.what()) + L" \nВ файле " + fileName);
 	}
+}
+
+const std::vector<Drawing>& TextParser::getDrawings() const
+{
+	return drawings;
 }

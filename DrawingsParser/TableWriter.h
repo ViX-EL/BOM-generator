@@ -14,32 +14,30 @@ class TableWriter
 private:
 	size_t currentList = 0;
 	std::unique_ptr<IMessagePrinter> printer;
-	const BaseTextParser::Columns* columns;
+	const std::vector<Drawing>* drawings;
 	const std::vector<std::wstring> columnsNames { 
-		L"Описание компонента", L"Условный диаметр", L"Документ", 
-		L"Кол-во", L"Код позиции", L"Листов", L"Лист", L"Рабочая температура",
-		L"Рабочее давление", L"Спутниковый обогрев", L"Класс трубопровода",
-		L"Технологическая среда", L"Среда испытаний", L"Система покраски",
-		L"Послесвар. Термообраб", L"Контроль сварных швов", L"Давление испыт",
-		L"Категория трубопр. Гост", L"Расчет. Темп", L"Расчет. Давление",
-		L"Шифр документа", L"Диаметр трубопровода", L"Изоляция",
-		L"Категория трубопр. ТР ТС", L"Номер схемы", L"Номер линии",
-		L"Расчет напряжений", L"Изометрический чертеж", L"Имя файла"
+		L"Шифр документа", L"Номер линии", L"Изометрический чертеж", L"Имя файла", L"Листов", L"Лист", L"Номер позиции", L"Описание компонента", L"Условный диаметр", L"Документ",
+		L"Кол - во", L"Код позиции", L"Диаметр трубопровода", L"Рабочая температура", L"Рабочее давление", L"Спутниковый обогрев", L"Класс трубопровода", L"Технологическая среда",
+		L"Среда испытаний", L"Система покраски", L"Послесварочная Термообработка", L"Контроль сварных швов", L"Давление испытаний", L"Категория трубопровода Гост",
+		L"Расчетная Температура", L"Расчетное Давление", L"Изоляция", L"Категория трубопровода ТР ТС", L"Номер схемы", L"Расчет напряжений"
 	};
-	const std::vector<int>* componentsCountPerList;
 	lxw_workbook* workbook{ nullptr };
 	lxw_worksheet* worksheet{nullptr};
 
 	std::string tableFileName{"IsoBOM"};
+	std::wstring currentFileName;
 
 	void writeHeders() const;
-	void writeListsLines(uint16_t startRow);
+	void writePagesFields();
+	void writeCell(uint16_t& row, uint16_t& column, const std::wstring& cellValueStr) const;
+	void writeCell(uint16_t& row, uint16_t& column, int cellValue) const;
+	void incrementCell(uint16_t& row, uint16_t& column) const;
 	void changeFileNameIfAlreadyExists(const std::string& tableDirectoryName);
 
 public:
-	TableWriter(const BaseTextParser::Columns& columns, const std::vector<int>& componentsCountPerList, IMessagePrinter* printer);
+	TableWriter(const std::vector<Drawing>& drawings, IMessagePrinter* printer);
 	void writeTable();
 	void createNewTableFile(const std::string& tableDirectoryName);
-	const std::string& getFileName();
+	const std::string& getFileName() const;
 };
 

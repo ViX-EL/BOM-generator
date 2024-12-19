@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -136,7 +136,8 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,13 +149,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BuildComponentASP.cpp" />
-    <ClCompile Include="DrawingListASP.cpp" />
+    <ClCompile Include="BuildComponentIOT.cpp" />
+    <ClCompile Include="BuildComponentLGN.cpp" />
+    <ClCompile Include="BuildComponentNAG.cpp" />
+    <ClCompile Include="DrawingPageASP.cpp" />
     <ClCompile Include="BaseTextParser.cpp" />
     <ClCompile Include="BuildComponent.cpp" />
     <ClCompile Include="ConsolPrinter.cpp" />
     <ClCompile Include="BOMGeneratorApp.cpp" />
     <ClCompile Include="DOCXPrinter.cpp" />
-    <ClCompile Include="DrawingList.cpp" />
+    <ClCompile Include="DrawingPage.cpp" />
+    <ClCompile Include="DrawingPageIOT.cpp" />
+    <ClCompile Include="DrawingPageLGN.cpp" />
+    <ClCompile Include="DrawingPageNAG.cpp" />
     <ClCompile Include="DWGTextLoader.cpp" />
     <ClCompile Include="PDFTextLoader.cpp" />
     <ClCompile Include="TextDialog.cpp" />
@@ -174,13 +181,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuildComponentASP.h" />
-    <ClInclude Include="DrawingListASP.h" />
+    <ClInclude Include="BuildComponentIOT.h" />
+    <ClInclude Include="BuildComponentLGN.h" />
+    <ClInclude Include="BuildComponentNAG.h" />
+    <ClInclude Include="DrawingPageASP.h" />
     <ClInclude Include="BaseTextParser.h" />
     <ClInclude Include="BuildComponent.h" />
     <ClInclude Include="ConsolPrinter.h" />
     <ClInclude Include="BOMGeneratorApp.h" />
     <ClInclude Include="DOCXPrinter.h" />
-    <ClInclude Include="DrawingList.h" />
+    <ClInclude Include="DrawingPage.h" />
+    <ClInclude Include="DrawingPageIOT.h" />
+    <ClInclude Include="DrawingPageLGN.h" />
+    <ClInclude Include="DrawingPageNAG.h" />
     <ClInclude Include="DWGTextLoader.h" />
     <ClInclude Include="PDFTextLoader.h" />
     <ClInclude Include="TextDialog.h" />

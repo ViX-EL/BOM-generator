@@ -1,18 +1,19 @@
 #include "TextParserIOT.h"
 #include "BaseTextParser.h"
+#include "DrawingPageIOT.h"
+#include "BuildComponentIOT.h"
 
 #include <regex>
 #include <string>
 
-TextParserIOT::TextParserIOT(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList, wchar_t separator) : 
-	BaseTextParser(text, columns, componentsCountPerList, separator)
+TextParserIOT::TextParserIOT(const std::wstring& text, wchar_t separator) : BaseTextParser(text, separator)
 {
 
 }
 
 bool TextParserIOT::readComponent()
 {
-	if (!readLastComponentNumber()) {
+	if (!readComponentNumber()) {
 		return false;
 	}
 
@@ -21,18 +22,14 @@ bool TextParserIOT::readComponent()
 	for (int i = 0; i < 4; i++) {
 		subStrBuffer.emplace_back(getNextSubString());
 	}
-
-	std::wregex diameterPattern(LR"(\d{1,4} x \d{1,4}|\d{1,4})");
-	std::wregex itemCodePattern(LR"([a-zA-Z0-9()-]+)");
-	std::wregex countPattern(LR"( {0,2}\d{1,3}M?| {0,2}\d{1,3}\.\d{1,4}M)");
 	bool match{ false };
 
 	int descriptionSubStrCount{ 1 };
 	while (!match)
 	{
-		match = std::regex_match(*(subStrBuffer.end() - 3), diameterPattern);
-		match = match && std::regex_match(*(subStrBuffer.end() - 2), itemCodePattern);
-		match = match && std::regex_match(*(subStrBuffer.end() - 1), countPattern);
+		match = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
+		match = match && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getPositionCodePattern());
+		match = match && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
 
 		if (!match) {
 			subStrBuffer.emplace_back(getNextSubString());
@@ -45,17 +42,15 @@ bool TextParserIOT::readComponent()
 	{
 		descriptionStr += subStrBuffer[i];
 	}
-	(*columns)[L"Описание компонента"].emplace_back(descriptionStr);
+	lastComponentPtr->trySetDescription(descriptionStr);
 
-	(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 3));
-	(*columns)[L"Код позиции"].emplace_back(*(subStrBuffer.end() - 2));
-	(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
-
-	(*columns)[L"Документ"].emplace_back(L"-");
+	lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
+	lastComponentPtr->trySetPositionCode(*(subStrBuffer.end() - 2));
+	lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
 	return true;
 }
 
-bool TextParserIOT::readLastComponentNumber()
+bool TextParserIOT::readComponentNumber()
 {
 	if (componentsEnded) {
 		return false;
@@ -63,56 +58,58 @@ bool TextParserIOT::readLastComponentNumber()
 
 	std::wstring componentNumberStr(getNextSubString());
 	//Если не найден номер компонента
-	std::wregex componentNumberPattern(LR"( *\d+)");
-	if (!std::regex_match(componentNumberStr, componentNumberPattern)) {
+	if (!std::regex_match(componentNumberStr, BuildComponent::getPositionNumberPattern())) 
+	{
 		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") || componentNumberStr.starts_with(L"GCC-IOT-DDD")) {
-			componentsCountPerList->push_back(lastComponentNumber);
 			componentsEnded = true;
 		}
 		return false;
 	}
 	else
 	{
-		lastComponentNumber++;
+		createDrawing<DrawingPageIOT>();
+
+		tryAddComponent<BuildComponentIOT>(componentNumberStr);
 		return true;
 	}
 }
 
 void TextParserIOT::readTablePartData()
 {
-	(*columns)[L"Класс трубопровода"].emplace_back(getPreviouslySubString(L"TOTAL FOR"));
-	(*columns)[L"Диаметр трубопровода"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Изоляция"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Спутниковый обогрев"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Рабочая температура"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Расчет. Темп"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Рабочее давление"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Давление испыт"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Расчет. Давление"].emplace_back(getPreviouslySubString());
+	lastDrawingPagePtr->trySetPipelineClass(getPreviouslySubString(L"TOTAL FOR"));
+	lastDrawingPagePtr->trySetDiameterPipeline(getPreviouslySubString());
+	lastDrawingPagePtr->trySetIsolation(getPreviouslySubString());
+	lastDrawingPagePtr->trySetTracing(getPreviouslySubString());
+	lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubString());
+	lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubString());
+	lastDrawingPagePtr->trySetOperatingPressure(getPreviouslySubString());
+	lastDrawingPagePtr->trySetTestPressure(getPreviouslySubString());
+	lastDrawingPagePtr->trySetDesignPressure(getPreviouslySubString());
 	moveToPreviouslySubString();
-	(*columns)[L"Номер схемы"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Изометрический чертеж"].emplace_back(getSubString(L"Isometric drawing", true).erase(0, 18));
+	lastDrawingPagePtr->trySetSchemeNumber(getPreviouslySubString());
+	lastDrawingPagePtr->trySetIsometricDrawing(getSubString(L"Isometric drawing", true).erase(0, 18));
 	moveToPreviouslySubString();
-	(*columns)[L"Имя файла"].emplace_back(getPreviouslySubString());
+	lastDrawingPagePtr->trySetFileName(getPreviouslySubString());
 	moveOnCountSubStr(8, true);
-	(*columns)[L"Номер линии"].emplace_back(getPreviouslySubString());
+	lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
 	moveOnCountSubStr(3, true);
-	(*columns)[L"Листов"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Лист"].emplace_back(getPreviouslySubString());
+	std::wstring totalPagesStr = getPreviouslySubString();
+	lastDrawingPagePtr->trySetPages(getPreviouslySubString(), totalPagesStr);
 	moveToPreviouslySubString();
-	(*columns)[L"Шифр документа"].emplace_back(getPreviouslySubString());
-	(*columns)[L"Система покраски"].emplace_back(getNextSubString(L"ТЕХНОЛОГИИ"));
-	(*columns)[L"Среда испытаний"].emplace_back(getNextSubString());
-	(*columns)[L"Контроль сварных швов"].emplace_back(getNextSubString());
-	(*columns)[L"Послесвар. Термообраб"].emplace_back(getNextSubString());
-	(*columns)[L"Расчет напряжений"].emplace_back(getNextSubString());
-	(*columns)[L"Технологическая среда"].emplace_back(getNextSubString());
-	(*columns)[L"Категория трубопр. ТР ТС"].emplace_back(getNextSubString());
-	(*columns)[L"Категория трубопр. Гост"].emplace_back(getNextSubString());
+	lastDrawingPagePtr->trySetCipherDocument(getPreviouslySubString());
+	lastDrawingPagePtr->trySetPaintingSystem(getNextSubString(L"ТЕХНОЛОГИИ"));
+	lastDrawingPagePtr->trySetTestEnvironment(getNextSubString());
+	lastDrawingPagePtr->trySetWeldInspection(getNextSubString());
+	lastDrawingPagePtr->trySetPostWeldingHeatTreatment(getNextSubString());
+	lastDrawingPagePtr->trySetStressCalculation(getNextSubString());
+	lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
+	lastDrawingPagePtr->trySetCategoryPipelinesTRCU(getNextSubString());
+	lastDrawingPagePtr->trySetGOSTPipelineCategory(getNextSubString());
 }
 
-void TextParserIOT::parse(const std::wstring& fileName)
+void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& drawings)
 {
+	drawingsPtr = &drawings;
 	reset();
 
 	moveToNextSubString(L"КОЛ-ВО");

@@ -4,9 +4,10 @@
 
 class BuildComponentASP : public BuildComponent
 {
-	bool trySetDescription(const std::wstring& descriptionStr, bool assertionCheck = true) override;
-	bool trySetNominalDiameter(const std::wstring& nominalDiameterStr, bool assertionCheck = true) override;
-	bool trySetAmount(const std::wstring& amountStr, bool assertionCheck = true) override;
-	bool trySetPositionCode(const std::wstring& positionCodeStr, bool assertionCheck = true);
+public:
+	BuildComponentASP(const std::wstring& positionNumberStr);
+	bool trySetPositionCode(const std::wstring& positionCodeStr, bool assertionCheck = true) override;
+private:
+	std::wstring replaceRuSimbols(const std::wstring& sourceStr);
 };
 

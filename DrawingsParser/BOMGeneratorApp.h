@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wx/log.h> 
 #include <string>
 
 class DrawingsParserApp : public wxApp
@@ -18,10 +17,6 @@ private:
 		LOAD_PARSE = 1 << 1,          // 0010
 		LOAD_PARSE_WRITE = 1 << 2     // 0100
 	};
-
-	//wxLog* logger = nullptr;
-
-	//void initLogging();
 
 	//Функция для тестирования отдельных файлов
 	void processingOneFile(std::string& fileName, unsigned int state);

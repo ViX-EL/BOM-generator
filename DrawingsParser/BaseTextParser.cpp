@@ -58,20 +58,22 @@ std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wstring& su
 	return std::pair(beginIdx, endIdx);
 }
 
-std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wregex& pattern)
+std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wregex& pattern, bool reverseFind)
 {
-	std::wsmatch match;
-	if (std::regex_search(*text, match, pattern))
+	std::pair<size_t, size_t> beginEndIndexes;
+	do
 	{
-		size_t beginIdx = match.position(0);
-		size_t endIdx = text->find(separator, beginIdx);
-		beginIdx = text->rfind(separator, beginIdx) + 1;
-		currentPositionInText = endIdx - 1;
-		return std::pair(beginIdx, endIdx);
-	}
-	else {
-		return std::pair(size_tMax, size_tMax);
-	}
+		if (!reverseFind) {
+			beginEndIndexes = moveToNextSubString();
+		}
+		else {
+			beginEndIndexes = moveToPreviouslySubString();
+		}
+		if (beginEndIndexes.second == std::wstring::npos || beginEndIndexes.first == std::wstring::npos) {
+			break;
+		}
+	} while (!std::regex_match(text->substr(beginEndIndexes.first, beginEndIndexes.second - beginEndIndexes.first), pattern));
+	return beginEndIndexes;
 }
 
 std::pair<size_t, size_t> BaseTextParser::moveToLastSubString()
@@ -123,9 +125,9 @@ std::wstring BaseTextParser::getSubString(const std::wstring& subString, bool re
 	return returnSubString(beginEndIndexes);
 }
 
-std::wstring BaseTextParser::getSubString(const std::wregex& pattern)
+std::wstring BaseTextParser::getSubString(const std::wregex& pattern, bool reverseFind)
 {
-	std::pair<size_t, size_t> beginEndIndexes = moveToSubString(pattern);
+	std::pair<size_t, size_t> beginEndIndexes = moveToSubString(pattern, reverseFind);
 	return returnSubString(beginEndIndexes);
 }
 
@@ -297,143 +299,12 @@ std::pair<size_t, size_t> BaseTextParser::moveOnCountSubStr(size_t& positionInTe
 void BaseTextParser::reset()
 {
 	currentPositionInText = 0;
-	lastComponentNumber = 0;
 	componentsEnded = false;
-	listsCountBeforeStart = componentsCountPerList->size();
+	lastDrawingPagePtr = nullptr;
+	lastComponentPtr = nullptr;
 }
 
-BaseTextParser::BaseTextParser(const std::wstring& text, Columns& columns,
-	std::vector<int>& componentsCountPerList, wchar_t separator) : text(&text), columns(&columns),
-	componentsCountPerList(&componentsCountPerList), separator(separator)
+BaseTextParser::BaseTextParser(const std::wstring& text,  wchar_t separator) : text(&text), separator(separator)
 {
 
-}
-
-bool BaseTextParser::readComponent(Columns* columns)
-{
-	if (!readLastComponentNumber()) {
-		return false;
-	}
-
-	std::vector<std::wstring> subStrBuffer;
-
-	for (int i = 0; i < 3; i++) {
-		subStrBuffer.emplace_back(getNextSubString());
-	}
-
-	std::wregex diameterPattern(LR"(\d{1,4} x( \d+)?|\d{1,4})");
-	std::wregex itemCodePattern(LR"([a-zA-Z0-9()_]+)");
-	std::wregex countPattern(LR"( {0,2}\d{1,3}M?| {0,2}\d{1,3}\.\d{1,4}M)");
-	bool cases[]{ false, false };
-
-	int descriptionSubStrCount{ 1 };
-	while (!cases[0] && !cases[1])
-	{
-		cases[0] = std::regex_match(*(subStrBuffer.begin()), diameterPattern);
-		cases[0] = cases[0] && std::regex_match(*(subStrBuffer.begin() + 1), countPattern);
-		if (cases[0]) {
-			descriptionSubStrCount = 0;
-		}
-		else {
-			cases[0] = std::regex_match(*(subStrBuffer.end() - 2), diameterPattern);
-			cases[0] = cases[0] && std::regex_match(*(subStrBuffer.end() - 1), countPattern);
-		}
-
-		if (!cases[0])
-		{
-			cases[1] = std::regex_match(*(subStrBuffer.end() - 3), diameterPattern);
-			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 2), itemCodePattern);
-			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 1), countPattern);
-		}
-
-		if (!cases[0] && !cases[1]) {
-			subStrBuffer.emplace_back(getNextSubString());
-			descriptionSubStrCount++;
-		}
-	}
-
-	std::wregex componentNumberPattern(LR"( *\d+)");
-	if (!cases[1] && std::regex_match(*(subStrBuffer.begin()), componentNumberPattern) && !std::regex_match(*(subStrBuffer.begin() + 1), countPattern))
-	{
-		nextComponentNumberMissing = true;
-		descriptionSubStrCount--;
-		subStrBuffer.erase(subStrBuffer.begin());
-	}
-
-	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ') && !cases[1]) {
-		size_t currentPos = currentPositionInText;
-		std::vector<std::wstring> buffer; 
-		buffer.emplace_back(getNextSubString(currentPos));
-		buffer.emplace_back(getNextSubString(currentPos));
-		if ((buffer.end() - 1)->starts_with(L"CUT PIPE")) {
-			subStrBuffer.emplace_back(getNextSubString());
-			descriptionSubStrCount++;
-		}
-	}
-
-	if (cases[0] && (subStrBuffer.end() - 2)->ends_with(L"x")) {
-		subStrBuffer.emplace_back(getNextSubString());
-	}
-
-	if (cases[1] && (subStrBuffer.end() - 3)->ends_with(L"x")) {
-		descriptionSubStrCount--;
-	}
-
-	if (cases[1]) {
-		descriptionSubStrCount--;
-	}
-
-	std::wstring descriptionStr;
-	if (!(cases[1] && subStrBuffer.size() == 3)) {
-		for (int i = 0; i < descriptionSubStrCount; i++)
-		{
-			descriptionStr += subStrBuffer[i];
-		}
-	}
-	else {
-		descriptionStr = L"-";
-	}
-	if (descriptionSubStrCount == 0) {
-		descriptionStr = L"-";
-	}
-	(*columns)[L"Описание компонента"].emplace_back(descriptionStr);
-
-	if (cases[0])
-	{
-		if ((subStrBuffer.end() - 3)->ends_with(L"x")) {
-			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 3) + L' ' + (*(subStrBuffer.end() - 2))));
-		}
-		else 
-		{
-			if (descriptionSubStrCount != 0) {
-				(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 2));
-			}
-			else {
-				(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.begin() + 1));
-			}
-		}
-		if (descriptionSubStrCount != 0) {
-			(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
-		}
-		else 
-		{
-			(*columns)[L"Кол-во"].emplace_back(*subStrBuffer.begin());
-			moveToPreviouslySubString();
-		}
-
-		(*columns)[L"Код позиции"].emplace_back(L"-");
-	}
-	else if (cases[1])
-	{
-		if (subStrBuffer.size() != 3 && (subStrBuffer.end() - 4)->ends_with(L"x")) {
-			(*columns)[L"Условный диаметр"].emplace_back((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
-		}
-		else {
-			(*columns)[L"Условный диаметр"].emplace_back(*(subStrBuffer.end() - 3));
-		}
-		(*columns)[L"Код позиции"].emplace_back(*(subStrBuffer.end() - 2));
-		(*columns)[L"Кол-во"].emplace_back(*(subStrBuffer.end() - 1));
-	}
-	(*columns)[L"Документ"].emplace_back(L"-");
-	return true;
 }

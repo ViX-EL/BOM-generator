@@ -6,11 +6,10 @@
 class TextParserMEN : public BaseTextParser
 {
 private:
-	bool readLastComponentNumber() override;
+	bool readComponentNumber() override;
 
 public:
-	void parse(const std::wstring& fileName) override;
-	TextParserMEN(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList,
-		wchar_t separator);
+	void parse(const std::wstring& fileName, std::vector<Drawing>& drawings) override;
+	TextParserMEN(const std::wstring& text, wchar_t separator);
 };
 

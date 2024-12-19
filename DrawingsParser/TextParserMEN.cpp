@@ -1,18 +1,16 @@
 #include "TextParserMEN.h"
 
-bool TextParserMEN::readLastComponentNumber()
+bool TextParserMEN::readComponentNumber()
 {
 	return false;
 }
 
-void TextParserMEN::parse(const std::wstring& fileName)
+void TextParserMEN::parse(const std::wstring& fileName, std::vector<Drawing>& drawings)
 {
 
 }
 
-TextParserMEN::TextParserMEN(const std::wstring& text, Columns& columns,
-	std::vector<int>& componentsCountPerList, wchar_t separator) : BaseTextParser(text, columns,
-		componentsCountPerList, separator)
+TextParserMEN::TextParserMEN(const std::wstring& text,  wchar_t separator) : BaseTextParser(text, separator)
 {
 
 }

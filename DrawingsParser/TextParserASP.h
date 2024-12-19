@@ -4,21 +4,23 @@
 #define TEXTPARSERASP_H
 
 #include "BaseTextParser.h"
+#include "DrawingPageASP.h"
 
 #include <string>
+#include <memory>
 
 class TextParserASP : public BaseTextParser
 {
 private:
 	bool withoutWeldedPipe = false;
 	bool existComponentsInEndText = false;
-	bool listStartWithContFrom = false;
+	bool pageStartWithContFrom = false;
+
 	std::wstring cipherDocumentStr;
 
-	void writeComponentsCount();
 	void readComponensFromEndText();
-	bool readLastComponentNumber() override;
-	bool readListAndListsCount(const std::wstring& listCountStr, const std::wstring& currentListStr);
+	bool readComponentNumber() override;
+	bool readComponent() override;
 	void readTablePartData();
 
 	void readDescriptionsFromEndText();
@@ -26,11 +28,11 @@ private:
 	void parseCase1(std::wstring designTemperatureStr);
 	void parseCase2();
 	void parseCase3();
-	void setDashIfValueMissing(const std::wstring& nextSubStr, const std::wstring& unwantedSubStr, const std::wstring& columnName);
+	void trySet(const std::wstring& nextSubStr, const std::wstring& unwantedSubStr, bool(DrawingPage::* trySetFunction)(const std::wstring&, bool));
 
 public:
-	TextParserASP(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList, wchar_t separator);
-	void parse(const std::wstring& fileName) override;
+	TextParserASP(const std::wstring& text, wchar_t separator);
+	void parse(const std::wstring& fileName, std::vector<Drawing>& drawings) override;
 	void reset() override;
 };
 

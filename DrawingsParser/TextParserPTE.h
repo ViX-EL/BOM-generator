@@ -3,12 +3,12 @@
 class TextParserPTE : public BaseTextParser
 {
 private:
-	bool readLastComponentNumber() override;
-	bool readComponent(Columns* columns) override;
+	bool readComponentNumber() override;
+	bool readComponent() override;
 	void readTablePartData();
 
 public:
-	TextParserPTE(const std::wstring& text, Columns& columns, std::vector<int>& componentsCountPerList, wchar_t separator);
-	void parse(const std::wstring& fileName) override;
+	TextParserPTE(const std::wstring& text, wchar_t separator);
+	void parse(const std::wstring& fileName, std::vector<Drawing>& drawings) override;
 };
 

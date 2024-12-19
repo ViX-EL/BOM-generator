@@ -1,27 +1,55 @@
 #include "BuildComponentASP.h"
 
 #include <regex>
-#include <string>
 
-bool BuildComponentASP::trySetDescription(const std::wstring& descriptionStr, bool assertionCheck)
+BuildComponentASP::BuildComponentASP(const std::wstring& positionNumberStr) : BuildComponent(positionNumberStr)
 {
-    return trySetValue(descriptionStr, description, std::wregex(LR"([A-Za-zА-Яа-я0-9 -./"=#]+)"),assertionCheck, "Недопустимое значение для описания компонента!");
-}
-
-bool BuildComponentASP::trySetNominalDiameter(const std::wstring& nominalDiameterStr, bool assertionCheck)
-{
-    return trySetValue(nominalDiameterStr, nominalDiameter, std::wregex(LR"(\d{1,4} x( \d+)?|\d{1,4})"), assertionCheck, 
-        "Недопустимое значение для условного диаметра компонента!");
-}
-
-bool BuildComponentASP::trySetAmount(const std::wstring& amountStr, bool assertionCheck)
-{
-    return trySetValue(amountStr, amount, std::wregex(LR"( {0,2}\d{1,3}M?| {0,2}\d{1,3}\.\d{1,4}M)"), assertionCheck,
-        "Недопустимое значение для количества компонента!");
+	descriptionPattern.assign(LR"([\[A-Za-zА-Яа-я0-9 -№.:,/"=#\]]{12,})");
+	nominalDiameterPattern.assign(LR"(\d{1,4} ?x( ?\d+)?|\d{1,4})");
+	amountPattern.assign(LR"( {0,2}\d{1,3}\.\d{1,4}M| {0,2}[1-9]\d{0,2}M?)");
+	positionCodePattern.assign(LR"([a-zA-ZА-Яа-я0-9()_]{3,11})");
 }
 
 bool BuildComponentASP::trySetPositionCode(const std::wstring& positionCodeStr, bool assertionCheck)
 {
-	return trySetValue(positionCodeStr, positionCode, std::wregex(LR"([a-zA-Z0-9()_]+)"), assertionCheck,
-		"Недопустимое значение для кода позиции компонента!");
+	std::wregex patternWithoutRusSimbols(L"[a-zA-Z0-9()_]+");
+	if (std::regex_match(positionCodeStr, positionCodePattern) && !std::regex_match(positionCodeStr, patternWithoutRusSimbols))
+	{
+		return BuildComponent::trySetPositionCode(replaceRuSimbols(positionCodeStr), assertionCheck);
+	}
+	return BuildComponent::trySetPositionCode(positionCodeStr, assertionCheck);
+}
+
+std::wstring BuildComponentASP::replaceRuSimbols(const std::wstring& sourceStr)
+{
+	std::wstring newStr;
+	for (wchar_t simbol : sourceStr)
+	{
+		if (!((simbol >= L'A' && simbol <= L'Z') || (simbol >= L'a' && simbol <= L'z')))
+		{
+			switch (simbol)
+			{
+			case L'С': simbol = L'C'; break;
+			case L'с': simbol = L'c'; break;
+			case L'Е': simbol = L'E'; break;
+			case L'е': simbol = L'e'; break;
+			case L'Т': simbol = L'T'; break;
+			case L'у': simbol = L'y'; break;
+			case L'О': simbol = L'O'; break;
+			case L'о': simbol = L'o'; break;
+			case L'Р': simbol = L'P'; break;
+			case L'р': simbol = L'p'; break;
+			case L'А': simbol = L'A'; break;
+			case L'а': simbol = L'a'; break;
+			case L'Х': simbol = L'X'; break;
+			case L'х': simbol = L'x'; break;
+			case L'В': simbol = L'B'; break;
+			case L'М': simbol = L'M'; break;
+			default:
+				break;
+			}
+		}
+		newStr += simbol;
+	}
+	return newStr;
 }

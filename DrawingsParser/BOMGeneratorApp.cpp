@@ -10,7 +10,6 @@
 #include <wx/log.h>
 
 #include "DialogPrinter.h"
-//#include "DOCXPrinter.h"
 #include "DWGTextLoader.h"
 #include "PDFTextLoader.h"
 #include "TextParser.h"
@@ -26,7 +25,7 @@ bool DrawingsParserApp::OnInit()
 	window->SetBackgroundColour(*wxWHITE);
 	window->Show(true);
 
-	std::string fileName = "16150-11-2200_005-IA-0711-GCB2B01BN-02_Sht_1" ".dwg";
+	std::string fileName = "GCC-LGN-DDD-12510-01-0000-TK-ISO-00003_06_2_source" ".dwg";
 
 	processingOneFile(fileName, NONE);
 
@@ -55,9 +54,9 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 
 	if (state & LOAD_PARSE_WRITE) 
 	{
-		if (parser.getComponentsCountPerList().size() != 0)
+		if (parser.getDrawings().size() != 0)
 		{
-			TableWriter tableWriter(parser.getColumns(), parser.getComponentsCountPerList(), new DialogPrinter);
+			TableWriter tableWriter(parser.getDrawings(), new DialogPrinter);
 			tableWriter.createNewTableFile(".\\");
 			tableWriter.writeTable();
 		}
@@ -69,27 +68,5 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 
 DrawingsParserApp::~DrawingsParserApp()
 {
-	//wxLog::SetActiveTarget(nullptr);
-	//delete logger;
-}
 
-//void DrawingsParserApp::initLogging()
-//{
-//	namespace logging = boost::log;
-//	namespace keywords = boost::log::keywords;
-//
-//	logging::register_simple_formatter_factory<logging::trivial::severity_level, char>("Severity");
-//
-//	//logging::core::get()->set_filter
-//	//(
-//	//	logging::trivial::severity >= logging::trivial::trace
-//	//);
-//
-//	logging::add_file_log
-//	(
-//		keywords::file_name = "GeneratorLog.log",
-//		keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%"
-//	);
-//
-//	logging::add_common_attributes();
-//}
+}

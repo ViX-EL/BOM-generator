@@ -13,6 +13,36 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\Парсеры">
+      <UniqueIdentifier>{899818a5-7018-4a5c-9cab-5ee0ad26ebe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Парсеры\ASP">
+      <UniqueIdentifier>{4435cd23-1727-4ae3-b461-cd2b330eadaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Парсеры\LGN">
+      <UniqueIdentifier>{0f7434c8-13fa-4ddb-8a31-63739b97af21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Парсеры\NAG">
+      <UniqueIdentifier>{83ce92d0-17b7-44cb-87d8-08a69fa8c670}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Парсеры">
+      <UniqueIdentifier>{e773a94d-52c8-4611-ad61-5b5b9aae08d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Парсеры\ASP">
+      <UniqueIdentifier>{2114ecc4-bdd0-4c1a-a19c-163115f8e7cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Парсеры\LGN">
+      <UniqueIdentifier>{439006aa-01b5-4f07-baa8-e1cc4437c2ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Парсеры\NAG">
+      <UniqueIdentifier>{699e62d2-b229-4d5c-bbc7-abe0b9bdbff1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Парсеры\IOT">
+      <UniqueIdentifier>{ef094bdf-699c-49c3-a446-d0d7413819c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Парсеры\IOT">
+      <UniqueIdentifier>{c388c85b-1843-4914-9c56-2ac8d3e39d0c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsolPrinter.cpp">
@@ -36,9 +66,6 @@
     <ClCompile Include="DialogPrinter.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="TextParserLGN.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="StringConvert.h">
       <Filter>Файлы заголовков</Filter>
     </ClCompile>
@@ -48,19 +75,7 @@
     <ClCompile Include="BaseTextParser.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="TextParserASP.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="TextParserMEN.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="TextDialog.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="TextParserIOT.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="TextParserNAG.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="DWGTextLoader.cpp">
@@ -72,20 +87,53 @@
     <ClCompile Include="DOCXPrinter.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="TextParserPTE.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="BuildComponent.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="DrawingList.cpp">
+    <ClCompile Include="DrawingPage.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="BuildComponentASP.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Парсеры\ASP</Filter>
     </ClCompile>
-    <ClCompile Include="DrawingListASP.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="DrawingPageASP.cpp">
+      <Filter>Исходные файлы\Парсеры\ASP</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParserASP.cpp">
+      <Filter>Исходные файлы\Парсеры\ASP</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingPageLGN.cpp">
+      <Filter>Исходные файлы\Парсеры\LGN</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParserLGN.cpp">
+      <Filter>Исходные файлы\Парсеры\LGN</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildComponentLGN.cpp">
+      <Filter>Исходные файлы\Парсеры\LGN</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParserNAG.cpp">
+      <Filter>Исходные файлы\Парсеры\NAG</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingPageNAG.cpp">
+      <Filter>Исходные файлы\Парсеры\NAG</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParserMEN.cpp">
+      <Filter>Исходные файлы\Парсеры</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParserPTE.cpp">
+      <Filter>Исходные файлы\Парсеры</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildComponentNAG.cpp">
+      <Filter>Исходные файлы\Парсеры\NAG</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParserIOT.cpp">
+      <Filter>Исходные файлы\Парсеры\IOT</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingPageIOT.cpp">
+      <Filter>Исходные файлы\Парсеры\IOT</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildComponentIOT.cpp">
+      <Filter>Исходные файлы\Парсеры\IOT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,25 +161,10 @@
     <ClInclude Include="DialogPrinter.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="TextParserLGN.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="BaseTextParser.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="TextParserASP.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="TextParserMEN.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="TextDialog.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="TextParserIOT.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="TextParserNAG.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="DWGTextLoader.h">
@@ -143,20 +176,53 @@
     <ClInclude Include="DOCXPrinter.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="TextParserPTE.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="BuildComponent.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="DrawingList.h">
+    <ClInclude Include="DrawingPage.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="BuildComponentASP.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\Парсеры\ASP</Filter>
     </ClInclude>
-    <ClInclude Include="DrawingListASP.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="DrawingPageASP.h">
+      <Filter>Файлы заголовков\Парсеры\ASP</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParserASP.h">
+      <Filter>Файлы заголовков\Парсеры\ASP</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawingPageLGN.h">
+      <Filter>Файлы заголовков\Парсеры\LGN</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildComponentLGN.h">
+      <Filter>Файлы заголовков\Парсеры\LGN</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParserLGN.h">
+      <Filter>Файлы заголовков\Парсеры\LGN</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParserNAG.h">
+      <Filter>Файлы заголовков\Парсеры\NAG</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawingPageNAG.h">
+      <Filter>Файлы заголовков\Парсеры\NAG</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParserMEN.h">
+      <Filter>Файлы заголовков\Парсеры</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParserPTE.h">
+      <Filter>Файлы заголовков\Парсеры</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildComponentNAG.h">
+      <Filter>Файлы заголовков\Парсеры\NAG</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParserIOT.h">
+      <Filter>Файлы заголовков\Парсеры\IOT</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawingPageIOT.h">
+      <Filter>Файлы заголовков\Парсеры\IOT</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildComponentIOT.h">
+      <Filter>Файлы заголовков\Парсеры\IOT</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

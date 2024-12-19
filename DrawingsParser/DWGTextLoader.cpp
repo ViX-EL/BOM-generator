@@ -9,6 +9,7 @@
 //#include <boost/log/trivial.hpp>
 #include <wx/log.h> 
 #include <string>
+#include <cassert>
 
 DWGTextLoader::DWGTextLoader(IMessagePrinter* printer) : TextLoader(printer)
 {
@@ -30,6 +31,7 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	memset(&dwg, 0, sizeof(Dwg_Data));
 	int success = dwg_read_file(filePath.c_str(), &dwg);
 	if (!(success < DWG_ERR_CRITICAL)) {
+		assert(success < DWG_ERR_CRITICAL && "Wrong file!");
 		printer->printError(L"Wrong file!");
 		return success;
 	}
@@ -54,13 +56,13 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	text = text + separator;
 
 	if (!found) {
+		assert(found && "Text not found!");
 		printer->printError(L"Text not found!");
 		return 0;
 	}
 
 	dwg_free(&dwg);
 
-	//BOOST_LOG_TRIVIAL(trace) << "Конец чтения файла " << filename;
 	wxLogMessage("[Чтение] Конец чтения файла %s", wxString(getFileName()));
 
 	return success;

@@ -15,45 +15,80 @@ void TableWriter::writeHeders() const
 {
 	for (uint16_t i = 0; i < columnsNames.size(); i++)
 	{
-		worksheet_write_string(worksheet, 0, i,
-			utf8_encode(columnsNames[i]).c_str(), NULL);
+		worksheet_write_string(worksheet, 0, i, utf8_encode(columnsNames[i]).c_str(), NULL);
 	}
 }
 
-void TableWriter::writeListsLines(uint16_t startRow)
+void TableWriter::writePagesFields()
 {
-	currentList = 0;
-	uint16_t currentRow{ startRow };
+	uint16_t currentRow{ 1 };
+	uint16_t currentColumn{ 0 };
 
-	for (size_t i = 0; i < componentsCountPerList->size(); i++) //Запись листов со всех файлов последовательно
+	for (size_t drawingIdx = 0; drawingIdx < drawings->size(); drawingIdx++)
 	{
-		wxString currentFileName(columns->at(L"Имя файла").at(currentList));
-		wxString currentListNumber(columns->at(L"Лист").at(currentList));
-		wxLogMessage("[Запись] Начало записи листа %s файла %s", currentListNumber, currentFileName);
-		//BOOST_LOG_TRIVIAL(trace) << "Начало записи листов файла " << utf8_encode(currentFileName);
-
-		for (size_t j = 0; j < componentsCountPerList->at(currentList); j++) //Запись строк текущего листа
+		for (size_t pageIdx = 0; pageIdx < (*drawings)[drawingIdx].pages.size(); pageIdx++)
 		{
-			const size_t componentsFieldsCount{ 5 };
-			for (uint16_t compFieldIdx = 0; compFieldIdx < componentsFieldsCount; compFieldIdx++)
+			for (size_t componentIdx = 0; componentIdx < (*drawings)[drawingIdx].pages[pageIdx]->getComponentsCount(); componentIdx++)
 			{
-				std::wstring currentCellValue = columns->at(columnsNames[compFieldIdx]).at(currentRow);
-				worksheet_write_string(worksheet, currentRow + 1, compFieldIdx, utf8_encode(currentCellValue).c_str(), NULL);
+				currentFileName = (*drawings)[drawingIdx].pages[pageIdx]->getFileName();
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getCipherDocument());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getLineNumber());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getIsometricDrawing());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getFileName());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTotalPages());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getCurrentPage());
+
+				BuildComponent* currentComponentPtr = &(*drawings)[drawingIdx].pages[pageIdx]->getComponent(componentIdx);
+				writeCell(currentRow, currentColumn, currentComponentPtr->getPositionNumber());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getDescription());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getNominalDiameter());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getDocument());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getAmount());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getPositionCode());
+
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getDiameterPipeline());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getOperatingTemperature());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getOperatingPressure());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTracing());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getPipelineClass());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTechnologicalEnvironment());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTestEnvironment());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getPaintingSystem());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getPostWeldingHeatTreatment());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getWeldInspection());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTestPressure());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getGOSTPipelineCategory());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getDesignTemperature());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getDesignPressure());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getIsolation());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getCategoryPipelinesTRCU());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getSchemeNumber());
+				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getStressCalculation());
 			}
 
-			for (uint16_t colIdx = componentsFieldsCount; colIdx < columnsNames.size(); colIdx++)
-			{
-				std::wstring currentCellValue = columns->at(columnsNames[colIdx]).at(currentList);
-				worksheet_write_string(worksheet, currentRow + 1, colIdx, utf8_encode(currentCellValue).c_str(), NULL);
-			}
-
-			currentRow++;
+			wxLogMessage("[Запись] Конец записи листа %d файла %s", (*drawings)[drawingIdx].pages[pageIdx]->getCurrentPage(), (*drawings)[drawingIdx].pages[pageIdx]->getFileName());
 		}
+	}
+}
 
-		//BOOST_LOG_TRIVIAL(trace) << "Записан лист " << utf8_encode(*lastListNumberIter) << " файла " << utf8_encode(currentFileName);
-		wxLogMessage("[Запись] Конец записи листа %s файла %s", currentListNumber, currentFileName);
+void TableWriter::writeCell(uint16_t& row, uint16_t& column, const std::wstring& cellValueStr) const
+{
+	worksheet_write_string(worksheet, row, column, utf8_encode(cellValueStr).c_str(), NULL);
+	incrementCell(row, column);
+}
 
-		currentList++;
+void TableWriter::writeCell(uint16_t& row, uint16_t& column, int cellValue) const
+{
+	worksheet_write_number(worksheet, row, column, cellValue, NULL);
+	incrementCell(row, column);
+}
+
+void TableWriter::incrementCell(uint16_t& row, uint16_t& column) const
+{
+	column++;
+	if (column == 30) {
+		row++;
+		column = 0;
 	}
 }
 
@@ -87,13 +122,12 @@ void TableWriter::changeFileNameIfAlreadyExists(const std::string& tableDirector
 	}
 }
 
-const std::string& TableWriter::getFileName()
+const std::string& TableWriter::getFileName() const
 {
 	return tableFileName;
 }
 
-TableWriter::TableWriter(const BaseTextParser::Columns& columns, const  std::vector<int>& componentsCountPerList, IMessagePrinter* printer) :
-	columns(&columns), componentsCountPerList(&componentsCountPerList), workbook(nullptr), worksheet(nullptr), printer(printer)
+TableWriter::TableWriter(const std::vector<Drawing>& drawings, IMessagePrinter* printer) : drawings(&drawings), workbook(nullptr), worksheet(nullptr), printer(printer)
 {
 
 }
@@ -103,13 +137,12 @@ void TableWriter::writeTable()
 	try {
 		writeHeders();
 
-		writeListsLines(0);
+		writePagesFields();
 
 		workbook_close(workbook);
 	}
 	catch (const std::exception& ex) {
-		printer->printError(L"Ошибка заполнения файла таблицы: " + utf8_decode(ex.what()) + L" \nВ файле " 
-			+ columns->at(L"Имя файла").at(currentList));
+		printer->printError(L"Ошибка заполнения файла таблицы: " + utf8_decode(ex.what()) + L" \nВ файле " + currentFileName);
 	}
 }
 

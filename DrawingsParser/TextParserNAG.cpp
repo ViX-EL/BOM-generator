@@ -1,22 +1,27 @@
 #include "TextParserNAG.h"
+#include "DrawingPageNAG.h"
+#include "BuildComponentNAG.h"
+#include "DrawingPage.h"
 
 #include <regex>
 #include <initializer_list>
+#include <string>
+#include <vector>
 #include <wx/log.h>
 
-bool TextParserNAG::readLastComponentNumber()
+bool TextParserNAG::readComponentNumber()
 {
 	std::wstring componentNumberStr(getNextSubString());
 	//Если не найден номер компонента
-	std::wregex componentNumberPattern(LR"( *\d+)");
-	std::wregex lineNumberPattern(LR"(\d+-\d+-\d+\/\d+-\w+-\d+-[0-9A-Z]+-\d+)");
+	std::wregex lineNumberPattern(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{9}-\d{2})");
 	bool isLineNumber = std::regex_match(componentNumberStr, lineNumberPattern);
-	if (!std::regex_match(componentNumberStr, componentNumberPattern) || isLineNumber)
+	if (!std::regex_match(componentNumberStr, BuildComponent::getPositionNumberPattern()) || isLineNumber)
 	{
 		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") ||
 			componentNumberStr.starts_with(L"UT PIPE LENGTH")) {
-			if (lastComponentNumber != 0) {
-				componentsCountPerList->push_back(lastComponentNumber);
+			if (lastDrawingPagePtr != nullptr)
+			{
+				componentsEnded = true;
 				std::wstring formatStr = getPreviouslySubString(L"LEGEND");
 				if (formatStr.starts_with(L"Формат")) {
 					moveOnCountSubStr(2, true);
@@ -24,17 +29,16 @@ bool TextParserNAG::readLastComponentNumber()
 				else {
 					moveToPreviouslySubString();
 				}
-				std::wregex listsPattern(LR"(\d+)");
-				std::wstring listsCountStr(getPreviouslySubString());
-				if (std::regex_match(listsCountStr, listsPattern))
+
+				std::wstring pagesCountStr(getPreviouslySubString());
+				if (std::regex_match(pagesCountStr, lastDrawingPagePtr->getPagesPattern()))
 				{
-					(*columns)[L"Листов"].emplace_back(listsCountStr);
-					(*columns)[L"Лист"].emplace_back(getPreviouslySubString());
-					(*columns)[L"Номер линии"].emplace_back(getPreviouslySubString());
+					lastDrawingPagePtr->trySetPages(getPreviouslySubString(), pagesCountStr);
+					lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
 					moveOnCountSubStr(2);
 				}
 				else {
-					(*columns)[L"Номер линии"].emplace_back(listsCountStr);
+					lastDrawingPagePtr->trySetLineNumber(pagesCountStr);
 				}
 			}
 			else {
@@ -45,26 +49,27 @@ bool TextParserNAG::readLastComponentNumber()
 			moveToSubString(L"КОЛ-ВО");
 		}
 		else if (isLineNumber) {
-			(*columns)[L"Номер линии"].emplace_back(componentNumberStr);
-			std::wstring listStr(getNextSubString());
-			std::wregex listPattern(LR"(\d+)");
-			if (std::regex_match(listStr, listPattern))
-			{
-				(*columns)[L"Лист"].emplace_back(listStr);
-				(*columns)[L"Листов"].emplace_back(getNextSubString());
+			lastDrawingPagePtr->trySetLineNumber(componentNumberStr);
+			std::wstring pageStr(getNextSubString());
+			if (std::regex_match(pageStr, lastDrawingPagePtr->getPagesPattern())) {
+				lastDrawingPagePtr->trySetPages(pageStr, getNextSubString());
 			}
-			componentsCountPerList->push_back(lastComponentNumber);
+			componentsEnded = true;
 		}
 		return false;
 	}
 	else
 	{
-		lastComponentNumber++;
+		if (lastDrawingPagePtr == nullptr)
+		{
+			createDrawing<DrawingPageNAG>();
+		}
+		tryAddComponent<BuildComponentNAG>(componentNumberStr);
 		return true;
 	}
 }
 
-void TextParserNAG::writeValueOfTwoSubStr(const std::wstring& columnName, std::initializer_list<std::wstring> ifEqualStrList, const std::wstring& firstStr)
+void TextParserNAG::writeValueOfTwoSubStr(bool(DrawingPage::* trySetFunction)(const std::wstring&, bool), std::initializer_list<std::wstring> ifEqualStrList, const std::wstring& firstStr)
 {
 	std::wstring subStr;
 	if (firstStr == L"") {
@@ -80,82 +85,74 @@ void TextParserNAG::writeValueOfTwoSubStr(const std::wstring& columnName, std::i
 			break;
 		}
 	}
-	(*columns)[columnName].emplace_back(subStr);
+	(*lastDrawingPagePtr.*trySetFunction)(subStr, true);
+}
+
+void TextParserNAG::reset()
+{
+	currentListEmpty = false;
+	BaseTextParser::reset();
 }
 
 void TextParserNAG::readTablePartData()
 {
 	std::wstring schemeNumber(getNextSubString(L"ЛИСТОВ"));
-	std::wregex cipherOfDocumentPattern(LR"(GCC-NAG-DDD-\d+-\d+-\d+-TKM?-ISO-\d+)");
 	bool cipherWasFoundEarlier = false;
-	if (std::regex_match(schemeNumber, cipherOfDocumentPattern)) 
+	if (std::regex_match(schemeNumber, lastDrawingPagePtr->getCipherDocumentPattern()))
 	{
 		cipherWasFoundEarlier = true;
-		(*columns)[L"Шифр документа"].emplace_back(schemeNumber);
+		lastDrawingPagePtr->trySetCipherDocument(schemeNumber);
 		moveToNextSubString();
-		(*columns)[L"Изометрический чертеж"].emplace_back(getNextSubString());
-		(*columns)[L"Листов"].emplace_back(getPreviouslySubString(L"Формат", true));
-		(*columns)[L"Лист"].emplace_back(getPreviouslySubString());
+		lastDrawingPagePtr->trySetIsometricDrawing(getNextSubString());
+		std::wstring totalPagesStr = getPreviouslySubString(L"Формат", true);
+		std::wstring currentPageStr = getPreviouslySubString();
+		lastDrawingPagePtr->trySetPages(currentPageStr, totalPagesStr);
 		schemeNumber = getNextSubString(L"КЛАСС ТРУБОПРОВОДА", true);
 	}
 
-	std::wregex designPressurePattern(LR"(-?\d|-|\d,\d(\/\d,\d)?|\d\.\d)");
 	bool isFlareFarming = false;
 	if (schemeNumber.starts_with(L"GCC-NAG-DDD")) {
-		(*columns)[L"Номер схемы"].emplace_back(schemeNumber);
-		writeValueOfTwoSubStr(L"Расчет. Давление", { L"HYDROSTATIC/" });
+		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber);
+		writeValueOfTwoSubStr(&DrawingPage::trySetStressCalculation, { L"HYDROSTATIC/" });
 	}
 	else
 	{
-		(*columns)[L"Номер схемы"].emplace_back(L"-");
 		std::wregex flareFarmingPattern(L"Факельное хозяйство");
-		if (std::regex_search(*text, flareFarmingPattern) && !std::regex_match(schemeNumber, designPressurePattern)) {
+		if (std::regex_search(*text, flareFarmingPattern) && !std::regex_match(schemeNumber, lastDrawingPagePtr->getDesignPressurePattern())) {
 			isFlareFarming = true;
 		}
 		else {
-			writeValueOfTwoSubStr(L"Расчет. Давление", { L"HYDROSTATIC/" }, schemeNumber);
+			writeValueOfTwoSubStr(&DrawingPage::trySetDesignPressure, { L"HYDROSTATIC/" }, schemeNumber);
 		}
 	}
 
-	if (isFlareFarming && !std::regex_match(schemeNumber, designPressurePattern))
+	if (isFlareFarming && !std::regex_match(schemeNumber, lastDrawingPagePtr->getDesignPressurePattern()))
 	{
-		writeValueOfTwoSubStr(L"Среда испытаний", { L"PLANT AIR /", L"FW /" }, schemeNumber);
-		(*columns)[L"Послесвар. Термообраб"].emplace_back(getNextSubString());
-		(*columns)[L"Расчет напряжений"].emplace_back(getNextSubString());
-		(*columns)[L"Система покраски"].emplace_back(getNextSubString());
-		(*columns)[L"Спутниковый обогрев"].emplace_back(getNextSubString());
-		(*columns)[L"Изоляция"].emplace_back(getNextSubString());
-		(*columns)[L"Технологическая среда"].emplace_back(getNextSubString());
-		(*columns)[L"Класс трубопровода"].emplace_back(getNextSubString());
-
-		(*columns)[L"Расчет. Давление"].emplace_back(L"-");
-		(*columns)[L"Расчет. Темп"].emplace_back(L"-");
-		(*columns)[L"Рабочее давление"].emplace_back(L"-");
-		(*columns)[L"Рабочая температура"].emplace_back(L"-");
-		(*columns)[L"Давление испыт"].emplace_back(L"-");
-		(*columns)[L"Контроль сварных швов"].emplace_back(L"-");
-		(*columns)[L"Категория трубопр. ТР ТС"].emplace_back(L"-");
-		(*columns)[L"Категория трубопр. Гост"].emplace_back(L"-");
-		(*columns)[L"Диаметр трубопровода"].emplace_back(L"-");
+		writeValueOfTwoSubStr(&DrawingPage::trySetTestEnvironment, { L"PLANT AIR /", L"FW /" }, schemeNumber);
+		lastDrawingPagePtr->trySetPostWeldingHeatTreatment(getNextSubString());
+		lastDrawingPagePtr->trySetStressCalculation(getNextSubString());
+		lastDrawingPagePtr->trySetPaintingSystem(getNextSubString());
+		lastDrawingPagePtr->trySetTracing(getNextSubString());
+		lastDrawingPagePtr->trySetIsolation(getNextSubString());
+		lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
+		lastDrawingPagePtr->trySetPipelineClass(getNextSubString());
 	}
 	else
 	{
-		(*columns)[L"Расчет. Темп"].emplace_back(getNextSubString());
-		writeValueOfTwoSubStr(L"Рабочее давление", { L"HYDROSTATIC/" });
-		writeValueOfTwoSubStr(L"Рабочая температура", { L"Не ниже 5 /" });
-		(*columns)[L"Давление испыт"].emplace_back(getNextSubString());
-		writeValueOfTwoSubStr(L"Среда испытаний", { L"PLANT AIR /", L"FW /" });
-		writeValueOfTwoSubStr(L"Контроль сварных швов", { L"2 метода объем" });
-		(*columns)[L"Послесвар. Термообраб"].emplace_back(getNextSubString());
-		(*columns)[L"Расчет напряжений"].emplace_back(getNextSubString());
-		(*columns)[L"Система покраски"].emplace_back(getNextSubString());
-		(*columns)[L"Спутниковый обогрев"].emplace_back(getNextSubString());
+		lastDrawingPagePtr->trySetDesignTemperature(getNextSubString());
+		writeValueOfTwoSubStr(&DrawingPage::trySetOperatingPressure, { L"HYDROSTATIC/" });
+		writeValueOfTwoSubStr(&DrawingPage::trySetOperatingTemperature, { L"Не ниже 5 /" });
+		lastDrawingPagePtr->trySetTestPressure(getNextSubString());
+		writeValueOfTwoSubStr(&DrawingPage::trySetTestEnvironment, { L"PLANT AIR /", L"FW /" });
+		writeValueOfTwoSubStr(&DrawingPage::trySetWeldInspection, { L"2 метода объем" });
+		lastDrawingPagePtr->trySetPostWeldingHeatTreatment(getNextSubString());
+		lastDrawingPagePtr->trySetStressCalculation(getNextSubString());
+		lastDrawingPagePtr->trySetPaintingSystem(getNextSubString());
+		lastDrawingPagePtr->trySetTracing(getNextSubString());
 		std::wstring isolation(getNextSubString());
-		std::wregex isolationPattern(LR"(H|NO|\d+|[0-9 ]+|LI|NO ?/ ?НЕТ|\d+ \d+)");
-		if (!std::regex_match(isolation, isolationPattern))
+		if (!std::regex_match(isolation, lastDrawingPagePtr->getIsolationPattern()))
 		{
-			(*columns)[L"Изоляция"].emplace_back(L"-");
-			(*columns)[L"Технологическая среда"].emplace_back(isolation);
+			lastDrawingPagePtr->trySetTechnologicalEnvironment(isolation);
 		}
 		else {
 			std::wstring diameterSubStr;
@@ -172,37 +169,127 @@ void TextParserNAG::readTablePartData()
 			moveOnCountSubStr(subStrToDiametrCount, true);
 			if (subStrToDiametrCount != 3)
 			{
-				(*columns)[L"Изоляция"].emplace_back(isolation);
-				(*columns)[L"Технологическая среда"].emplace_back(getNextSubString());
+				lastDrawingPagePtr->trySetIsolation(isolation);
+				lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
 			}
 			else
 			{
-				(*columns)[L"Изоляция"].emplace_back(L"-");
-				(*columns)[L"Технологическая среда"].emplace_back(isolation);
+				lastDrawingPagePtr->trySetTechnologicalEnvironment(isolation);
 			}
 		}
-		(*columns)[L"Категория трубопр. ТР ТС"].emplace_back(getNextSubString());
-		(*columns)[L"Категория трубопр. Гост"].emplace_back(getNextSubString());
-		(*columns)[L"Диаметр трубопровода"].emplace_back(getNextSubString());
-		(*columns)[L"Класс трубопровода"].emplace_back(getNextSubString());
+		lastDrawingPagePtr->trySetCategoryPipelinesTRCU(getNextSubString());
+		lastDrawingPagePtr->trySetGOSTPipelineCategory(getNextSubString());
+		lastDrawingPagePtr->trySetDiameterPipeline(getNextSubString());
+		lastDrawingPagePtr->trySetPipelineClass(getNextSubString());
 	}
 
 	if (!cipherWasFoundEarlier) 
 	{
-		(*columns)[L"Шифр документа"].emplace_back(getNextSubString());
-		(*columns)[L"Изометрический чертеж"].emplace_back(getNextSubString(L"Isometric drawing"));
+		lastDrawingPagePtr->trySetCipherDocument(getNextSubString());
+		lastDrawingPagePtr->trySetIsometricDrawing(getNextSubString(L"Isometric drawing"));
 	}
 }
 
-TextParserNAG::TextParserNAG(const std::wstring& text, Columns& columns,
-std::vector<int>& componentsCountPerList, wchar_t separator) : BaseTextParser(text, columns,
-	componentsCountPerList, separator)
+TextParserNAG::TextParserNAG(const std::wstring& text, wchar_t separator) : BaseTextParser(text, separator)
 {
 
 }
 
-void TextParserNAG::parse(const std::wstring& fileName)
+bool TextParserNAG::readComponent()
 {
+	if (!readComponentNumber()) {
+		return false;
+	}
+
+	std::vector<std::wstring> subStrBuffer;
+
+	for (int i = 0; i < 3; i++) {
+		subStrBuffer.emplace_back(getNextSubString());
+	}
+
+	bool cases[]{ false, false };
+
+
+	int descriptionSubStrCount{ 1 };
+	while (!cases[0] && !cases[1])
+	{
+		cases[0] = std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getNominalDiameterPattern());
+		cases[0] = cases[0] && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
+
+		if (!cases[0])
+		{
+			cases[1] = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
+			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getPositionCodePattern());
+			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
+		}
+
+		if (!cases[0] && !cases[1]) {
+			subStrBuffer.emplace_back(getNextSubString());
+			descriptionSubStrCount++;
+		}
+	}
+
+	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ') && !cases[1]) {
+		size_t currentPos = currentPositionInText;
+		std::vector<std::wstring> buffer;
+		buffer.emplace_back(getNextSubString(currentPos));
+		buffer.emplace_back(getNextSubString(currentPos));
+		if ((buffer.end() - 1)->starts_with(L"CUT PIPE"))
+		{
+			subStrBuffer.emplace_back(getNextSubString());
+			descriptionSubStrCount++;
+		}
+	}
+
+	if (cases[0] && (subStrBuffer.end() - 2)->ends_with(L"x")) {
+		subStrBuffer.emplace_back(getNextSubString());
+	}
+
+	if (cases[1] && (subStrBuffer.end() - 3)->ends_with(L"x")) {
+		descriptionSubStrCount--;
+	}
+
+	if (cases[1]) {
+		descriptionSubStrCount--;
+	}
+
+	std::wstring descriptionStr;
+	if (!(cases[1] && subStrBuffer.size() == 3)) {
+		for (int i = 0; i < descriptionSubStrCount; i++)
+		{
+			descriptionStr += subStrBuffer[i];
+		}
+		lastComponentPtr->trySetDescription(descriptionStr);
+	}
+
+	if (cases[0])
+	{
+		if ((subStrBuffer.end() - 3)->ends_with(L"x")) {
+			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 3) + L' ' + (*(subStrBuffer.end() - 2))));
+		}
+		else
+		{
+				lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 2));
+		}
+		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
+	}
+	else if (cases[1])
+	{
+		if (subStrBuffer.size() != 3 && (subStrBuffer.end() - 4)->ends_with(L"x")) {
+			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
+		}
+		else {
+			lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
+		}
+		lastComponentPtr->trySetPositionCode(*(subStrBuffer.end() - 2));
+		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
+	}
+	return true;
+}
+
+void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& drawings)
+{
+	drawingsPtr = &drawings;
 	reset();
 
 	if (text->find(L"FABRICATION MATERIALS", currentPositionInText) != std::wstring::npos) {
@@ -210,9 +297,9 @@ void TextParserNAG::parse(const std::wstring& fileName)
 	}
 	while (true) //Чтение всех компонентов
 	{
-		if (!BaseTextParser::readComponent(columns))
+		if (!readComponent())
 		{
-			if (!BaseTextParser::readComponent(columns)) {
+			if (!readComponent()) {
 				break;
 			}
 		}
@@ -222,7 +309,7 @@ void TextParserNAG::parse(const std::wstring& fileName)
 	{
 		readTablePartData();
 
-		(*columns)[L"Имя файла"].emplace_back(fileName);
+		lastDrawingPagePtr->trySetFileName(fileName);
 	}
 	else {
 		currentListEmpty = false;
