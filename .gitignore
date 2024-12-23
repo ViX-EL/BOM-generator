@@ -15,6 +15,7 @@
 Проверенные изометрички/
 .dwg
 .dxf
+.dll
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -368,3 +369,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /DrawingsParser/Проверенные изометрички
+*.dwg
