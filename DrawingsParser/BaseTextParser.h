@@ -59,7 +59,7 @@ protected:
 	std::wstring getPreviouslySubString();
 	std::wstring getLastSubString();
 	std::wstring getFirstSubString();
-	void moveOnCountSubStr(int count, bool reverse = false);
+	void moveOnCountSubStr(size_t count, bool reverse = false);
 	std::pair<size_t, size_t> moveOnCountSubStr(size_t& positionInText, int count, bool reverse) const;
 
 	bool tryMoveToNextSubString(size_t& positionInText) const;

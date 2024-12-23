@@ -318,6 +318,10 @@ bool DrawingPage::trySetOperatingPressure(const std::wstring& sourceStr, bool as
 	if (sourceStr == L"-") {
 		return true;
 	}
+	if (sourceStr == L"атм.") {
+		operatingPressure = L"atm.";
+		return true;
+	}
 	return trySetValue(sourceStr, operatingPressure, operatingPressurePattern, assertionCheck, "Недопустимое значение для рабочего давления!");
 }
 
@@ -406,7 +410,7 @@ bool DrawingPage::trySetDesignPressure(const std::wstring& sourceStr, bool asser
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, designPressure, designPressurePattern, assertionCheck, "Недопустимое значение для рассчётного давлени!");
+	return trySetValue(sourceStr, designPressure, designPressurePattern, assertionCheck, "Недопустимое значение для рассчётного давления!");
 }
 
 bool DrawingPage::trySetCipherDocument(const std::wstring& sourceStr, bool assertionCheck)
@@ -443,7 +447,7 @@ bool DrawingPage::trySetCategoryPipelinesTRCU(const std::wstring& sourceStr, boo
 
 bool DrawingPage::trySetSchemeNumber(const std::wstring& sourceStr, bool assertionCheck)
 {
-	if (sourceStr == L"-") {
+	if (sourceStr == L"-" || sourceStr == L"No/Нет") {
 		return true;
 	}
 	return trySetValue(sourceStr, schemeNumber, schemeNumberPattern, assertionCheck, "Недопустимое значение для номера схемы!");

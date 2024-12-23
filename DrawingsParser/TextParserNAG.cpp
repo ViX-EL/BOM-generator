@@ -17,8 +17,8 @@ bool TextParserNAG::readComponentNumber()
 	bool isLineNumber = std::regex_match(componentNumberStr, lineNumberPattern);
 	if (!std::regex_match(componentNumberStr, BuildComponent::getPositionNumberPattern()) || isLineNumber)
 	{
-		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") ||
-			componentNumberStr.starts_with(L"UT PIPE LENGTH")) {
+		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") || componentNumberStr.starts_with(L"UT PIPE LENGTH"))
+		{
 			if (lastDrawingPagePtr != nullptr)
 			{
 				componentsEnded = true;
@@ -78,7 +78,7 @@ void TextParserNAG::writeValueOfTwoSubStr(bool(DrawingPage::* trySetFunction)(co
 	else {
 		subStr = firstStr;
 	}
-	for (std::wstring currentTemplateStr : ifEqualStrList)
+	for (const std::wstring& currentTemplateStr : ifEqualStrList)
 	{
 		if (subStr == currentTemplateStr) {
 			subStr = subStr + getNextSubString();
@@ -113,7 +113,7 @@ void TextParserNAG::readTablePartData()
 	bool isFlareFarming = false;
 	if (schemeNumber.starts_with(L"GCC-NAG-DDD")) {
 		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber);
-		writeValueOfTwoSubStr(&DrawingPage::trySetStressCalculation, { L"HYDROSTATIC/" });
+		writeValueOfTwoSubStr(&DrawingPage::trySetDesignPressure, { L"HYDROSTATIC/" });
 	}
 	else
 	{
@@ -292,9 +292,10 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	drawingsPtr = &drawings;
 	reset();
 
-	if (text->find(L"FABRICATION MATERIALS", currentPositionInText) != std::wstring::npos) {
+	if (text->find(L"FABRICATION MATERIALS", currentPositionInText) != std::wstring::npos || text->find(L"ERECTION MATERIALS", currentPositionInText) != std::wstring::npos) {
 		moveToSubString(L"КОЛ-ВО");
 	}
+
 	while (true) //Чтение всех компонентов
 	{
 		if (!readComponent())

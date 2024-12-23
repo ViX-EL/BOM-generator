@@ -13,9 +13,9 @@
 Тексты из файлов/
 Изометрички для проверки/
 Проверенные изометрички/
-.dwg
-.dxf
-.dll
+*.dwg
+*.dxf
+*.dll
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

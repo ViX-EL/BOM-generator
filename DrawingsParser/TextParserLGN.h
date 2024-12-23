@@ -21,6 +21,7 @@ private:
 	bool readDescriptionAndDiameter(const std::wstring& descriptionStr, std::wstring& diameterStr);
 	void readDocument();
 	
+	bool isEndOfComponent(const std::wstring& stringAfterComponent, size_t positionInText) const;
 	bool findCountStr();
 	bool readList();
 	bool isHaveOnlyOneList();

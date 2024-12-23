@@ -2,6 +2,7 @@
 #include "StringConvert.h"
 #include "BuildComponentLGN.h"
 #include "DrawingPageLGN.h"
+#include <functional>
 
 #include <regex>
 
@@ -83,8 +84,13 @@ void TextParserLGN::readDocument()
 	for (int i{ 0 }; i < 3; i++) {
 		subStringsBuffer.emplace_back(getNextSubString(position));
 	}
+	std::wstring documentStr = *(subStringsBuffer.begin());
 
-	if (subStringsBuffer[0] == L"–" || std::regex_match(subStringsBuffer[0], lastComponentPtr->getAmountPattern()) || subStringsBuffer[0] == L"None") {
+	if (subStringsBuffer[0] == L"–" || std::regex_match(subStringsBuffer[0], lastComponentPtr->getAmountPattern()) || subStringsBuffer[0] == L"None") 
+	{
+		if (subStringsBuffer[0] == L"–" || subStringsBuffer[0] == L"None") {
+			moveToNextSubString();
+		}
 		return;
 	}
 
@@ -100,36 +106,53 @@ void TextParserLGN::readDocument()
 		}
 		else
 		{
-			matches[0] = std::regex_match(*(subStringsBuffer.end() - 3), lastComponentPtr->getDocumentPattern());
+			matches[0] = std::regex_match(documentStr, lastComponentPtr->getDocumentPattern());
 			matches[1] = std::regex_match(*(subStringsBuffer.end() - 2), lastComponentPtr->getAmountPattern());
-			matches[2] = std::regex_match(*(subStringsBuffer.end() - 1), BuildComponent::getPositionNumberPattern());
-			if (!matches[2]) {
-				matches[2] = matches[2] || (subStringsBuffer.end() - 1)->starts_with(L"CUT PIPE LENGTH");
-			}
-			if (!matches[2]) {
-				std::wregex categoryPattern(LR"([A-Z ]+\/[А-Я ]+)");
-				matches[2] = matches[2] || std::regex_match(*(subStringsBuffer.end() - 1), categoryPattern);
-			}
-			if (!matches[2]) {
-				matches[2] = matches[2] || (subStringsBuffer.end() - 1)->starts_with(L"*******");
-			}
+			matches[2] = isEndOfComponent(*(subStringsBuffer.end() - 1), position);
 		}
+
 		if (matches[0] && matches[1] && matches[2])
 		{
-			std::wstring documentSubStr;
-			for (size_t i = 0; i < documentSubStrCount; i++) 
-			{
-				documentSubStr = documentSubStr + subStringsBuffer[i];
-				moveToNextSubString();
-			}
-			lastComponentPtr->trySetDocument(documentSubStr);
+			lastComponentPtr->trySetDocument(documentStr);
+			moveOnCountSubStr(documentSubStrCount);
 			break;
 		}
-		else {
+		else 
+		{
+			documentStr = documentStr + *(subStringsBuffer.begin() + documentSubStrCount);
 			subStringsBuffer.push_back(getNextSubString(position));
 			documentSubStrCount++;
 		}
 	}
+}
+
+bool TextParserLGN::isEndOfComponent(const std::wstring& stringAfterComponent, size_t positionInText) const
+{
+	std::function checkEnd = [](const std::wstring& subStr) 
+	{
+		bool isEnd = subStr.starts_with(L"CUT PIPE LENGTH");
+		if (!isEnd)
+		{
+			std::wregex categoryPattern(LR"([A-Z ]+\/[А-Я ]+)");
+			isEnd = std::regex_match(subStr, categoryPattern);
+		}
+		if (!isEnd) {
+			isEnd = subStr.starts_with(L"*******");
+		}
+		return isEnd;
+	};
+
+	bool isEnd = std::regex_match(stringAfterComponent, BuildComponent::getPositionNumberPattern());
+	if (isEnd)
+	{
+		std::wstring secondStringAfterComponent = getNextSubString(positionInText);
+		isEnd = std::regex_match(secondStringAfterComponent, lastComponentPtr->getDescriptionPattern()) && !checkEnd(secondStringAfterComponent);
+		if (!isEnd) {
+			isEnd = std::regex_match(stringAfterComponent, lastDrawingPagePtr->getPagesPattern()) && std::regex_match(secondStringAfterComponent, lastDrawingPagePtr->getPagesPattern());
+		}
+		return isEnd;
+	}
+	return checkEnd(stringAfterComponent);
 }
 
 bool TextParserLGN::findCountStr()
@@ -202,9 +225,20 @@ bool TextParserLGN::readList()
 	lastDrawingPagePtr->trySetDesignTemperature(getNextSubString());
 	lastDrawingPagePtr->trySetGOSTPipelineCategory(getNextSubString());
 	lastDrawingPagePtr->trySetTestPressure(getNextSubString());
-	lastDrawingPagePtr->trySetWeldInspection(getNextSubString());
-	lastDrawingPagePtr->trySetPostWeldingHeatTreatment(getNextSubString());
-	lastDrawingPagePtr->trySetPaintingSystem(getNextSubString());
+	std::wstring weldInspection = getNextSubString();
+	std::wstring postWeldingHeatTreatmentStr;
+	if (!lastDrawingPagePtr->trySetWeldInspection(weldInspection, false)) {
+		postWeldingHeatTreatmentStr = weldInspection;
+	}
+	else {
+		postWeldingHeatTreatmentStr = getNextSubString();
+	}
+	if (!lastDrawingPagePtr->trySetPostWeldingHeatTreatment(postWeldingHeatTreatmentStr, false)) {
+		lastDrawingPagePtr->trySetPaintingSystem(postWeldingHeatTreatmentStr);
+	}
+	else {
+		lastDrawingPagePtr->trySetPaintingSystem(getNextSubString());
+	}
 
 	std::wstring testEnvironmentStr = getNextSubString();
 	if (testEnvironmentStr == L"Воздух/Азот") {
@@ -226,9 +260,7 @@ bool TextParserLGN::readList()
 		lastDrawingPagePtr->trySetCipherDocument(getPreviouslySubString(L"Газохимический комплекс"));
 	}
 	else {
-		moveToNextSubString(L"Газохимический комплекс");
-		moveOnCountSubStr(2);
-		lastDrawingPagePtr->trySetCipherDocument(getNextSubString());
+		lastDrawingPagePtr->trySetCipherDocument(getSubString(lastDrawingPagePtr->getCipherDocumentPattern()));
 	}
 	lastDrawingPagePtr->trySetDiameterPipeline(getSubString(L"DN"));
 	lastDrawingPagePtr->trySetIsolation(getNextSubString());
@@ -250,7 +282,7 @@ bool TextParserLGN::readList()
 		moveOnCountSubStr(3);
 		schemeNumber = getNextSubString();
 		schemeNumber.erase(0, 3);
-		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber);
+		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber, false);
 	}
 	return true;
 }

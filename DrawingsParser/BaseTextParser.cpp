@@ -262,17 +262,17 @@ std::wstring BaseTextParser::getFirstSubString()
 	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
 }
 
-void BaseTextParser::moveOnCountSubStr(int count, bool reverse)
+void BaseTextParser::moveOnCountSubStr(size_t count, bool reverse)
 {
 	if (reverse)
 	{
-		for (int i = 0; i < count; i++) {
+		for (size_t i = 0; i < count; i++) {
 			moveToPreviouslySubString();
 		}
 	}
 	else
 	{
-		for (int i = 0; i < count; i++) {
+		for (size_t i = 0; i < count; i++) {
 			moveToNextSubString();
 		}
 	}

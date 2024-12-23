@@ -23,49 +23,37 @@ DrawingPageNAG::DrawingPageNAG()
 	lineNumberPattern.assign(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{9}-\d{2})");
 	stressCalculationPattern.assign(LR"(NO \/ ÍÅÒ|YES \/ ÄÀ)");
 	isometricDrawingPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}([ /0-9-]{2,5})?)");
-	fileNamePattern.assign(LR"(GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+\.dwg)");
+	fileNamePattern.assign(LR"(GCC-NAG-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+\.dwg)");
 }
-
-//bool DrawingPageNAG::tryAddComponent(const std::wstring& componentNumberStr)
-//{
-//	if (std::regex_match(componentNumberStr, positionNumberPattern))
-//{
-//	components.emplace_back(std::make_shared<BuildComponentNAG>(new BuildComponentNAG(componentNumberStr)));
-//	return true;
-//}
-//	return false;
-//}
 
 bool DrawingPageNAG::trySetOperatingTemperature(const std::wstring& operatingTemperatureStr, bool assertionCheck)
 {
-	std::wstring newOperatingTemperatureStr;
 	if (operatingTemperatureStr == L"Ambient" || operatingTemperatureStr == L"AMBIENT / ÎÊĞ.ÑĞÅÄÀ" || operatingTemperatureStr == L"AMBIENT/ ÎÊĞ. ÑĞÅÄÀ") {
-		newOperatingTemperatureStr = L"AMBIENT / ÎÊĞ.ÑĞÅÄÀ";
+		operatingTemperature = L"AMBIENT / ÎÊĞ.ÑĞÅÄÀ";
+		return true;
 	}
 	if (operatingTemperatureStr == L"Íå íèæå +5" || operatingTemperatureStr == L"Íå íèæå 5") {
-		newOperatingTemperatureStr = L"Íå íèæå 5 / No lower than 5";
-	}
-
-	if (newOperatingTemperatureStr != L"") {
-		return DrawingPage::trySetOperatingTemperature(newOperatingTemperatureStr, assertionCheck);
+		operatingTemperature = L"Íå íèæå 5 / No lower than 5";
+		return true;
 	}
 	return DrawingPage::trySetOperatingTemperature(operatingTemperatureStr, assertionCheck);
 }
 
 bool DrawingPageNAG::trySetOperatingPressure(const std::wstring& operatingPressureStr, bool assertionCheck)
 {
-	std::wstring newOperatingPressureStr;
-	if (newOperatingPressureStr == L"ÀÒÌ." || newOperatingPressureStr == L"ATM / ÀÒÌ" || newOperatingPressureStr == L"Atm") {
-		newOperatingPressureStr = L"ATM / ÀÒÌ.";
+	if (operatingPressureStr == L"ÀÒÌ." || operatingPressureStr == L"ATM / ÀÒÌ" || operatingPressureStr == L"Atm") {
+		operatingPressure = L"ATM / ÀÒÌ.";
+		return true;
 	}
-	if (newOperatingPressureStr == L"HYDROSTATIC/ ÃÈÄĞÎÑÒÀÒÈ×ÅÑÊÎÅ") {
-		newOperatingPressureStr = L"HYDR. / ÃÈÄĞÎÑÒ";
+	if (operatingPressureStr == L"HYDROSTATIC/ ÃÈÄĞÎÑÒÀÒÈ×ÅÑÊÎÅ") {
+		operatingPressure = L"HYDR. / ÃÈÄĞÎÑÒ";
+		return true;
 	}
-	if (newOperatingPressureStr.starts_with(L"Íå áîëåå / No more")) {
+	if (operatingPressureStr.starts_with(L"Íå áîëåå / No more")) {
+		std::wstring newOperatingPressureStr = operatingPressureStr;
 		newOperatingPressureStr.replace(0, 17, L"NO MORE / ÍÅ ÁÎËÅÅ");
-	}
-	if (newOperatingPressureStr != L"") {
-		return DrawingPage::trySetOperatingPressure(newOperatingPressureStr, assertionCheck);
+		operatingPressure = newOperatingPressureStr;
+		return true;
 	}
 	return DrawingPage::trySetOperatingPressure(operatingPressureStr, assertionCheck);
 }
@@ -73,7 +61,8 @@ bool DrawingPageNAG::trySetOperatingPressure(const std::wstring& operatingPressu
 bool DrawingPageNAG::trySetTracing(const std::wstring& tracingStr, bool assertionCheck)
 {
 	if (tracingStr == L"NO" || tracingStr == L"NO/ÍÅÒ") {
-		return DrawingPage::trySetOperatingPressure(L"NO / ÍÅÒ", assertionCheck);
+		tracing = L"NO / ÍÅÒ";
+		return true;
 	}
 	return DrawingPage::trySetTracing(tracingStr, assertionCheck);
 }
@@ -81,7 +70,8 @@ bool DrawingPageNAG::trySetTracing(const std::wstring& tracingStr, bool assertio
 bool DrawingPageNAG::trySetTestEnvironment(const std::wstring& testEnvironmentStr, bool assertionCheck)
 {
 	if (testEnvironmentStr == L"WATER/ÂÎÄÀ") {
-		return DrawingPage::trySetOperatingPressure(L"WATER / ÂÎÄÀ", assertionCheck);
+		testEnvironment = L"WATER / ÂÎÄÀ";
+		return true;
 	}
 	return DrawingPage::trySetTestEnvironment(testEnvironmentStr, assertionCheck);
 }
@@ -89,7 +79,8 @@ bool DrawingPageNAG::trySetTestEnvironment(const std::wstring& testEnvironmentSt
 bool DrawingPageNAG::trySetPaintingSystem(const std::wstring& paintingSystemStr, bool assertionCheck)
 {
 	if (paintingSystemStr == L"Ñ") {
-		return DrawingPage::trySetPaintingSystem(L"C", assertionCheck);
+		paintingSystem = L"C";
+		return true;
 	}
 	return DrawingPage::trySetPaintingSystem(paintingSystemStr, assertionCheck);
 }
@@ -97,7 +88,8 @@ bool DrawingPageNAG::trySetPaintingSystem(const std::wstring& paintingSystemStr,
 bool DrawingPageNAG::trySetPostWeldingHeatTreatment(const std::wstring& postWeldingHeatTreatmentStr, bool assertionCheck)
 {
 	if (postWeldingHeatTreatmentStr == L"NO/ÍÅÒ") {
-		DrawingPage::trySetPostWeldingHeatTreatment(L"NO / ÍÅÒ", assertionCheck);
+		postWeldingHeatTreatment = L"NO / ÍÅÒ";
+		return true;
 	}
 	return DrawingPage::trySetPostWeldingHeatTreatment(postWeldingHeatTreatmentStr, assertionCheck);
 }
@@ -105,22 +97,21 @@ bool DrawingPageNAG::trySetPostWeldingHeatTreatment(const std::wstring& postWeld
 bool DrawingPageNAG::trySetDesignPressure(const std::wstring& designPressureStr, bool assertionCheck)
 {
 	if (designPressureStr == L"HYDROSTATIC/ ÃÈÄĞÎÑÒÀÒÈ×ÅÑÊÎÅ") {
-		DrawingPage::trySetDesignPressure(L"HYDR. / ÃÈÄĞÎÑÒ.", assertionCheck);
+		designPressure = L"HYDR. / ÃÈÄĞÎÑÒ.";
+		return true;
 	}
 	return DrawingPage::trySetDesignPressure(designPressureStr, assertionCheck);
 }
 
 bool DrawingPageNAG::trySetStressCalculation(const std::wstring& stressCalculationStr, bool assertionCheck)
 {
-	std::wstring newStressCalculationStr;
-	if (newStressCalculationStr == L"NO/ÍÅÒ") {
-		newStressCalculationStr = L"NO / ÍÅÒ";
+	if (stressCalculationStr == L"NO/ÍÅÒ") {
+		stressCalculation = L"NO / ÍÅÒ";
+		return true;
 	}
-	if (newStressCalculationStr == L"YES/ÄÀ" || newStressCalculationStr == L"YES/ ÄÀ") {
-		newStressCalculationStr = L"YES / ÄÀ";
-	}
-	if (newStressCalculationStr != L"") {
-		return DrawingPage::trySetStressCalculation(newStressCalculationStr, assertionCheck);
+	if (stressCalculationStr == L"YES/ÄÀ" || stressCalculationStr == L"YES/ ÄÀ") {
+		stressCalculation = L"YES / ÄÀ";
+		return true;
 	}
 	return DrawingPage::trySetStressCalculation(stressCalculationStr, assertionCheck);
 }
