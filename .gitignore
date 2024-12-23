@@ -369,4 +369,3 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /DrawingsParser/Проверенные изометрички
-*.dwg
