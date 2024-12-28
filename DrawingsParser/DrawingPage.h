@@ -4,7 +4,7 @@
 #include <string>
 #include "BuildComponent.h"
 #include <memory>
-#include "BuildComponentASP.h"
+#include <cassert>
 
 class DrawingPage
 {
@@ -12,6 +12,7 @@ protected:
 	std::vector<std::shared_ptr<BuildComponent>> components;
 	int totalPages = 0;
 	int currentPage = 0;
+	bool inputCheckOff = false;
 	std::wstring operatingTemperature;
 	std::wstring operatingPressure;
 	std::wstring tracing; // Спутниковый обогрев
@@ -60,10 +61,12 @@ protected:
 	std::wregex fileNamePattern;
 
 	std::wstring truncate(const std::wstring& sourceStr);
-	DrawingPage();
+	explicit DrawingPage(bool inputCheckOff = false);
 public:
 	template <typename T>
 	bool tryAddComponent(const std::wstring& componentNumberStr);
+	template <typename T>
+	bool tryAddComponent(int componentNumber);
 	bool trySetPages(const std::wstring& currentPageStr, const std::wstring& totalPagesStr, bool assertionCheck = true);
 	virtual bool trySetOperatingTemperature(const std::wstring& sourceStr, bool assertionCheck = true);
 	virtual bool trySetOperatingPressure(const std::wstring& sourceStr, bool assertionCheck = true);
@@ -80,7 +83,7 @@ public:
 	virtual bool trySetDesignPressure(const std::wstring& sourceStr, bool assertionCheck = true);
 	virtual bool trySetCipherDocument(const std::wstring& sourceStr, bool assertionCheck = true);
 	bool trySetDiameterPipeline(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetIsolation(const std::wstring& sourceStr, bool assertionCheck = true);
+	virtual bool trySetIsolation(const std::wstring& sourceStr, bool assertionCheck = true);
 	virtual bool trySetCategoryPipelinesTRCU(const std::wstring& sourceStr, bool assertionCheck = true);
 	virtual bool trySetSchemeNumber(const std::wstring& sourceStr, bool assertionCheck = true);
 	virtual bool trySetLineNumber(const std::wstring& sourceStr, bool assertionCheck = true);
@@ -151,4 +154,12 @@ inline bool DrawingPage::tryAddComponent(const std::wstring& componentNumberStr)
 		return true;
 	}
 	return false;
+}
+
+template<typename T>
+inline bool DrawingPage::tryAddComponent(int componentNumber)
+{
+	assert(componentNumber > 0 && "Номер компонента должен быть больше 0!");
+	components.emplace_back(std::make_shared<T>(componentNumber));
+	return true;
 }

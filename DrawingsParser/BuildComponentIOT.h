@@ -5,6 +5,9 @@
 class BuildComponentIOT : public BuildComponent
 {
 public:
-	BuildComponentIOT(const std::wstring& positionNumberStr);
+	explicit BuildComponentIOT(const std::wstring& positionNumberStr);
+	explicit BuildComponentIOT(int positionNumber);
+private:
+	void initPatterns();
 };
 

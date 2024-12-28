@@ -5,6 +5,6 @@
 class BuildComponentNAG : public BuildComponent
 {
 public:
-	BuildComponentNAG(const std::wstring& positionNumberStr);
+	explicit BuildComponentNAG(const std::wstring& positionNumberStr);
 };
 

@@ -9,7 +9,7 @@ class BuildComponentASP;
 class DrawingPageASP : public DrawingPage
 {
 public:
-	DrawingPageASP();
+	explicit DrawingPageASP(bool inputCheckOff = false);
 	bool trySetOperatingTemperature(const std::wstring& operatingTemperatureStr, bool assertionCheck = true) override;
 	bool trySetDesignPressure(const std::wstring& designPressureStr, bool assertionCheck = true) override;
 	bool trySetCategoryPipelinesTRCU(const std::wstring& categoryPipelinesTRCUStr, bool assertionCheck = true) override;

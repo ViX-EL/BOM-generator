@@ -1,5 +1,4 @@
 #include "TextParserIOT.h"
-#include "BaseTextParser.h"
 #include "DrawingPageIOT.h"
 #include "BuildComponentIOT.h"
 
@@ -22,16 +21,22 @@ bool TextParserIOT::readComponent()
 	for (int i = 0; i < 4; i++) {
 		subStrBuffer.emplace_back(getNextSubString());
 	}
-	bool match{ false };
+	bool match[2]{ false, false };
 
 	int descriptionSubStrCount{ 1 };
-	while (!match)
+	while (!match[0] && !match[1])
 	{
-		match = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
-		match = match && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getPositionCodePattern());
-		match = match && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
+		match[0] = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
+		match[0] = match[0] && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getPositionCodePattern());
+		match[0] = match[0] && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
 
-		if (!match) {
+		if (!match[0])
+		{
+			match[1] = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
+			match[1] = match[1] && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getAmountPattern());
+		}
+
+		if (!match[0] && !match[1]) {
 			subStrBuffer.emplace_back(getNextSubString());
 			descriptionSubStrCount++;
 		}
@@ -40,13 +45,23 @@ bool TextParserIOT::readComponent()
 	std::wstring descriptionStr;
 	for (int i = 0; i < descriptionSubStrCount; i++)
 	{
-		descriptionStr += subStrBuffer[i];
+		std::wstring spase = i == 0 ? L"" : L" ";
+		descriptionStr += spase + subStrBuffer[i];
 	}
 	lastComponentPtr->trySetDescription(descriptionStr);
 
-	lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
-	lastComponentPtr->trySetPositionCode(*(subStrBuffer.end() - 2));
-	lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
+	if (match[0])
+	{
+		lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
+		lastComponentPtr->trySetPositionCode(*(subStrBuffer.end() - 2));
+		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
+	}
+	else if (match[1])
+	{
+		lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
+		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 2));
+		moveToPreviouslySubString();
+	}
 	return true;
 }
 
@@ -63,22 +78,29 @@ bool TextParserIOT::readComponentNumber()
 		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") || componentNumberStr.starts_with(L"GCC-IOT-DDD")) {
 			componentsEnded = true;
 		}
+		else if (componentNumberStr.starts_with(L"ERECTION MATERIALS")) {
+			moveToNextSubString(L"КОЛ-ВО");
+		}
 		return false;
 	}
 	else
 	{
+		componentsCount++;
 		createDrawing<DrawingPageIOT>();
 
-		tryAddComponent<BuildComponentIOT>(componentNumberStr);
+		tryAddComponent<BuildComponentIOT>(componentsCount);
 		return true;
 	}
 }
 
 void TextParserIOT::readTablePartData()
 {
-	lastDrawingPagePtr->trySetPipelineClass(getPreviouslySubString(L"TOTAL FOR"));
+	moveToPreviouslySubString(L"Газохимический комплекс");
+	lastDrawingPagePtr->trySetPipelineClass(getSubString(lastDrawingPagePtr->getPipelineClassPattern(), true));
 	lastDrawingPagePtr->trySetDiameterPipeline(getPreviouslySubString());
-	lastDrawingPagePtr->trySetIsolation(getPreviouslySubString());
+	if (!lastDrawingPagePtr->trySetIsolation(getPreviouslySubString(), false)) {
+		lastDrawingPagePtr->trySetIsolation(getSubString(lastDrawingPagePtr->getIsolationPattern(), true));
+	}
 	lastDrawingPagePtr->trySetTracing(getPreviouslySubString());
 	lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubString());
 	lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubString());
@@ -87,24 +109,56 @@ void TextParserIOT::readTablePartData()
 	lastDrawingPagePtr->trySetDesignPressure(getPreviouslySubString());
 	moveToPreviouslySubString();
 	lastDrawingPagePtr->trySetSchemeNumber(getPreviouslySubString());
-	lastDrawingPagePtr->trySetIsometricDrawing(getSubString(L"Isometric drawing", true).erase(0, 18));
-	moveToPreviouslySubString();
-	lastDrawingPagePtr->trySetFileName(getPreviouslySubString());
-	moveOnCountSubStr(8, true);
-	lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
-	moveOnCountSubStr(3, true);
-	std::wstring totalPagesStr = getPreviouslySubString();
-	lastDrawingPagePtr->trySetPages(getPreviouslySubString(), totalPagesStr);
-	moveToPreviouslySubString();
-	lastDrawingPagePtr->trySetCipherDocument(getPreviouslySubString());
-	lastDrawingPagePtr->trySetPaintingSystem(getNextSubString(L"ТЕХНОЛОГИИ"));
-	lastDrawingPagePtr->trySetTestEnvironment(getNextSubString());
+
+	std::wstring isometricDrawingStr = getSubString(L"Isometric drawing", true);
+	if (isometricDrawingStr != L"") {
+		lastDrawingPagePtr->trySetIsometricDrawing(isometricDrawingStr.erase(0, 18));
+	}
+	std::wstring fileNameStr = getSubString(lastDrawingPagePtr->getFileNamePattern(), lastDrawingPagePtr->getLineNumberPattern(), true);
+	if (fileNameStr != L"") {
+		lastDrawingPagePtr->trySetFileName(fileNameStr);
+	}
+	lastDrawingPagePtr->trySetLineNumber(getSubString(lastDrawingPagePtr->getLineNumberPattern(), lastDrawingPagePtr->getCipherDocumentPattern(), true));
+	lastDrawingPagePtr->trySetCipherDocument(getSubString(lastDrawingPagePtr->getCipherDocumentPattern(), true));
+	moveToNextSubString();
+	std::wstring currentPageStr = getNextSubString();
+	std::wstring totalPagesStr = getNextSubString();
+	if (std::regex_match(totalPagesStr, lastDrawingPagePtr->getPagesPattern())) {
+		lastDrawingPagePtr->trySetPages(currentPageStr, totalPagesStr);
+	}
+	else {
+		lastDrawingPagePtr->trySetPages(currentPageStr, currentPageStr);
+	}
+	std::wstring paintingSystemStr = getNextSubString(L"ТЕХНОЛОГИИ");
+	if (paintingSystemStr == L"") {
+		paintingSystemStr = getNextSubString(L"Беларусь");
+	}
+	if (lastDrawingPagePtr->trySetPaintingSystem(paintingSystemStr, false)) {
+		lastDrawingPagePtr->trySetTestEnvironment(getNextSubString());
+	}
+	else {
+		lastDrawingPagePtr->trySetTestEnvironment(paintingSystemStr);
+	}
 	lastDrawingPagePtr->trySetWeldInspection(getNextSubString());
 	lastDrawingPagePtr->trySetPostWeldingHeatTreatment(getNextSubString());
 	lastDrawingPagePtr->trySetStressCalculation(getNextSubString());
 	lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
 	lastDrawingPagePtr->trySetCategoryPipelinesTRCU(getNextSubString());
 	lastDrawingPagePtr->trySetGOSTPipelineCategory(getNextSubString());
+
+	if (isometricDrawingStr == L"") {
+		lastDrawingPagePtr->trySetIsometricDrawing(getSubString(L"Isometric drawing").erase(0, 18));
+	}
+
+	if (fileNameStr == L"") {
+		lastDrawingPagePtr->trySetFileName(getSubString(lastDrawingPagePtr->getFileNamePattern()));
+	}
+}
+
+void TextParserIOT::reset()
+{
+	componentsCount = 0;
+	BaseTextParser::reset();
 }
 
 void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& drawings)
@@ -112,7 +166,9 @@ void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	drawingsPtr = &drawings;
 	reset();
 
-	moveToNextSubString(L"КОЛ-ВО");
+	if (getNextSubString(L"КОЛ-ВО") == L"") {
+		componentsEnded = true;
+	}
 
 	while (true) //Чтение всех компонентов
 	{
@@ -124,5 +180,7 @@ void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 		}
 	}
 
-	readTablePartData();
+	if (lastDrawingPagePtr != nullptr) {
+		readTablePartData();
+	}
 }

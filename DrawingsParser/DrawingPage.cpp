@@ -284,8 +284,9 @@ std::wstring DrawingPage::truncate(const std::wstring& sourceStr)
 	return sourceStr.substr(startIndex, endIndex);
 }
 
-DrawingPage::DrawingPage()
+DrawingPage::DrawingPage(bool inputCheckOff)
 {
+	this->inputCheckOff = inputCheckOff;
 	pagesPattern.assign(LR"(\d{1,2})");
 }
 
@@ -310,7 +311,7 @@ bool DrawingPage::trySetOperatingTemperature(const std::wstring& sourceStr, bool
 	if (sourceStr == L"-") { 
 		return true; 
 	}
-	return trySetValue(sourceStr, operatingTemperature, operatingTemperaturePattern, assertionCheck, "Недопустимое значение для рабочей температуры!");
+	return trySetValue(sourceStr, operatingTemperature, operatingTemperaturePattern, assertionCheck, "Недопустимое значение для рабочей температуры!", inputCheckOff);
 }
 
 bool DrawingPage::trySetOperatingPressure(const std::wstring& sourceStr, bool assertionCheck)
@@ -322,7 +323,7 @@ bool DrawingPage::trySetOperatingPressure(const std::wstring& sourceStr, bool as
 		operatingPressure = L"atm.";
 		return true;
 	}
-	return trySetValue(sourceStr, operatingPressure, operatingPressurePattern, assertionCheck, "Недопустимое значение для рабочего давления!");
+	return trySetValue(sourceStr, operatingPressure, operatingPressurePattern, assertionCheck, "Недопустимое значение для рабочего давления!", inputCheckOff);
 }
 
 bool DrawingPage::trySetTracing(const std::wstring& sourceStr, bool assertionCheck)
@@ -330,7 +331,7 @@ bool DrawingPage::trySetTracing(const std::wstring& sourceStr, bool assertionChe
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, tracing, tracingPattern, assertionCheck, "Недопустимое значение для спутникового обогрева!");
+	return trySetValue(sourceStr, tracing, tracingPattern, assertionCheck, "Недопустимое значение для спутникового обогрева!", inputCheckOff);
 }
 
 bool DrawingPage::trySetPipelineClass(const std::wstring& sourceStr, bool assertionCheck)
@@ -338,7 +339,7 @@ bool DrawingPage::trySetPipelineClass(const std::wstring& sourceStr, bool assert
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, pipelineClass, pipelineClassPattern, assertionCheck, "Недопустимое значение для класса трубопровода!");
+	return trySetValue(sourceStr, pipelineClass, pipelineClassPattern, assertionCheck, "Недопустимое значение для класса трубопровода!", inputCheckOff);
 }
 
 bool DrawingPage::trySetTechnologicalEnvironment(const std::wstring& sourceStr, bool assertionCheck)
@@ -346,7 +347,7 @@ bool DrawingPage::trySetTechnologicalEnvironment(const std::wstring& sourceStr, 
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, technologicalEnvironment, technologicalEnvironmentPattern, assertionCheck, "Недопустимое значение для технологической среды!");
+	return trySetValue(sourceStr, technologicalEnvironment, technologicalEnvironmentPattern, assertionCheck, "Недопустимое значение для технологической среды!", inputCheckOff);
 }
 
 bool DrawingPage::trySetTestEnvironment(const std::wstring& sourceStr, bool assertionCheck)
@@ -354,7 +355,7 @@ bool DrawingPage::trySetTestEnvironment(const std::wstring& sourceStr, bool asse
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, testEnvironment, testEnvironmentPattern, assertionCheck, "Недопустимое значение для среды испытаний!");
+	return trySetValue(sourceStr, testEnvironment, testEnvironmentPattern, assertionCheck, "Недопустимое значение для среды испытаний!", inputCheckOff);
 }
 
 bool DrawingPage::trySetPaintingSystem(const std::wstring& sourceStr, bool assertionCheck)
@@ -362,7 +363,7 @@ bool DrawingPage::trySetPaintingSystem(const std::wstring& sourceStr, bool asser
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, paintingSystem, paintingSystemPattern, assertionCheck, "Недопустимое значение для системы покраски!");
+	return trySetValue(sourceStr, paintingSystem, paintingSystemPattern, assertionCheck, "Недопустимое значение для системы покраски!", inputCheckOff);
 }
 
 bool DrawingPage::trySetPostWeldingHeatTreatment(const std::wstring& sourceStr, bool assertionCheck)
@@ -370,7 +371,7 @@ bool DrawingPage::trySetPostWeldingHeatTreatment(const std::wstring& sourceStr, 
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, postWeldingHeatTreatment, postWeldingHeatTreatmentPattern, assertionCheck, "Недопустимое значение для послесварочной термообработки!");
+	return trySetValue(sourceStr, postWeldingHeatTreatment, postWeldingHeatTreatmentPattern, assertionCheck, "Недопустимое значение для послесварочной термообработки!", inputCheckOff);
 }
 
 bool DrawingPage::trySetWeldInspection(const std::wstring& sourceStr, bool assertionCheck)
@@ -378,7 +379,7 @@ bool DrawingPage::trySetWeldInspection(const std::wstring& sourceStr, bool asser
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, weldInspection, weldInspectionPattern, assertionCheck, "Недопустимое значение для контроля сварных швов!");
+	return trySetValue(sourceStr, weldInspection, weldInspectionPattern, assertionCheck, "Недопустимое значение для контроля сварных швов!", inputCheckOff);
 }
 
 bool DrawingPage::trySetTestPressure(const std::wstring& sourceStr, bool assertionCheck)
@@ -386,7 +387,7 @@ bool DrawingPage::trySetTestPressure(const std::wstring& sourceStr, bool asserti
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, testPressure, testPressurePattern, assertionCheck, "Недопустимое значение для давления испытаний!");
+	return trySetValue(sourceStr, testPressure, testPressurePattern, assertionCheck, "Недопустимое значение для давления испытаний!", inputCheckOff);
 }
 
 bool DrawingPage::trySetGOSTPipelineCategory(const std::wstring& sourceStr, bool assertionCheck)
@@ -394,7 +395,7 @@ bool DrawingPage::trySetGOSTPipelineCategory(const std::wstring& sourceStr, bool
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, GOSTPipelineCategory, GOSTPipelineCategoryPattern, assertionCheck, "Недопустимое значение для категории трубопровода Гост!");
+	return trySetValue(sourceStr, GOSTPipelineCategory, GOSTPipelineCategoryPattern, assertionCheck, "Недопустимое значение для категории трубопровода Гост!", inputCheckOff);
 }
 
 bool DrawingPage::trySetDesignTemperature(const std::wstring& sourceStr, bool assertionCheck)
@@ -402,7 +403,7 @@ bool DrawingPage::trySetDesignTemperature(const std::wstring& sourceStr, bool as
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, designTemperature, designTemperaturePattern, assertionCheck, "Недопустимое значение для рассчётной температуры!");
+	return trySetValue(sourceStr, designTemperature, designTemperaturePattern, assertionCheck, "Недопустимое значение для рассчётной температуры!", inputCheckOff);
 }
 
 bool DrawingPage::trySetDesignPressure(const std::wstring& sourceStr, bool assertionCheck)
@@ -410,7 +411,7 @@ bool DrawingPage::trySetDesignPressure(const std::wstring& sourceStr, bool asser
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, designPressure, designPressurePattern, assertionCheck, "Недопустимое значение для рассчётного давления!");
+	return trySetValue(sourceStr, designPressure, designPressurePattern, assertionCheck, "Недопустимое значение для рассчётного давления!", inputCheckOff);
 }
 
 bool DrawingPage::trySetCipherDocument(const std::wstring& sourceStr, bool assertionCheck)
@@ -418,7 +419,7 @@ bool DrawingPage::trySetCipherDocument(const std::wstring& sourceStr, bool asser
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, cipherDocument, cipherDocumentPattern, assertionCheck, "Недопустимое значение для шифра документа!");
+	return trySetValue(sourceStr, cipherDocument, cipherDocumentPattern, assertionCheck, "Недопустимое значение для шифра документа!", inputCheckOff);
 }
 
 bool DrawingPage::trySetDiameterPipeline(const std::wstring& sourceStr, bool assertionCheck)
@@ -426,7 +427,7 @@ bool DrawingPage::trySetDiameterPipeline(const std::wstring& sourceStr, bool ass
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, diameterPipeline, diameterPipelinePattern, assertionCheck, "Недопустимое значение для диаметра трубопровода!");
+	return trySetValue(sourceStr, diameterPipeline, diameterPipelinePattern, assertionCheck, "Недопустимое значение для диаметра трубопровода!", inputCheckOff);
 }
 
 bool DrawingPage::trySetIsolation(const std::wstring& sourceStr, bool assertionCheck)
@@ -434,7 +435,7 @@ bool DrawingPage::trySetIsolation(const std::wstring& sourceStr, bool assertionC
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, isolation, isolationPattern, assertionCheck, "Недопустимое значение для изоляции!");
+	return trySetValue(sourceStr, isolation, isolationPattern, assertionCheck, "Недопустимое значение для изоляции!", inputCheckOff);
 }
 
 bool DrawingPage::trySetCategoryPipelinesTRCU(const std::wstring& sourceStr, bool assertionCheck)
@@ -442,7 +443,7 @@ bool DrawingPage::trySetCategoryPipelinesTRCU(const std::wstring& sourceStr, boo
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, categoryPipelinesTRCU, categoryPipelinesTRCUPattern, assertionCheck, "Недопустимое значение категории трубопровода ТР ТС!");
+	return trySetValue(sourceStr, categoryPipelinesTRCU, categoryPipelinesTRCUPattern, assertionCheck, "Недопустимое значение категории трубопровода ТР ТС!", inputCheckOff);
 }
 
 bool DrawingPage::trySetSchemeNumber(const std::wstring& sourceStr, bool assertionCheck)
@@ -450,7 +451,7 @@ bool DrawingPage::trySetSchemeNumber(const std::wstring& sourceStr, bool asserti
 	if (sourceStr == L"-" || sourceStr == L"No/Нет") {
 		return true;
 	}
-	return trySetValue(sourceStr, schemeNumber, schemeNumberPattern, assertionCheck, "Недопустимое значение для номера схемы!");
+	return trySetValue(sourceStr, schemeNumber, schemeNumberPattern, assertionCheck, "Недопустимое значение для номера схемы!", inputCheckOff);
 }
 
 bool DrawingPage::trySetLineNumber(const std::wstring& sourceStr, bool assertionCheck)
@@ -458,7 +459,7 @@ bool DrawingPage::trySetLineNumber(const std::wstring& sourceStr, bool assertion
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, lineNumber, lineNumberPattern, assertionCheck, "Недопустимое значение для номера линии!");
+	return trySetValue(sourceStr, lineNumber, lineNumberPattern, assertionCheck, "Недопустимое значение для номера линии!", inputCheckOff);
 }
 
 bool DrawingPage::trySetStressCalculation(const std::wstring& sourceStr, bool assertionCheck)
@@ -466,7 +467,7 @@ bool DrawingPage::trySetStressCalculation(const std::wstring& sourceStr, bool as
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, stressCalculation, stressCalculationPattern, assertionCheck, "Недопустимое значение для расчёта напряжений!");
+	return trySetValue(sourceStr, stressCalculation, stressCalculationPattern, assertionCheck, "Недопустимое значение для расчёта напряжений!", inputCheckOff);
 }
 
 bool DrawingPage::trySetIsometricDrawing(const std::wstring& sourceStr, bool assertionCheck)
@@ -474,7 +475,7 @@ bool DrawingPage::trySetIsometricDrawing(const std::wstring& sourceStr, bool ass
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, isometricDrawing, isometricDrawingPattern, assertionCheck, "Недопустимое значение для изометрического чертежа!");
+	return trySetValue(sourceStr, isometricDrawing, isometricDrawingPattern, assertionCheck, "Недопустимое значение для изометрического чертежа!", inputCheckOff);
 }
 
 bool DrawingPage::trySetFileName(const std::wstring& sourceStr, bool assertionCheck)
@@ -482,5 +483,5 @@ bool DrawingPage::trySetFileName(const std::wstring& sourceStr, bool assertionCh
 	if (sourceStr == L"-") {
 		return true;
 	}
-	return trySetValue(sourceStr, fileName, fileNamePattern, assertionCheck, "Недопустимое значение для имени файла!");
+	return trySetValue(sourceStr, fileName, fileNamePattern, assertionCheck, "Недопустимое значение для имени файла!", inputCheckOff);
 }

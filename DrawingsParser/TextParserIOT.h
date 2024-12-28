@@ -5,9 +5,12 @@
 class TextParserIOT : public BaseTextParser
 {
 private:
+	int componentsCount = 0;
 	bool readComponent();
 	bool readComponentNumber() override;
 	void readTablePartData();
+
+	void reset() override;
 
 public:
 	void parse(const std::wstring& fileName, std::vector<Drawing>& drawings) override;

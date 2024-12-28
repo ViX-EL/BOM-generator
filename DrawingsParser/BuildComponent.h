@@ -4,7 +4,8 @@
 #include <regex>
 
 bool trySetValue(const std::wstring& sourceValueStr, int& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "");
-bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "");
+bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "", 
+	bool inputCheckOff = false);
 
 class BuildComponent
 {
@@ -23,10 +24,10 @@ protected:
 	std::wregex positionCodePattern;
 	static inline std::wregex positionNumberPattern{ LR"( *[1-9]\d*)" };
 
-	BuildComponent(const std::wstring& positionNumberStr);
+	explicit BuildComponent(const std::wstring& positionNumberStr);
+	explicit BuildComponent(int positionNumber);
 
 public:
-	//virtual ~BuildComponent() = default;
 	bool trySetDescription(const std::wstring& descriptionStr, bool assertionCheck = true);
 	bool trySetNominalDiameter(const std::wstring& nominalDiameterStr, bool assertionCheck = true);
 	virtual bool trySetAmount(const std::wstring& amountStr, bool assertionCheck = true);

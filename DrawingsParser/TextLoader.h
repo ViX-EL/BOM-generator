@@ -17,7 +17,7 @@ protected:
 	void setFileName(const std::wstring& filePath);
 	void setFilePath(const std::string& filePath);
 public:
-	TextLoader(IMessagePrinter* printer);
+	explicit TextLoader(IMessagePrinter* printer);
 	virtual int loadFile(const std::string& filePath) = 0;
 	void printText(const std::wstring& label); //отладочная функция
 	wchar_t getSeparator() const;

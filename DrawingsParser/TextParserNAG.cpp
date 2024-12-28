@@ -11,10 +11,16 @@
 
 bool TextParserNAG::readComponentNumber()
 {
+	if (componentsEnded) {
+		return false;
+	}
+
 	std::wstring componentNumberStr(getNextSubString());
 	//Если не найден номер компонента
-	std::wregex lineNumberPattern(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{9}-\d{2})");
-	bool isLineNumber = std::regex_match(componentNumberStr, lineNumberPattern);
+	bool isLineNumber = false;
+	if (lastDrawingPagePtr != nullptr) {
+		isLineNumber = std::regex_match(componentNumberStr, lastDrawingPagePtr->getLineNumberPattern());
+	}
 	if (!std::regex_match(componentNumberStr, BuildComponent::getPositionNumberPattern()) || isLineNumber)
 	{
 		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") || componentNumberStr.starts_with(L"UT PIPE LENGTH"))
@@ -150,32 +156,11 @@ void TextParserNAG::readTablePartData()
 		lastDrawingPagePtr->trySetPaintingSystem(getNextSubString());
 		lastDrawingPagePtr->trySetTracing(getNextSubString());
 		std::wstring isolation(getNextSubString());
-		if (!std::regex_match(isolation, lastDrawingPagePtr->getIsolationPattern()))
-		{
+		if (!lastDrawingPagePtr->trySetIsolation(isolation, false)) {
 			lastDrawingPagePtr->trySetTechnologicalEnvironment(isolation);
 		}
 		else {
-			std::wstring diameterSubStr;
-			size_t subStrToDiametrCount = 0;
-			while (!diameterSubStr.starts_with(L"DN"))
-			{
-				diameterSubStr = getNextSubString();
-				subStrToDiametrCount++;
-				if (diameterSubStr == "XXX") {
-					break;
-				}
-
-			}
-			moveOnCountSubStr(subStrToDiametrCount, true);
-			if (subStrToDiametrCount != 3)
-			{
-				lastDrawingPagePtr->trySetIsolation(isolation);
-				lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
-			}
-			else
-			{
-				lastDrawingPagePtr->trySetTechnologicalEnvironment(isolation);
-			}
+			lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
 		}
 		lastDrawingPagePtr->trySetCategoryPipelinesTRCU(getNextSubString());
 		lastDrawingPagePtr->trySetGOSTPipelineCategory(getNextSubString());
@@ -195,6 +180,34 @@ TextParserNAG::TextParserNAG(const std::wstring& text, wchar_t separator) : Base
 
 }
 
+bool TextParserNAG::isEndOfComponent(const std::wstring& stringAfterComponent) const
+{
+	std::function checkEnd = [this](const std::wstring& subStr)
+		{
+			bool isEnd = subStr.starts_with(L"CUT PIPE LENGTH");
+			if (!isEnd) {
+				isEnd = subStr.starts_with(L"*******");
+			}
+			if (!isEnd) {
+				isEnd = subStr.starts_with(L"ERECTION MATERIALS");
+			}
+			if (!isEnd) {
+				isEnd = regex_match(subStr, lastDrawingPagePtr->getLineNumberPattern());
+			}
+			return isEnd;
+		};
+
+	bool isEnd = std::regex_match(stringAfterComponent, BuildComponent::getPositionNumberPattern());
+	if (isEnd)
+	{
+		size_t positionInText = currentPositionInText;
+		std::wstring secondStringAfterComponent = getNextSubString(positionInText);
+		isEnd = std::regex_match(secondStringAfterComponent, lastComponentPtr->getDescriptionPattern()) && !checkEnd(secondStringAfterComponent);
+		return isEnd;
+	}
+	return checkEnd(stringAfterComponent);
+}
+
 bool TextParserNAG::readComponent()
 {
 	if (!readComponentNumber()) {
@@ -203,7 +216,7 @@ bool TextParserNAG::readComponent()
 
 	std::vector<std::wstring> subStrBuffer;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 		subStrBuffer.emplace_back(getNextSubString());
 	}
 
@@ -213,14 +226,16 @@ bool TextParserNAG::readComponent()
 	int descriptionSubStrCount{ 1 };
 	while (!cases[0] && !cases[1])
 	{
-		cases[0] = std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getNominalDiameterPattern());
-		cases[0] = cases[0] && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
+		cases[0] = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
+		cases[0] = cases[0] && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getAmountPattern());
+		cases[0] = cases[0] && isEndOfComponent(*(subStrBuffer.end() - 1));
 
 		if (!cases[0])
 		{
-			cases[1] = std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getNominalDiameterPattern());
-			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getPositionCodePattern());
-			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 1), lastComponentPtr->getAmountPattern());
+			cases[1] = std::regex_match(*(subStrBuffer.end() - 4), lastComponentPtr->getNominalDiameterPattern());
+			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 3), lastComponentPtr->getPositionCodePattern());
+			cases[1] = cases[1] && std::regex_match(*(subStrBuffer.end() - 2), lastComponentPtr->getAmountPattern());
+			cases[1] = cases[1] && isEndOfComponent(*(subStrBuffer.end() - 1));
 		}
 
 		if (!cases[0] && !cases[1]) {
@@ -229,7 +244,7 @@ bool TextParserNAG::readComponent()
 		}
 	}
 
-	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ') && !cases[1]) {
+	if (!(subStrBuffer.end() - 2)->starts_with(L' ') && !(subStrBuffer.end() - 3)->starts_with(L' ') && !cases[1]) {
 		size_t currentPos = currentPositionInText;
 		std::vector<std::wstring> buffer;
 		buffer.emplace_back(getNextSubString(currentPos));
@@ -241,11 +256,7 @@ bool TextParserNAG::readComponent()
 		}
 	}
 
-	if (cases[0] && (subStrBuffer.end() - 2)->ends_with(L"x")) {
-		subStrBuffer.emplace_back(getNextSubString());
-	}
-
-	if (cases[1] && (subStrBuffer.end() - 3)->ends_with(L"x")) {
+	if (std::regex_match(*(subStrBuffer.end() - 4), std::wregex(LR"(\d{1,4} ?x)"))) {
 		descriptionSubStrCount--;
 	}
 
@@ -254,7 +265,7 @@ bool TextParserNAG::readComponent()
 	}
 
 	std::wstring descriptionStr;
-	if (!(cases[1] && subStrBuffer.size() == 3)) {
+	if (!(cases[1] && subStrBuffer.size() == 4)) {
 		for (int i = 0; i < descriptionSubStrCount; i++)
 		{
 			descriptionStr += subStrBuffer[i];
@@ -264,26 +275,27 @@ bool TextParserNAG::readComponent()
 
 	if (cases[0])
 	{
-		if ((subStrBuffer.end() - 3)->ends_with(L"x")) {
-			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 3) + L' ' + (*(subStrBuffer.end() - 2))));
+		if (std::regex_match(*(subStrBuffer.end() - 4), std::wregex(LR"(\d{1,4} ?x)"))) {
+			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
 		}
 		else
 		{
-				lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 2));
+				lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
 		}
-		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
+		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 2));
 	}
 	else if (cases[1])
 	{
-		if (subStrBuffer.size() != 3 && (subStrBuffer.end() - 4)->ends_with(L"x")) {
-			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
+		if (subStrBuffer.size() != 4 && (subStrBuffer.end() - 5)->ends_with(L"x")) {
+			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 5) + L' ' + (*(subStrBuffer.end() - 4))));
 		}
 		else {
-			lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
+			lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 4));
 		}
-		lastComponentPtr->trySetPositionCode(*(subStrBuffer.end() - 2));
-		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 1));
+		lastComponentPtr->trySetPositionCode(*(subStrBuffer.end() - 3));
+		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 2));
 	}
+	moveToPreviouslySubString();
 	return true;
 }
 
@@ -294,6 +306,19 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 
 	if (text->find(L"FABRICATION MATERIALS", currentPositionInText) != std::wstring::npos || text->find(L"ERECTION MATERIALS", currentPositionInText) != std::wstring::npos) {
 		moveToSubString(L"КОЛ-ВО");
+	}
+	else if (text->find(L"*********", currentPositionInText) != std::wstring::npos)
+	{
+		moveToSubString(L"*********");
+		moveOnCountSubStr(2);
+	}
+	else if (std::regex_match(getFirstSubString(), std::wregex(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{8,9}-\d{2})"))) // Если первая строка - номер линии
+	{
+		componentsEnded = true;
+		currentListEmpty = true;
+	}
+	else {
+		currentPositionInText = 0;
 	}
 
 	while (true) //Чтение всех компонентов

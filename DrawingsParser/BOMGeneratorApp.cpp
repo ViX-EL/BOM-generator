@@ -25,9 +25,10 @@ bool DrawingsParserApp::OnInit()
 	window->SetBackgroundColour(*wxWHITE);
 	window->Show(true);
 
-	std::string fileName = "GCC-NAG-DDD-12460-12-1500-TK-ISO-00004-00_004" ".dwg";
+	std::string fileName = "GCC-IOT-DDD-16100-11-4100-TKM1-ISO-00024_00_BI_Sht_1" ".dwg";
 
-	processingOneFile(fileName, NONE);
+	//processingOneFile(fileName, LOAD_PARSE_WRITE);
+	//processingOneFile(fileName, LOAD);
 
 	return true;
 }

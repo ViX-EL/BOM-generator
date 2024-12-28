@@ -10,6 +10,7 @@
 #include <utility>
 #include <regex>
 #include <memory>
+#include <initializer_list>
 
 struct Drawing
 {
@@ -46,11 +47,14 @@ protected:
 	std::pair<size_t, size_t> moveToPreviouslySubString(const std::wstring& subString, bool reverseFind = false);
 	std::pair<size_t, size_t> moveToSubString(const std::wstring& subString, bool reverseFind = false);
 	std::pair<size_t, size_t> moveToSubString(const std::wregex& pattern, bool reverseFind = false);
+	std::pair<size_t, size_t> moveToSubString(const std::wregex& pattern, const std::wregex& stopPattern, bool reverseFind = false);
+	std::pair<size_t, size_t> moveUntil(std::initializer_list<std::wregex> patterns, bool reverseFind = false);
 	std::pair<size_t, size_t> moveToLastSubString();
 	std::pair<size_t, size_t> moveToFirstSubString();
 	std::wstring returnSubString(std::pair<size_t, size_t> beginEndIndexes) const;
 	std::wstring getSubString(const std::wstring& subString, bool reverseFind = false);
 	std::wstring getSubString(const std::wregex& pattern, bool reverseFind = false);
+	std::wstring getSubString(const std::wregex& pattern, const std::wregex& stopPattern, bool reverseFind = false);
 	std::wstring getNextSubString();
 	std::wstring getNextSubString(size_t& positionInText) const;
 	std::wstring getNextSubString(const std::wstring& subString, bool reverseFind = false);
@@ -70,22 +74,22 @@ protected:
 
 	virtual void reset();
 	template<typename T>
-	bool createDrawing();
+	bool createDrawing(bool inputCheckOff = false);
 	template<typename T>
 	bool tryAddComponent(const std::wstring& componentNumberStr);
 	template<typename T>
-	bool tryAddPage();
-private:
-	size_t size_tMax{ std::numeric_limits<size_t>::max() };
+	bool tryAddComponent(int componentNumber);
+	template<typename T>
+	bool tryAddPage(bool inputCheckOff = false);
 };
 
 template<typename T>
-inline bool BaseTextParser::createDrawing()
+inline bool BaseTextParser::createDrawing(bool inputCheckOff)
 {
 	if (lastDrawingPagePtr == nullptr) {
 		drawingsPtr->emplace_back();
 		currentDrawingPtr = &drawingsPtr->back();
-		tryAddPage<T>();
+		tryAddPage<T>(inputCheckOff);
 		return true;
 	}
 	return false;
@@ -102,11 +106,21 @@ inline bool BaseTextParser::tryAddComponent(const std::wstring& componentNumberS
 }
 
 template<typename T>
-inline bool BaseTextParser::tryAddPage()
+inline bool BaseTextParser::tryAddComponent(int componentNumber)
+{
+	bool isSuccessful = lastDrawingPagePtr->tryAddComponent<T>(componentNumber);
+	if (isSuccessful) {
+		lastComponentPtr = &lastDrawingPagePtr->getLastComponent();
+	}
+	return isSuccessful;
+}
+
+template<typename T>
+inline bool BaseTextParser::tryAddPage(bool inputCheckOff)
 {
 	if (currentDrawingPtr != nullptr)
 	{
-		currentDrawingPtr->pages.emplace_back(std::make_shared<T>());
+		currentDrawingPtr->pages.emplace_back(std::make_shared<T>(inputCheckOff));
 		lastDrawingPagePtr = currentDrawingPtr->pages.back();
 		componentsEnded = false;
 		return true;

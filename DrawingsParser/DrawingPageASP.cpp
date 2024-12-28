@@ -7,7 +7,7 @@
 #include <regex>
 #include <string>
 
-DrawingPageASP::DrawingPageASP()
+DrawingPageASP::DrawingPageASP(bool inputCheckOff) : DrawingPage(inputCheckOff)
 {
 	operatingTemperaturePattern.assign(LR"(-?\d+(\.\d+\/\d+)?|env\.\/окр\.ср\.)");
 	operatingPressurePattern.assign(LR"(\d{1}(\.\d{1,2})?|0\.3EX-01|атм\.)");

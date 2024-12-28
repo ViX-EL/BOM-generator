@@ -5,7 +5,6 @@
 class DrawingPageIOT : public DrawingPage
 {
 public:
-	DrawingPageIOT();
-	/*bool tryAddComponent(const std::wstring& componentNumberStr) override;*/
+	explicit DrawingPageIOT(bool inputCheckOff = false);
 };
 

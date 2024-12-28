@@ -14,7 +14,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToNextSubString(const std::wstring
 		beginIdx = text->rfind(subString, currentPositionInText);
 	}
 	if (beginIdx == std::string::npos) {
-		return std::pair(size_tMax, size_tMax);
+		return std::pair(std::string::npos, std::string::npos);
 	}
 	size_t endIdx = text->find_first_of(separator, beginIdx) + 1;
 	beginIdx = endIdx;
@@ -33,7 +33,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString(const std::w
 		endIdx = text->rfind(subString, currentPositionInText);
 	}
 	if (endIdx == std::string::npos) {
-		return std::pair(size_tMax, size_tMax);
+		return std::pair(std::string::npos, std::string::npos);
 	}
 	endIdx = text->rfind(separator, endIdx);
 	size_t beginIdx = text->rfind(separator, endIdx - 1) + 1;
@@ -51,7 +51,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wstring& su
 		beginIdx = text->rfind(subString, currentPositionInText);
 	}
 	if (beginIdx == std::string::npos) {
-		return std::pair(size_tMax, size_tMax);
+		return std::pair(std::string::npos, std::string::npos);
 	}
 	size_t endIdx = text->find_first_of(separator, beginIdx);
 	currentPositionInText = endIdx - 1;
@@ -60,19 +60,35 @@ std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wstring& su
 
 std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wregex& pattern, bool reverseFind)
 {
+	return moveUntil({ pattern }, reverseFind);
+}
+
+std::pair<size_t, size_t> BaseTextParser::moveToSubString(const std::wregex& pattern, const std::wregex& stopPattern, bool reverseFind)
+{
+	std::pair<size_t, size_t> beginEndIndexes = moveUntil({ pattern, stopPattern }, reverseFind);
+	if (std::regex_match(returnSubString(beginEndIndexes), stopPattern))
+	{
+		reverseFind ? moveToNextSubString() : moveToPreviouslySubString();
+		return std::pair<size_t, size_t>(std::string::npos, std::string::npos);
+	}
+	return beginEndIndexes;
+}
+
+std::pair<size_t, size_t> BaseTextParser::moveUntil(std::initializer_list<std::wregex> patterns, bool reverseFind)
+{
+	bool goalAchieved = false;
 	std::pair<size_t, size_t> beginEndIndexes;
 	do
 	{
-		if (!reverseFind) {
-			beginEndIndexes = moveToNextSubString();
-		}
-		else {
-			beginEndIndexes = moveToPreviouslySubString();
-		}
+		!reverseFind ? beginEndIndexes = moveToNextSubString() : beginEndIndexes = moveToPreviouslySubString();
 		if (beginEndIndexes.second == std::wstring::npos || beginEndIndexes.first == std::wstring::npos) {
 			break;
 		}
-	} while (!std::regex_match(text->substr(beginEndIndexes.first, beginEndIndexes.second - beginEndIndexes.first), pattern));
+		std::wstring subString = returnSubString(beginEndIndexes);
+		for (const auto& pattern : patterns) {
+			goalAchieved = goalAchieved || std::regex_match(subString, pattern);
+		}
+	} while (!goalAchieved);
 	return beginEndIndexes;
 }
 
@@ -88,7 +104,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToFirstSubString()
 {
 	size_t beginIdx = 1;
 	size_t endIdx = text->find(separator, beginIdx);
-	currentPositionInText = endIdx;
+	currentPositionInText = endIdx - 1;
 	return std::pair(beginIdx, endIdx);
 }
 
@@ -96,8 +112,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToFirstSubString()
 // текущей позиции в тексте
 std::wstring BaseTextParser::getPreviouslySubString(const std::wstring& subString, bool reverseFind)
 {
-	std::pair<size_t, size_t> beginEndIndexes = moveToPreviouslySubString(subString, reverseFind);
-	return returnSubString(beginEndIndexes);
+	return returnSubString(moveToPreviouslySubString(subString, reverseFind));
 }
 
 
@@ -105,13 +120,12 @@ std::wstring BaseTextParser::getPreviouslySubString(const std::wstring& subStrin
 // по тексту, в зависимости от reverseFind, относительно текущей позиции в тексте
 std::wstring BaseTextParser::getNextSubString(const std::wstring& subString, bool reverseFind)
 {
-	std::pair<size_t, size_t> beginEndIndexes = moveToNextSubString(subString, reverseFind);
-	return returnSubString(beginEndIndexes);
+	return returnSubString(moveToNextSubString(subString, reverseFind));
 }
 
 std::wstring BaseTextParser::returnSubString(std::pair<size_t, size_t> beginEndIndexes) const
 {
-	if (beginEndIndexes.first != size_tMax && beginEndIndexes.second != size_tMax) {
+	if (beginEndIndexes.first != std::string::npos && beginEndIndexes.second != std::string::npos) {
 		return std::wstring(text->begin() + beginEndIndexes.first, text->begin() + beginEndIndexes.second);
 	}
 	else {
@@ -121,24 +135,29 @@ std::wstring BaseTextParser::returnSubString(std::pair<size_t, size_t> beginEndI
 
 std::wstring BaseTextParser::getSubString(const std::wstring& subString, bool reverseFind)
 {
-	std::pair<size_t, size_t> beginEndIndexes = moveToSubString(subString, reverseFind);
-	return returnSubString(beginEndIndexes);
+	return returnSubString(moveToSubString(subString, reverseFind));
 }
 
 std::wstring BaseTextParser::getSubString(const std::wregex& pattern, bool reverseFind)
 {
-	std::pair<size_t, size_t> beginEndIndexes = moveToSubString(pattern, reverseFind);
-	return returnSubString(beginEndIndexes);
+	return returnSubString(moveToSubString(pattern, reverseFind));
+}
+
+std::wstring BaseTextParser::getSubString(const std::wregex& pattern, const std::wregex& stopPattern, bool reverseFind)
+{
+	return returnSubString(moveToSubString(pattern, stopPattern, reverseFind));
 }
 
 std::wstring BaseTextParser::getNextSubString()
 {
-	std::pair<size_t, size_t> beginEndIndxes = moveToNextSubString();
-	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+	return returnSubString(moveToNextSubString());
 }
 
 std::pair<size_t, size_t> BaseTextParser::moveToNextSubString()
 {
+	if (currentPositionInText + 2 < currentPositionInText) {
+		return std::pair(std::string::npos, std::string::npos); // Выход за пределы строки вправо
+	}
 	size_t beginIdx = currentPositionInText + 2;
 	size_t endIdx = text->find_first_of(separator, beginIdx);
 	currentPositionInText = endIdx - 1;
@@ -150,7 +169,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToNextSubString(size_t& positionIn
 	size_t beginIdx = text->find_first_of(separator, positionInText) + 1;
 	size_t endIdx = text->find_first_of(separator, beginIdx);
 	if (beginIdx == std::string::npos || endIdx == std::string::npos) {
-		return std::pair(size_tMax, size_tMax);
+		return std::pair(std::string::npos, std::string::npos);
 	}
 	positionInText = endIdx;
 	return std::pair(beginIdx, endIdx);
@@ -161,7 +180,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString(size_t& posi
 	size_t endIdx = text->rfind(separator, positionInText);
 	size_t beginIdx = text->rfind(separator, endIdx - 1) + 1;
 	if (beginIdx == std::string::npos || endIdx == std::string::npos) {
-		return std::pair(size_tMax, size_tMax);
+		return std::pair(std::string::npos, std::string::npos);
 	}
 	positionInText = endIdx - 1;
 	return std::pair(beginIdx, endIdx);
@@ -170,6 +189,9 @@ std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString(size_t& posi
 std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString()
 {
 	size_t endIdx = text->rfind(separator, currentPositionInText);
+	if (endIdx - 1 == std::string::npos) {
+		return std::pair(std::string::npos, std::string::npos); // Выход за пределы строки влево
+	}
 	size_t beginIdx = text->rfind(separator, endIdx - 1) + 1;
 	currentPositionInText = endIdx - 1;
 	return std::pair(beginIdx, endIdx);
@@ -234,32 +256,27 @@ bool BaseTextParser::searchForMatchesInFollowing(const std::wregex& pattern, int
 
 std::wstring BaseTextParser::getNextSubString(size_t& positionInText) const
 {
-	std::pair<size_t, size_t> beginEndIndxes = moveToNextSubString(positionInText);
-	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+	return returnSubString(moveToNextSubString(positionInText));
 }
 
 std::wstring BaseTextParser::getPreviouslySubString(size_t& positionInText) const
 {
-	std::pair<size_t, size_t> beginEndIndxes = moveToPreviouslySubString(positionInText);
-	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+	return returnSubString(moveToPreviouslySubString(positionInText));
 }
 
 std::wstring BaseTextParser::getPreviouslySubString()
 {
-	std::pair<size_t, size_t> beginEndIndxes = moveToPreviouslySubString();
-	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+	return returnSubString(moveToPreviouslySubString());
 }
 
 std::wstring BaseTextParser::getLastSubString()
 {
-	std::pair<size_t, size_t> beginEndIndxes = moveToLastSubString();
-	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+	return returnSubString(moveToLastSubString());
 }
 
 std::wstring BaseTextParser::getFirstSubString()
 {
-	std::pair<size_t, size_t> beginEndIndxes = moveToFirstSubString();
-	return std::wstring(text->begin() + beginEndIndxes.first, text->begin() + beginEndIndxes.second);
+	return returnSubString(moveToFirstSubString());
 }
 
 void BaseTextParser::moveOnCountSubStr(size_t count, bool reverse)

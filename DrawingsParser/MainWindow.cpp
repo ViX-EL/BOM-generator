@@ -17,8 +17,6 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) : wxFrame(NULL
 {
 	Centre();
 
-	//AllocConsole();
-
 	wxLogWindow* logWindow = new wxLogWindow(this, "Log", true, false);
 	logWindow->GetFrame()->SetClientSize(650, 400);
 	logger.reset(logWindow);
@@ -54,6 +52,9 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) : wxFrame(NULL
 	buttonCreateTable->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnCreateXlsxTable, this);
 
 	CreateStatusBar();
+
+	inputFolderTextField->SetLabelText("D:\\Изометрички для isoBom\\IOT\\Проверенные");
+	outputFolderTextField->SetLabelText("C:\\Users\\User\\Downloads");
 }
 
 MainWindow::~MainWindow()
@@ -101,7 +102,7 @@ void MainWindow::OnAbout(wxCommandEvent& event)
 {
 	wxAboutDialogInfo info;
 	info.SetName(_("Bom generator"));
-	info.SetVersion(_("0.6.0"));
+	info.SetVersion(_("0.7.0"));
 	info.SetDescription(_(aboutStr));
 	info.SetCopyright("(C) 2024 Dmitriy Zelenev <Dmitry22_s@cc7.cn>");
 	wxAboutBox(info);

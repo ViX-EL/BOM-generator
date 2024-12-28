@@ -8,7 +8,7 @@ class TextDialog : public wxFrame
 {
 public:
 
-	TextDialog(const wxString& title);
+	explicit TextDialog(const wxString& title);
 
 	const wxString& GetText();
 	void setText(const std::wstring& text);

@@ -269,8 +269,13 @@ bool TextParserLGN::readList()
 
 	lastDrawingPagePtr->trySetIsometricDrawing(getNextSubString(L"Изометрический чертеж"));
 	moveToPreviouslySubString();
-	lastDrawingPagePtr->trySetStressCalculation(getPreviouslySubString());
-	lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
+	std::wstring stressCalculationStr = getPreviouslySubString();
+	if (!lastDrawingPagePtr->trySetStressCalculation(stressCalculationStr, false)) {
+		lastDrawingPagePtr->trySetLineNumber(stressCalculationStr);
+	}
+	else {
+		lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
+	}
 
 	std::wstring schemeNumber(getPreviouslySubString());
 	if (!schemeNumber.starts_with(L"* (See note /")) {

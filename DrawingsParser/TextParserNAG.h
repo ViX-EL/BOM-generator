@@ -17,6 +17,7 @@ private:
 	void writeValueOfTwoSubStr(bool(DrawingPage::* trySetFunction)(const std::wstring&, bool), std::initializer_list<std::wstring> ifEqualStr, const std::wstring& firstStr = L"");
 	void reset() override;
 	bool readComponent() override;
+	bool isEndOfComponent(const std::wstring& stringAfterComponent) const;
 public:
 	TextParserNAG(const std::wstring& text, wchar_t separator);
 	void parse(const std::wstring& fileName, std::vector<Drawing>& drawings) override;

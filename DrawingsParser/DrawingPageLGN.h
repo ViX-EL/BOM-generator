@@ -5,8 +5,7 @@
 class DrawingPageLGN : public DrawingPage
 {
 public:
-	DrawingPageLGN();
-	//bool tryAddComponent(const std::wstring& componentNumberStr) override;
+	explicit DrawingPageLGN(bool inputCheckOff);
 	bool trySetDesignPressure(const std::wstring& sourceStr, bool assertionCheck = true) override;
 	bool trySetFileName(const std::wstring& sourceStr, bool assertionCheck = true) override;
 	bool trySetWeldInspection(const std::wstring& sourceStr, bool assertionCheck = true) override;

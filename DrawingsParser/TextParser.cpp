@@ -25,12 +25,12 @@ TextParser::TextParser(const std::wstring& text, wchar_t separator,IMessagePrint
 
 void TextParser::parse(const std::wstring& fileName)
 {
-	std::wregex cipherDocumentPattern(LR"(GCC-\w{3}-DDD)");
+	std::wregex cipherDocumentPattern(LR"(GCC-\w{3}-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
 
 	std::wstring currentDesignerStr;
 
 	if (std::regex_search(fileName, cipherDocumentPattern)) {
-		currentDesignerStr = fileName.substr(4, 3);
+		currentDesignerStr = fileName.substr(fileName.find(L"GCC-") + 4, 3);
 	}
 	else
 	{
@@ -99,8 +99,14 @@ void TextParser::parse(const std::wstring& fileName)
 	try {
 		wxLogMessage("[Парсинг] Начало парсинга файла %s", wxString(fileName));
 
+		size_t sizeBeforeParsing = drawings.size();
 		if (currentParser != nullptr) {
 			currentParser->parse(fileName, drawings);
+		}
+
+		if(drawings.size() == sizeBeforeParsing)
+		{
+			printer->printError(L"В файле " + fileName + L" нет записываемых листов!");
 		}
 
 		wxLogMessage("[Парсинг] Конец парсинга файла %s", wxString(fileName + L" " + std::to_wstring(drawings.size())));

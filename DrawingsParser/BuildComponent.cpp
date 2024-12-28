@@ -18,23 +18,36 @@ bool trySetValue(const std::wstring& sourceValueStr, int& targetValue, const std
 	return false;
 }
 
-bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck, const char* assertionMessage)
+bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck, const char* assertionMessage, bool inputCheckOff)
 {
-	bool isMatch = std::regex_match(sourceValueStr, valuePattern);
-	if (assertionCheck) {
- 		assert(isMatch && assertionMessage);
-	}
-	if (isMatch)
+	if (inputCheckOff) 
 	{
 		targetValue = sourceValueStr;
 		return true;
 	}
-	return false;
+	else
+	{
+		bool isMatch = std::regex_match(sourceValueStr, valuePattern);
+		if (assertionCheck) {
+			assert(isMatch && assertionMessage);
+		}
+		if (isMatch)
+		{
+			targetValue = sourceValueStr;
+			return true;
+		}
+		return false;
+	}
 }
 
 BuildComponent::BuildComponent(const std::wstring& positionNumberStr)
 {
 	positionNumber = std::stoi(positionNumberStr);
+}
+
+BuildComponent::BuildComponent(int positionNumber)
+{
+	this->positionNumber = positionNumber;
 }
 
 bool BuildComponent::trySetDescription(const std::wstring& descriptionStr, bool assertionCheck)

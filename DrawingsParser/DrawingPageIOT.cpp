@@ -1,37 +1,27 @@
-#include "DrawingPageIOT.h"
+Ôªø#include "DrawingPageIOT.h"
 
-DrawingPageIOT::DrawingPageIOT() //TODO œÂÂ‰ÂÎ‡Ú¸ ¯‡·ÎÓÌ˚
+DrawingPageIOT::DrawingPageIOT(bool inputCheckOff) : DrawingPage(inputCheckOff)
 {
-	operatingTemperaturePattern.assign(LR"((-|\+)?\d{2,3}(\.\.\.\+?\d{2,3})?|AMBIENT \/ Œ –\. —–≈ƒ¿|ÕÂ ÌËÊÂ \d \/ No lower than \d)");
-	operatingPressurePattern.assign(LR"(-?\d,\d{1,6}(\.\.\.\d,\d{1,6})?|ATM \/ ¿“Ã\.|HYDR\. \/ √»ƒ–Œ—“|NO MORE \/ Õ≈ ¡ŒÀ≈≈ \d,\d{1,6}|HOLD)");
-	tracingPattern.assign(LR"(E|H|N|T|NO \/ Õ≈“)");
-	pipelineClassPattern.assign(LR"([A-Z0-9]{8,9})");
-	technologicalEnvironmentPattern.assign(LR"([A-Z]{2,4})");
-	testEnvironmentPattern.assign(LR"((PLANT )?AIR ?/ ?(“≈’Õ»◊≈— »… )?¬Œ«ƒ”’|FW / œ–Œ“»¬ŒœŒ∆¿–Õ€… ¬ŒƒŒœ–Œ¬Œƒ|NO / Õ≈“|WATER / ¬Œƒ¿)");
-	paintingSystemPattern.assign(LR"(A|B|C|T|NO \/ Õ≈“)");
-	postWeldingHeatTreatmentPattern.assign(LR"(NO \/ Õ≈“)");
-	weldInspectionPattern.assign(LR"(\d{1,3}%?( œ¬ )?|\d ÏÂÚÓ‰‡ Ó·˙ÂÏÌÓ„Ó ÍÓÌÚÓÎˇ|NO \/ Õ≈“)");
-	testPressurePattern.assign(LR"(\d,\d{1,3}|NO \/ Õ≈“)");
-	GOSTPipelineCategoryPattern.assign(LR"(\w{1,3}(-\w{1,2})?((,|\.) \w{1,2})?( \/ \w{1,3} \(\w{3} \d{3}\))?)"); //[A-Za-z¿-ﬂ‡-ˇ .,/()0-9-]{4,22}
-	designTemperaturePattern.assign(LR"(-?\d{1,3} ?( ?\/ ?|\.\.\.?)?\+?(\d{1,3})?)");
-	designPressurePattern.assign(LR"((FV|-?\d(,\d{1,9})?)?( ?\/ ?(\d(,|\.)\d{2}|FV)?)?|HYDR\. \/ √»ƒ–Œ—“\.)");
-	cipherDocumentPattern.assign(LR"(GCC-NAG-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
-	diameterPipelinePattern.assign(LR"(DN ?\d{2,4}(( \/ |,) ?(DN)? ?\d{2,4})?)");
-	isolationPattern.assign(LR"(\d{2,3}( \d{2,3})?( \d{2,3})?( \d{2,3})?( \d{2,3})?|H|NO \/ Õ≈“)");
-	categoryPipelinesTRCUPattern.assign(LR"(NO \/ Õ≈“|\d|[0-9A-Z() /¿-ﬂ]{10,20})");
-	schemeNumberPattern.assign(LR"(GCC-NAG-DDD-\d{5}-\d{2}-\d{4}-\w{2}-\w{3}-\d{5}(, ?\d{5}){0,2})");
-	lineNumberPattern.assign(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{9}-\d{2})");
-	stressCalculationPattern.assign(LR"(NO \/ Õ≈“|YES \/ ƒ¿)");
-	isometricDrawingPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}([ /0-9-]{2,5})?)");
-	fileNamePattern.assign(LR"(GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+\.dwg)");
+	cipherDocumentPattern.assign(LR"(GCC-IOT-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
+	lineNumberPattern.assign(LR"(\d{2,3}-\w{1,3}(\d{1,2})?-\d{4})");
+	isometricDrawingPattern.assign(LR"(\d{2,3}-\w{1,3}(\d{1,2})?-\d{4}( part \d)?)");
+	fileNamePattern.assign(LR"(GCC-IOT-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[\-_0-9A-Z]+\.(pdf|dxf))");
+	diameterPipelinePattern.assign(LR"(DN \d{2,4})");
+	operatingTemperaturePattern.assign(LR"(\d{1,3}(\.\d)?(‚Ä¶\d{1,3})?|AMB\/–û–ö–†\.–°–†\.)");
+	operatingPressurePattern.assign(LR"(\d(\.\d{1,3})?(\w{2}-\d{2})?(‚Ä¶\d(\.\d{1,2})?)?)");
+	tracingPattern.assign(LR"(E|NO\/–ù–ï–¢)");
+	pipelineClassPattern.assign(LR"([A-Z0-9]{9}|Generic_spec)");
+	technologicalEnvironmentPattern.assign(LR"([A-Z]{1,4}(\d{1,2})?)");
+	testEnvironmentPattern.assign(LR"(AIR\/–í–û–ó–î–£–•|WATER\/–í–û–î–ê|NO\/–ù–ï–¢)");
+	paintingSystemPattern.assign(LR"([A-Z–ê-–Ø]\d( ?(‚Üí|->) ?[A-Z–ê-–Ø]\d)?(,[A-Z–ê-–Ø]\d ?(‚Üí|->) ?[A-Z–ê-–Ø]\d)?|NO\/–ù–ï–¢)");
+	postWeldingHeatTreatmentPattern.assign(LR"(NO\/–ù–ï–¢)");
+	weldInspectionPattern.assign(LR"(\d{1,3}%?((,|\.)\d{1,3}%?)?(,—Å–º.–¢–¢)?|NO\/–ù–ï–¢|YES\/–î–ê)");
+	testPressurePattern.assign(LR"(\d(\.\d{1,3})?|NO\/–ù–ï–¢)");
+	GOSTPipelineCategoryPattern.assign(LR"(NO\/–ù–ï–¢|[A-Z–ê-–Øa-z–∞-—è]{2,4})");
+	designTemperaturePattern.assign(LR"(-?\d{1,3}(\.\d)?(\/\d{1,3})?)");
+	designPressurePattern.assign(LR"(\d(\.\d{1,3})?(\w{2}-\d{2})?)");
+	isolationPattern.assign(LR"(M|P|H|NO\/–ù–ï–¢)");
+	categoryPipelinesTRCUPattern.assign(LR"(NO\/–ù–ï–¢|\d)");
+	schemeNumberPattern.assign(LR"(GCC-(T|I)OT-DDD-\d{5}-\d{2}-\d{4}-[A-Z–ê-–Ø]{2,4}\d?-\w{3}-\d{5}(-\d+)?|NO\/–ù–ï–¢)");
+	stressCalculationPattern.assign(LR"(YES\/–î–ê|NO\/–ù–ï–¢)");
 }
-
-//bool DrawingPageIOT::tryAddComponent(const std::wstring& componentNumberStr)
-//{
-//	//if (std::regex_match(componentNumberStr, positionNumberPattern))
-//	//{
-//	//	components.emplace_back(std::make_shared<BuildComponentASP>(new BuildComponentASP(componentNumberStr)));
-//	//	return true;
-//	//}
-//	return false;
-//}
