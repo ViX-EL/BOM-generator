@@ -135,6 +135,12 @@
     <ClCompile Include="BuildComponentIOT.cpp">
       <Filter>Исходные файлы\Парсеры\IOT</Filter>
     </ClCompile>
+    <ClCompile Include="SplitBuildComponentData.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtilityes.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolPrinter.h">
@@ -223,6 +229,12 @@
     </ClInclude>
     <ClInclude Include="BuildComponentIOT.h">
       <Filter>Файлы заголовков\Парсеры\IOT</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitBuildComponentData.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtilities.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

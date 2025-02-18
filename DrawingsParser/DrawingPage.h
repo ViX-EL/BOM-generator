@@ -143,6 +143,8 @@ public:
 	const std::wregex& getIsometricDrawingPattern();
 	const std::wregex& getFileNamePattern();
 	const std::wregex& getPagesPattern();
+
+	void parseSplitComponentsData();
 };
 
 template<typename T>

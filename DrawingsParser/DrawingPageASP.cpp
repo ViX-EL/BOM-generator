@@ -27,7 +27,7 @@ DrawingPageASP::DrawingPageASP(bool inputCheckOff) : DrawingPage(inputCheckOff)
 	isolationPattern.assign(LR"(H|N|NO \/ Õ≈“|YES \/ ƒ¿)");
 	categoryPipelinesTRCUPattern.assign(LR"(NO \/ Õ≈“|„\. ?2, ?Í‡Ú\. ?1)");
 	schemeNumberPattern.assign(LR"((\/\d{3}-)?GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2}-\w{3}-\d{5} ?)");
-	lineNumberPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}-(\d{2}-)?(\d{3}-)?[A-Z0-9]{9}(-\w)?(_new)?)");
+	lineNumberPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}-(\d{2}-)?(\d{3}-)?[A-Z0-9]{9}(_\d{1,2}\.\d{1,2})?(-\w)?(_new)?)");
 	stressCalculationPattern.assign(LR"(NO ?\/ ?Õ≈“|YES ?\/ ?ƒ¿)");
 	isometricDrawingPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}([ /0-9-]{2,5})?)");
 	fileNamePattern.assign(LR"(\d{5}-\d{2}-\d{4}_\d{3}-\w{2,4}-\d{4}-[A-Z0-9]{9}-\d{2}_Sht__?\d{1,2}.dwg|GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+\.dwg)");

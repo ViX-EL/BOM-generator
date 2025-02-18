@@ -248,6 +248,10 @@ void TextParserASP::readComponensFromEndText()
 		positionCodeStr = nominalDiameterStr;
 		nominalDiameterStr = getPreviouslySubString();
 	}
+	else if (!std::regex_match(nominalDiameterStr, lastComponentPtr->getNominalDiameterPattern())) {
+		return;
+	}
+
 	std::wstring currentSubStr = getPreviouslySubString();
 	bool anotherComponentExist = false;
 	do 
@@ -586,8 +590,14 @@ void TextParserASP::parseCase3()
 		lastDrawingPagePtr->trySetTestEnvironment(getPreviouslySubString());
 	}
 	else {
-		if (!std::regex_match(testEnvironmentStr, lastDrawingPagePtr->getLineNumberPattern())) {
-			lastDrawingPagePtr->trySetTestEnvironment(testEnvironmentStr);
+		if (!std::regex_match(testEnvironmentStr, lastDrawingPagePtr->getLineNumberPattern())) 
+		{
+			if (!lastDrawingPagePtr->trySetTestEnvironment(testEnvironmentStr, false))
+			{
+				withoutWeldedPipe = false;
+				readTablePartData();
+				return;
+			}
 		}
 		else {
 			lastDrawingPagePtr->trySetLineNumber(testEnvironmentStr);
@@ -782,6 +792,8 @@ void TextParserASP::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 		readTablePartData();
 
 		lastDrawingPagePtr->trySetFileName(fileName);
+
+		lastDrawingPagePtr->parseSplitComponentsData();
 	}
 }
 

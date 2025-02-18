@@ -25,7 +25,7 @@ bool DrawingsParserApp::OnInit()
 	window->SetBackgroundColour(*wxWHITE);
 	window->Show(true);
 
-	std::string fileName = "GCC-IOT-DDD-16100-11-4100-TKM1-ISO-00024_00_BI_Sht_1" ".dwg";
+	std::string fileName = "16150-11-2200_031-AT-0001-ESB1B01BN-01_Sht_4" ".dwg";
 
 	//processingOneFile(fileName, LOAD_PARSE_WRITE);
 	//processingOneFile(fileName, LOAD);
@@ -58,7 +58,7 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 		if (parser.getDrawings().size() != 0)
 		{
 			TableWriter tableWriter(parser.getDrawings(), new DialogPrinter);
-			tableWriter.createNewTableFile(".\\");
+			tableWriter.createNewTableFile(L".\\");
 			tableWriter.writeTable();
 		}
 		else {

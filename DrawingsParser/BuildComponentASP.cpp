@@ -1,4 +1,5 @@
 #include "BuildComponentASP.h"
+#include "StringUtilities.h"
 
 #include <regex>
 
@@ -15,41 +16,7 @@ bool BuildComponentASP::trySetPositionCode(const std::wstring& positionCodeStr, 
 	std::wregex patternWithoutRusSimbols(L"[a-zA-Z0-9()_]+");
 	if (std::regex_match(positionCodeStr, positionCodePattern) && !std::regex_match(positionCodeStr, patternWithoutRusSimbols))
 	{
-		return BuildComponent::trySetPositionCode(replaceRuSimbols(positionCodeStr), assertionCheck);
+		return BuildComponent::trySetPositionCode(StringUtilities::replaceSimilarRuSimbols(positionCodeStr), assertionCheck);
 	}
 	return BuildComponent::trySetPositionCode(positionCodeStr, assertionCheck);
-}
-
-std::wstring BuildComponentASP::replaceRuSimbols(const std::wstring& sourceStr)
-{
-	std::wstring newStr;
-	for (wchar_t simbol : sourceStr)
-	{
-		if (!((simbol >= L'A' && simbol <= L'Z') || (simbol >= L'a' && simbol <= L'z')))
-		{
-			switch (simbol)
-			{
-			case L'Ñ': simbol = L'C'; break;
-			case L'ñ': simbol = L'c'; break;
-			case L'Å': simbol = L'E'; break;
-			case L'å': simbol = L'e'; break;
-			case L'Ò': simbol = L'T'; break;
-			case L'ó': simbol = L'y'; break;
-			case L'Î': simbol = L'O'; break;
-			case L'î': simbol = L'o'; break;
-			case L'Ð': simbol = L'P'; break;
-			case L'ð': simbol = L'p'; break;
-			case L'À': simbol = L'A'; break;
-			case L'à': simbol = L'a'; break;
-			case L'Õ': simbol = L'X'; break;
-			case L'õ': simbol = L'x'; break;
-			case L'Â': simbol = L'B'; break;
-			case L'Ì': simbol = L'M'; break;
-			default:
-				break;
-			}
-		}
-		newStr += simbol;
-	}
-	return newStr;
 }

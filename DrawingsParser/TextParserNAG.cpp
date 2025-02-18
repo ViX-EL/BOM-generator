@@ -336,6 +336,8 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 		readTablePartData();
 
 		lastDrawingPagePtr->trySetFileName(fileName);
+
+		lastDrawingPagePtr->parseSplitComponentsData();
 	}
 	else {
 		currentListEmpty = false;

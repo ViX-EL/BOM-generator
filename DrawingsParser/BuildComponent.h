@@ -1,7 +1,10 @@
 #pragma once
 
+#include "SplitBuildComponentData.h"
+
 #include <string>
 #include <regex>
+#include <memory>
 
 bool trySetValue(const std::wstring& sourceValueStr, int& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "");
 bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "", 
@@ -16,6 +19,8 @@ protected:
 	std::wstring document;
 	std::wstring amount;
 	std::wstring positionCode;
+
+	std::shared_ptr<SplitBuildComponentData> splitData;
 
 	std::wregex descriptionPattern;
 	std::wregex nominalDiameterPattern;
@@ -35,7 +40,7 @@ public:
 	virtual bool trySetPositionCode(const std::wstring& positionCodeStr, bool assertionCheck = true);
 
 	int getPositionNumber() const;
-	std::wstring getDescription() const;
+	const std::wstring& getDescription() const;
 	std::wstring getNominalDiameter() const;
 	std::wstring getDocument() const;
 	std::wstring getAmount() const;
@@ -47,5 +52,8 @@ public:
 	const std::wregex& getDocumentPattern() { return documentPattern; }
 	const std::wregex& getAmountPattern() { return amountPattern; }
 	const std::wregex& getPositionCodePattern() { return positionCodePattern; }
+
+	void parseSplitData();
+	std::shared_ptr<SplitBuildComponentData> getSplitData();
 };
 

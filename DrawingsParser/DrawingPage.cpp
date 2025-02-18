@@ -258,6 +258,14 @@ const std::wregex& DrawingPage::getPagesPattern()
 	return pagesPattern;
 }
 
+void DrawingPage::parseSplitComponentsData()
+{
+	for (size_t i = 0; i < components.size(); i++)
+	{
+		components[i]->parseSplitData();
+	}
+}
+
 std::wstring DrawingPage::truncate(const std::wstring& sourceStr)
 {
 	size_t startIndex = 0;

@@ -53,7 +53,7 @@ MainWindow::MainWindow(const wxString& title, const wxSize& size) : wxFrame(NULL
 
 	CreateStatusBar();
 
-	inputFolderTextField->SetLabelText("D:\\Изометрички для isoBom\\IOT\\Проверенные");
+	inputFolderTextField->SetLabelText("C:\\Users\\User\\Downloads\\Изометрички для проверки\\ASP");
 	outputFolderTextField->SetLabelText("C:\\Users\\User\\Downloads");
 }
 
@@ -92,7 +92,7 @@ void MainWindow::OnCreateXlsxTable(wxCommandEvent& event)
 	}
 
 	TableWriter tableWriter(parser.getDrawings(), new DialogPrinter);
-	tableWriter.createNewTableFile(outputFolderTextField->GetLabelText().ToStdString());
+	tableWriter.createNewTableFile(outputFolderTextField->GetLabelText().ToStdWstring());
 	tableWriter.writeTable();
 
 	SetStatusText("Таблица " + tableWriter.getFileName() + " создана!");

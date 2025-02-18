@@ -182,5 +182,6 @@ void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 
 	if (lastDrawingPagePtr != nullptr) {
 		readTablePartData();
+		lastDrawingPagePtr->parseSplitComponentsData();
 	}
 }

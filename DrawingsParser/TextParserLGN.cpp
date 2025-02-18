@@ -252,8 +252,13 @@ bool TextParserLGN::readList()
 	lastDrawingPagePtr->trySetPipelineClass(getNextSubString());
 	moveOnCountSubStr(2);
 	lastDrawingPagePtr->trySetTracing(getNextSubString());
-	lastDrawingPagePtr->trySetOperatingPressure(getNextSubString());
-	lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString());
+	std::wstring operatingPressureStr = getNextSubString();
+	if (!lastDrawingPagePtr->trySetOperatingPressure(operatingPressureStr, false)) {
+		lastDrawingPagePtr->trySetOperatingTemperature(operatingPressureStr);
+	}
+	else {
+		lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString());
+	}
 
 	std::wstring cipherDocumentStr(getPreviouslySubString(L"Газохимический комплекс"));
 	if (std::regex_match(cipherDocumentStr, lastDrawingPagePtr->getCipherDocumentPattern())) {
@@ -328,5 +333,6 @@ void TextParserLGN::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	bool success{ false };
 	do {
 		success = readList();
+		lastDrawingPagePtr->parseSplitComponentsData();
 	} while (success);
 }

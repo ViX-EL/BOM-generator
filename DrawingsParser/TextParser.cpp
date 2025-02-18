@@ -86,7 +86,9 @@ void TextParser::parse(const std::wstring& fileName)
 		currentParser = parsers[index];
 		break;
 	case DesignerIndex::PTE:
-		if (!parsers[index]) {
+		if (!parsers[index])
+		{
+			printer->printError(L"Обработка файлов проектировщика " + currentDesignerStr + L" находится в разработке!");
 		/*	parsers[index] = std::make_shared<TextParserPTE>(*text, columns, componentsCountPerList, separator);*/
 		}
 		currentParser = parsers[index];
@@ -106,7 +108,7 @@ void TextParser::parse(const std::wstring& fileName)
 
 		if(drawings.size() == sizeBeforeParsing)
 		{
-			printer->printError(L"В файле " + fileName + L" нет записываемых листов!");
+			wxLogMessage("[Запись] В файле %s нет записываемых листов!", wxString(fileName));
 		}
 
 		wxLogMessage("[Парсинг] Конец парсинга файла %s", wxString(fileName + L" " + std::to_wstring(drawings.size())));

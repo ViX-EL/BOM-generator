@@ -14,11 +14,11 @@ DrawingPageLGN::DrawingPageLGN(bool inputCheckOff) : DrawingPage(inputCheckOff)
 	testEnvironmentPattern.assign(LR"(Water/Вода|Воздух\/Азот Air\/Nitrogen)");
 	paintingSystemPattern.assign(LR"(A|B|C|F)");
 	postWeldingHeatTreatmentPattern.assign(LR"(No\/Нет|Да)");
-	weldInspectionPattern.assign(LR"(\d{1,3}%?%?(\d{3})?( \(LPT\))?(, \d{1,3}%)?|No/Нет)");
+	weldInspectionPattern.assign(LR"(\d{1,3}%?%?(\d{3})?( \(LPT\))?((, \d{1,3}%){1,2})?|No\/Нет)");
 	testPressurePattern.assign(LR"(\d{1,2}(\.\d{1,2})?)");
 	GOSTPipelineCategoryPattern.assign(LR"([A-Za-zА-Яа-я(), ]+)");
 	designTemperaturePattern.assign(LR"(-?\d{2,3} \/ \d{2,3}|to\/до \d{2})");
-	designPressurePattern.assign(LR"(-?\d{1,2}(\.\d{1,4})?( \/ (FV)?(\d\.\d{2})?)?|atm\.|hydr\.|to\/до \d)");
+	designPressurePattern.assign(LR"(-?\d{1,2}(\.\d{1,4})?( \/ (FV)?(\d\.\d{1,2})?)?|atm\.|hydr\.|to\/до \d(\.\d{1,2})?)");
 	cipherDocumentPattern.assign(LR"(GCC-LGN-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
 	diameterPipelinePattern.assign(LR"(DN\d{2,4}(mm)?)");
 	isolationPattern.assign(LR"(C|H|M|N|P|R)");
@@ -27,7 +27,7 @@ DrawingPageLGN::DrawingPageLGN(bool inputCheckOff) : DrawingPage(inputCheckOff)
 	lineNumberPattern.assign(LR"(\d{3}-[A-Z0-9]{1,4}-\d{4}-[A-Z0-9]{9,11}|Protective duct drain\/Слив защитного желоба №\d{2}(_|-)(\d{2,3}|\w{1,3})(_|-)\d{2})");
 	stressCalculationPattern.assign(LR"(NO\/НЕТ|YES\/ДА)");
 	isometricDrawingPattern.assign(LR"(\d{3}-[A-Z0-9]{1,4}-\d{4}-[A-Z0-9]{9,11}|Protective duct drain\/Слив защитного желоба №\d{2}(_|-)(\d{2,3}|\w{1,3})(_|-)\d{2})");
-	fileNamePattern.assign(LR"(GCC-LGN-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+(\.dwg|\.dxf))");
+	fileNamePattern.assign(LR"(GCC-LGN-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9А-ЯA-Za-z]+(\.dwg|\.dxf))");
 }
 
 bool DrawingPageLGN::trySetDesignPressure(const std::wstring& sourceStr, bool assertionCheck)

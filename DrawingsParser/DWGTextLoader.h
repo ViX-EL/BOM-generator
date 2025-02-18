@@ -11,7 +11,5 @@ class DWGTextLoader : public TextLoader
 public:
 	explicit DWGTextLoader(IMessagePrinter* errorPrinter);
 	int loadFile(const std::string& filePath) override;
-
-	bool isContainsCyrillicLetters(char* subString);
 };
 

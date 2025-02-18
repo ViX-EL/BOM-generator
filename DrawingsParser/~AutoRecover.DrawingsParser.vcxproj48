@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{56aa0f1a-671e-441d-befc-d71279cba07a}</ProjectGuid>
+    <RootNamespace>DrawingsParser</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>BOM generator</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\C++Libraries\wxWidgets-3.2.5\wxwidgets.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\C++Libraries\wxWidgets-3.2.5\wxwidgets.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\C++Libraries\wxWidgets-3.2.5\wxwidgets.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\C++Libraries\wxWidgets-3.2.5\wxwidgets.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ExecutablePath>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>C:\C++Libraries\PoDoFo\lib;C:\C++Libraries\zlib\lib;C:\C++Libraries\xlsxwriter\lib;C:\C++Libraries\libredwg-0.13.3-win64\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ExecutablePath>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>C:\C++Libraries\PoDoFo\lib;C:\C++Libraries\xlsxwriter\lib;C:\C++Libraries\libredwg-0.13.3-win64\lib;C:\C++Libraries\zlib\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>podofo.lib;libredwg.dll.a;xlsxwriter.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>podofo.lib;libredwg.dll.a;xlsxwriter.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="BuildComponentASP.cpp" />
+    <ClCompile Include="BuildComponentIOT.cpp" />
+    <ClCompile Include="BuildComponentLGN.cpp" />
+    <ClCompile Include="BuildComponentNAG.cpp" />
+    <ClCompile Include="DrawingPageASP.cpp" />
+    <ClCompile Include="BaseTextParser.cpp" />
+    <ClCompile Include="BuildComponent.cpp" />
+    <ClCompile Include="ConsolPrinter.cpp" />
+    <ClCompile Include="BOMGeneratorApp.cpp" />
+    <ClCompile Include="DOCXPrinter.cpp" />
+    <ClCompile Include="DrawingPage.cpp" />
+    <ClCompile Include="DrawingPageIOT.cpp" />
+    <ClCompile Include="DrawingPageLGN.cpp" />
+    <ClCompile Include="DrawingPageNAG.cpp" />
+    <ClCompile Include="DWGTextLoader.cpp" />
+    <ClCompile Include="PDFTextLoader.cpp" />
+    <ClCompile Include="SplitBuildComponentData.cpp" />
+    <ClCompile Include="TextDialog.cpp" />
+    <ClCompile Include="TextParserASP.cpp" />
+    <ClCompile Include="StringConvert.cpp" />
+    <ClCompile Include="StringConvert.h" />
+    <ClCompile Include="TextParserIOT.cpp" />
+    <ClCompile Include="TextParserLGN.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="TableWriter.cpp" />
+    <ClCompile Include="TextLoader.cpp" />
+    <ClCompile Include="TextParser.cpp" />
+    <ClCompile Include="DialogPrinter.cpp" />
+    <ClCompile Include="TextParserMEN.cpp" />
+    <ClCompile Include="TextParserNAG.cpp" />
+    <ClCompile Include="TextParserPTE.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BuildComponentASP.h" />
+    <ClInclude Include="BuildComponentIOT.h" />
+    <ClInclude Include="BuildComponentLGN.h" />
+    <ClInclude Include="BuildComponentNAG.h" />
+    <ClInclude Include="DrawingPageASP.h" />
+    <ClInclude Include="BaseTextParser.h" />
+    <ClInclude Include="BuildComponent.h" />
+    <ClInclude Include="ConsolPrinter.h" />
+    <ClInclude Include="BOMGeneratorApp.h" />
+    <ClInclude Include="DOCXPrinter.h" />
+    <ClInclude Include="DrawingPage.h" />
+    <ClInclude Include="DrawingPageIOT.h" />
+    <ClInclude Include="DrawingPageLGN.h" />
+    <ClInclude Include="DrawingPageNAG.h" />
+    <ClInclude Include="DWGTextLoader.h" />
+    <ClInclude Include="PDFTextLoader.h" />
+    <ClInclude Include="SplitBuildComponentData.h" />
+    <ClInclude Include="TextDialog.h" />
+    <ClInclude Include="TextParserASP.h" />
+    <ClInclude Include="IMessagePrinter.h" />
+    <ClInclude Include="TextParserIOT.h" />
+    <ClInclude Include="TextParserLGN.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="TableWriter.h" />
+    <ClInclude Include="TextLoader.h" />
+    <ClInclude Include="TextParser.h" />
+    <ClInclude Include="DialogPrinter.h" />
+    <ClInclude Include="TextParserMEN.h" />
+    <ClInclude Include="TextParserNAG.h" />
+    <ClInclude Include="TextParserPTE.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\boost.1.86.0\build\boost.targets" Condition="Exists('..\packages\boost.1.86.0\build\boost.targets')" />
+    <Import Project="..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets" Condition="Exists('..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets')" />
+    <Import Project="..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets" Condition="Exists('..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets')" />
+    <Import Project="..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets" Condition="Exists('..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets')" />
+    <Import Project="..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets" Condition="Exists('..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets')" />
+    <Import Project="..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets" Condition="Exists('..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets')" />
+    <Import Project="..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets" Condition="Exists('..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets')" />
+    <Import Project="..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets" Condition="Exists('..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets')" />
+    <Import Project="..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets" Condition="Exists('..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\boost.1.86.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.86.0\build\boost.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets'))" />
+  </Target>
+</Project>

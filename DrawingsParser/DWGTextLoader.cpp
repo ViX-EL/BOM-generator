@@ -18,8 +18,6 @@ DWGTextLoader::DWGTextLoader(IMessagePrinter* printer) : TextLoader(printer)
 
 int DWGTextLoader::loadFile(const std::string& filePath)
 {
-	/*BOOST_LOG_TRIVIAL(trace) << "Начало чтения файла " << filename;*/
-
 	text.clear();
 	setFilePath(filePath);
 	setFileName(getFilePath());
@@ -66,17 +64,4 @@ int DWGTextLoader::loadFile(const std::string& filePath)
 	wxLogMessage("[Чтение] Конец чтения файла %s", wxString(getFileName()));
 
 	return success;
-}
-
-bool DWGTextLoader::isContainsCyrillicLetters(char* subString)
-{
-	size_t size = strlen(subString);
-	for (size_t i = 0; i < size; i++)
-	{
-		if (subString[i] >= 'А' && subString[i] <= 'я')
-		{
-			return true;
-		}
-	}
-	return false;
 }

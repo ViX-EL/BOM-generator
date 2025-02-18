@@ -28,17 +28,38 @@ void TableWriter::writePagesFields()
 	{
 		for (size_t pageIdx = 0; pageIdx < (*drawings)[drawingIdx].pages.size(); pageIdx++)
 		{
+			std::shared_ptr<DrawingPage> currentDrawingPage = (*drawings)[drawingIdx].pages[pageIdx];
 			for (size_t componentIdx = 0; componentIdx < (*drawings)[drawingIdx].pages[pageIdx]->getComponentsCount(); componentIdx++)
 			{
-				currentFileName = (*drawings)[drawingIdx].pages[pageIdx]->getFileName();
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getCipherDocument());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getLineNumber());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getIsometricDrawing());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getFileName());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTotalPages());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getCurrentPage());
+				BuildComponent* currentComponentPtr = &currentDrawingPage->getComponent(componentIdx);
 
-				BuildComponent* currentComponentPtr = &(*drawings)[drawingIdx].pages[pageIdx]->getComponent(componentIdx);
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getElementName());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getType1());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getType2());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getType3());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getProductStandard());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getProductStandardENG());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getSteelGrade());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getSteelGradeENG());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getDiameter1());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getDiameter2());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getWallThickness1());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getWallThickness2());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getNominalDiameter1());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getNominalDiameter2());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getPressureNominal());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getPressureClass());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getASMEThickness1());
+				writeCell(currentRow, currentColumn, currentComponentPtr->getSplitData()->getASMEThickness2());
+
+				currentFileName = currentDrawingPage->getFileName();
+				writeCell(currentRow, currentColumn, currentDrawingPage->getCipherDocument());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getLineNumber());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getIsometricDrawing());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getFileName());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getTotalPages());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getCurrentPage());
+
 				writeCell(currentRow, currentColumn, currentComponentPtr->getPositionNumber());
 				writeCell(currentRow, currentColumn, currentComponentPtr->getDescription());
 				writeCell(currentRow, currentColumn, currentComponentPtr->getNominalDiameter());
@@ -46,27 +67,27 @@ void TableWriter::writePagesFields()
 				writeCell(currentRow, currentColumn, currentComponentPtr->getAmount());
 				writeCell(currentRow, currentColumn, currentComponentPtr->getPositionCode());
 
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getDiameterPipeline());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getOperatingTemperature());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getOperatingPressure());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTracing());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getPipelineClass());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTechnologicalEnvironment());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTestEnvironment());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getPaintingSystem());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getPostWeldingHeatTreatment());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getWeldInspection());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getTestPressure());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getGOSTPipelineCategory());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getDesignTemperature());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getDesignPressure());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getIsolation());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getCategoryPipelinesTRCU());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getSchemeNumber());
-				writeCell(currentRow, currentColumn, (*drawings)[drawingIdx].pages[pageIdx]->getStressCalculation());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getDiameterPipeline());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getOperatingTemperature());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getOperatingPressure());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getTracing());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getPipelineClass());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getTechnologicalEnvironment());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getTestEnvironment());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getPaintingSystem());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getPostWeldingHeatTreatment());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getWeldInspection());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getTestPressure());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getGOSTPipelineCategory());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getDesignTemperature());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getDesignPressure());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getIsolation());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getCategoryPipelinesTRCU());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getSchemeNumber());
+				writeCell(currentRow, currentColumn, currentDrawingPage->getStressCalculation());
 			}
 
-			wxLogMessage("[Запись] Конец записи листа %d файла %s", (*drawings)[drawingIdx].pages[pageIdx]->getCurrentPage(), (*drawings)[drawingIdx].pages[pageIdx]->getFileName());
+			wxLogMessage("[Запись] Конец записи листа %d файла %s", currentDrawingPage->getCurrentPage(), currentDrawingPage->getFileName());
 		}
 	}
 }
@@ -79,50 +100,73 @@ void TableWriter::writeCell(uint16_t& row, uint16_t& column, const std::wstring&
 
 void TableWriter::writeCell(uint16_t& row, uint16_t& column, int cellValue) const
 {
-	worksheet_write_number(worksheet, row, column, cellValue, NULL);
+	if (cellValue == 0) {
+		worksheet_write_string(worksheet, row, column, "-", NULL);
+	}
+	else {
+		worksheet_write_number(worksheet, row, column, cellValue, NULL);
+	}
+	incrementCell(row, column);
+}
+
+void TableWriter::writeCell(uint16_t& row, uint16_t& column, double cellValue) const
+{
+	if (cellValue == 0.0) {
+		worksheet_write_string(worksheet, row, column, "-", NULL);
+	}
+	else {
+		worksheet_write_number(worksheet, row, column, cellValue, NULL);
+	}
 	incrementCell(row, column);
 }
 
 void TableWriter::incrementCell(uint16_t& row, uint16_t& column) const
 {
 	column++;
-	if (column == 30) {
+	if (column == columnsNames.size()) {
 		row++;
 		column = 0;
 	}
 }
 
-void TableWriter::changeFileNameIfAlreadyExists(const std::string& tableDirectoryName)
+void TableWriter::changeFileNameIfAlreadyExists(const std::wstring& tableDirectoryName)
 {
 	namespace fs = std::filesystem;
 
-	int alreadyExistsCount{ 0 };
-	for (auto& dirIter : fs::directory_iterator(tableDirectoryName))
+	try
 	{
-		if (!fs::is_regular_file(dirIter.status())) {
-			continue;
+		int alreadyExistsCount{ 0 };
+		for (auto& dirIter : fs::directory_iterator(tableDirectoryName))
+		{
+			if (!fs::is_regular_file(dirIter.status())) {
+				continue;
+			}
+
+			std::wstring currfileName = dirIter.path().filename().wstring();
+			if (currfileName.compare(0, tableFileName.size(), tableFileName) == 0) {
+				alreadyExistsCount++;
+			}
 		}
 
-		std::string currfileName = dirIter.path().filename().string();
-		if (currfileName.compare(0, tableFileName.size(), tableFileName) == 0) {
-			alreadyExistsCount++;
+		if (alreadyExistsCount > 0) {
+			std::wstring currFileName;
+			do {
+				currFileName = tableFileName + " (" + std::to_string(alreadyExistsCount) + ')' + ".xlsx";
+				alreadyExistsCount++;
+			} while (fs::exists(tableDirectoryName + L'\\' + currFileName));
+			tableFileName = currFileName;
+		}
+		else {
+			tableFileName += L".xlsx";
 		}
 	}
-
-	if (alreadyExistsCount > 0) {
-		std::string currFileName;
-		do {
-			currFileName = tableFileName + " (" + std::to_string(alreadyExistsCount) + ')' + ".xlsx";
-			alreadyExistsCount++;
-		} while (fs::exists(tableDirectoryName + '\\' + currFileName));
-		tableFileName = currFileName;
-	} 
-	else {
-		tableFileName += ".xlsx";
+	catch (const std::exception& ex)
+	{
+		printer->printError(L"Ошибка создания файла таблицы: " + utf8_decode(ex.what()));
 	}
 }
 
-const std::string& TableWriter::getFileName() const
+const std::wstring& TableWriter::getFileName() const
 {
 	return tableFileName;
 }
@@ -146,15 +190,15 @@ void TableWriter::writeTable()
 	}
 }
 
-void TableWriter::createNewTableFile(const std::string& tableDirectoryName)
+void TableWriter::createNewTableFile(const std::wstring& tableDirectoryName)
 {
 	changeFileNameIfAlreadyExists(tableDirectoryName);
 
 	if (tableDirectoryName != ".\\") {
-		workbook = workbook_new((tableDirectoryName + "\\" + tableFileName).c_str());
+		workbook = workbook_new((utf8_encode(tableDirectoryName + L'\\' + tableFileName)).c_str());
 	}
 	else {
-		workbook = workbook_new(tableFileName.c_str());
+		workbook = workbook_new(utf8_encode(tableFileName).c_str());
 	}
 	worksheet = workbook_add_worksheet(workbook, NULL);
 }

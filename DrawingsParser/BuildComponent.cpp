@@ -1,4 +1,5 @@
 #include "BuildComponent.h"
+#include "StringUtilities.h"
 
 #include <string>
 #include <regex>
@@ -57,7 +58,8 @@ bool BuildComponent::trySetDescription(const std::wstring& descriptionStr, bool 
 
 bool BuildComponent::trySetNominalDiameter(const std::wstring& nominalDiameterStr, bool assertionCheck)
 {
-	return trySetValue(nominalDiameterStr, nominalDiameter, nominalDiameterPattern, assertionCheck, "Недопустимое значение для условного диаметра компонента!");
+	return trySetValue(StringUtilities::removeSpaces(nominalDiameterStr), nominalDiameter, nominalDiameterPattern, assertionCheck, 
+		"Недопустимое значение для условного диаметра компонента!");
 }
 
 bool BuildComponent::trySetAmount(const std::wstring& amountStr, bool assertionCheck)
@@ -80,7 +82,7 @@ int BuildComponent::getPositionNumber() const
 	return positionNumber;
 }
 
-std::wstring BuildComponent::getDescription() const
+const std::wstring& BuildComponent::getDescription() const
 {
 	return description != L"" ? description : L"-";
 }
@@ -108,4 +110,14 @@ std::wstring BuildComponent::getPositionCode() const
 const std::wregex& BuildComponent::getPositionNumberPattern()
 {
 	return positionNumberPattern;
+}
+
+void BuildComponent::parseSplitData()
+{
+	splitData = std::make_shared<SplitBuildComponentData>(this);
+}
+
+std::shared_ptr<SplitBuildComponentData> BuildComponent::getSplitData()
+{
+	return splitData;
 }
