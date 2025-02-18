@@ -110,8 +110,8 @@ void SplitBuildComponentData::parseElementName()
 	}
 	if (elementName == L"FLANGE")
 	{
-		if(componentPtr->getDescription().contains(L"Òðîéíèê") || componentPtr->getDescription().contains(L"Çàäâèæêà") || componentPtr->getDescription().contains(L"Êëàïàí") ||
-			componentPtr->getDescription().contains(L"Çàòâîð") || componentPtr->getDescription().contains(L"Ðóêàâ") || componentPtr->getDescription().contains(L"CAMLOCK")) {
+		if(componentPtr->getDescription().contains(L"Ð¢Ñ€Ð¾Ð¹Ð½Ð¸Ðº") || componentPtr->getDescription().contains(L"Ð—Ð°Ð´Ð²Ð¸Ð¶ÐºÐ°") || componentPtr->getDescription().contains(L"ÐšÐ»Ð°Ð¿Ð°Ð½") ||
+			componentPtr->getDescription().contains(L"Ð—Ð°Ñ‚Ð²Ð¾Ñ€") || componentPtr->getDescription().contains(L"Ð ÑƒÐºÐ°Ð²") || componentPtr->getDescription().contains(L"CAMLOCK")) {
 			elementName = L"-";
 		}
 	}
@@ -120,7 +120,7 @@ void SplitBuildComponentData::parseElementName()
 void SplitBuildComponentData::parseType1()
 {
 	if (elementName == L"ELBOW") {
-		type1 = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}[- ](?:ñâàðíîé )?(?:\d(\.\d)?DN-)?\d{2,4}(?:\.\d{1,2})?x\d{1,2}(?:\.\d{1,2})?|\d{2} d\d{2,3} PN16)"))
+		type1 = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}[- ](?:ÑÐ²Ð°Ñ€Ð½Ð¾Ð¹ )?(?:\d(\.\d)?DN-)?\d{2,4}(?:\.\d{1,2})?x\d{1,2}(?:\.\d{1,2})?|\d{2} d\d{2,3} PN16)"))
 			.substr(0, 2);
 	}
 	else if (elementName == L"BLIND FLANGE") {
@@ -128,8 +128,8 @@ void SplitBuildComponentData::parseType1()
 	}
 	else if (elementName == L"CAP") 
 	{
-		if (componentPtr->getDescription().contains(L"Çàãëóøêà ñ âíåøíåé ðåçüáîé")) {
-			type1 = L"External Thread";
+		if (componentPtr->getDescription().contains(L"Ð—Ð°Ð³Ð»ÑƒÑˆÐºÐ° Ñ Ð²Ð½ÐµÑˆÐ½ÐµÐ¹ Ñ€ÐµÐ·ÑŒÐ±Ð¾Ð¹")) {
+			type1 = L"ExternalÂ Thread";
 		}
 	}
 	else if (elementName == L"Clip")
@@ -146,22 +146,22 @@ void SplitBuildComponentData::parseType1()
 	}
 	else if (elementName == L"FLANGE")
 	{
-		if (componentPtr->getDescription().contains(L"WN") || productStandard == L"ÃÎÑÒ 33259-2015" || productStandard == L"EN 1092-1"|| productStandard == L"ASME B16.(5|47)") {
+		if (componentPtr->getDescription().contains(L"WN") || productStandard == L"Ð“ÐžÐ¡Ð¢ 33259-2015" || productStandard == L"EN 1092-1"|| productStandard == L"ASME B16.(5|47)") {
 			type1 = L"WN";
 		}
 	}
 	else if (elementName == L"PIPE")
 	{
-		if (componentPtr->getDescription().contains(L"ñ íàðóæíîé öèëèíäðè÷åñêîé ðåçüáîé")) {
+		if (componentPtr->getDescription().contains(L"Ñ Ð½Ð°Ñ€ÑƒÐ¶Ð½Ð¾Ð¹ Ñ†Ð¸Ð»Ð¸Ð½Ð´Ñ€Ð¸Ñ‡ÐµÑÐºÐ¾Ð¹ Ñ€ÐµÐ·ÑŒÐ±Ð¾Ð¹")) {
 			type1 = L"with external cylindrical thread";
 		}
-		else if (componentPtr->getDescription().contains(L"ñ íàðóæíîé ÏÝ èçîëÿöèåé")) {
+		else if (componentPtr->getDescription().contains(L"Ñ Ð½Ð°Ñ€ÑƒÐ¶Ð½Ð¾Ð¹ ÐŸÐ­ Ð¸Ð·Ð¾Ð»ÑÑ†Ð¸ÐµÐ¹")) {
 			type1 = L"with external PE insulation";
 		}
 	}
 	else if (elementName == L"REDUCER ECC")
 	{
-		if (componentPtr->getDescription().contains(L"ñ íàðóæíîé ÏÝ èçîëÿöèåé")) {
+		if (componentPtr->getDescription().contains(L"Ñ Ð½Ð°Ñ€ÑƒÐ¶Ð½Ð¾Ð¹ ÐŸÐ­ Ð¸Ð·Ð¾Ð»ÑÑ†Ð¸ÐµÐ¹")) {
 			type1 = L"with external PE insulation";
 		}
 	}
@@ -170,7 +170,7 @@ void SplitBuildComponentData::parseType1()
 	}
 	/*else if (elementName == L"Support") 
 	{
-		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Îïîðà \d{2} OCT)")); matchStr != L"-") {
+		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(ÐžÐ¿Ð¾Ñ€Ð° \d{2} OCT)")); matchStr != L"-") {
 			type1 = matchStr.substr(6, 2);
 		}
 		else if (componentPtr->getDescription().contains(L"Clamp")) 
@@ -196,10 +196,10 @@ void SplitBuildComponentData::parseType1()
 		else if (componentPtr->getDescription().contains(L"Support and guide ring")) {
 			type1 = L"Support and guide ring; Precast";
 		}
-		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{3}-ÒÎ-À\d)")); matchStr != L"-") {
-			type1 = L"ÒÎ";
+		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{3}-Ð¢Ðž-Ð\d)")); matchStr != L"-") {
+			type1 = L"Ð¢Ðž";
 		}
-		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(òèï \d èñïîëíåíèå \d)")); matchStr != L"-") {
+		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Ñ‚Ð¸Ð¿ \d Ð¸ÑÐ¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ \d)")); matchStr != L"-") {
 			type1 = L"Type " + matchStr[5] + std::wstring(L"perf.") + matchStr[matchStr.size() - 1];
 		}
 		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Z-D?S\d{1,2}L?-\d{2,3})")); matchStr != L"-")
@@ -207,7 +207,7 @@ void SplitBuildComponentData::parseType1()
 			size_t strBegin = matchStr.find_first_of(L'-') + 1;
 			type1 = matchStr.substr(strBegin, matchStr.find_last_of(L'-') - strBegin);
 		}
-		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2,4}(?:\.\d)?-\w{2}-À)")); matchStr != L"-")
+		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2,4}(?:\.\d)?-\w{2}-Ð)")); matchStr != L"-")
 		{
 			size_t strBegin = matchStr.find_first_of(L'-') + 1;
 			type1 = matchStr.substr(strBegin, matchStr.find_last_of(L'-') - strBegin);
@@ -256,11 +256,11 @@ void SplitBuildComponentData::parseType3()
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(PN\d{2})")); matchStr != L"-") {
 			type3 = matchStr;
 		}
-		else if (productStandard == L"ÃÎÑÒ 17375-2001" || productStandard == L"EN 10253" || productStandard == L"ÒÓ 3600-010-78786272-2012" ||
+		else if (productStandard == L"Ð“ÐžÐ¡Ð¢ 17375-2001" || productStandard == L"EN 10253" || productStandard == L"Ð¢Ð£ 3600-010-78786272-2012" ||
 			searchDescriptionMatch(StringUtilities::getRegex(LR"(LR \d{2}-\d{1,2})"))!= L"-" || componentPtr->getDescription().contains(L"1.5DN")) {
 			type3 = L"R=1.5DN";
 		}
-		else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(SR \d{2}-\d{1,2})")) != L"-" || (componentPtr->getDescription().contains(L"Îïðîñíûé") &&
+		else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(SR \d{2}-\d{1,2})")) != L"-" || (componentPtr->getDescription().contains(L"ÐžÐ¿Ñ€Ð¾ÑÐ½Ñ‹Ð¹") &&
 			searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2} \d{4}x\d{1,2})")) != L"-") || componentPtr->getDescription().contains(L"R=DN") ||
 			componentPtr->getDescription().contains(L"1DN")) {
 			type3 = L"R=DN";
@@ -300,10 +300,10 @@ void SplitBuildComponentData::parseType2Tee()
 
 void SplitBuildComponentData::parseType1Tee()
 {
-	if (productStandard == L"ÃÎÑÒ 17376-2001" || componentPtr->getDescription().contains(L"SMLS")) {
+	if (productStandard == L"Ð“ÐžÐ¡Ð¢ 17376-2001" || componentPtr->getDescription().contains(L"SMLS")) {
 		type1 = L"SMLS";
 	}
-	else if (productStandard == L"ÎÑÒ 36-23-77" || productStandard == L"ÒÓ 3600-010-78786272-2007" || productStandard == L"ÒÓ 3600-010-78786272-2012") {
+	else if (productStandard == L"ÐžÐ¡Ð¢ 36-23-77" || productStandard == L"Ð¢Ð£ 3600-010-78786272-2007" || productStandard == L"Ð¢Ð£ 3600-010-78786272-2012") {
 		type1 = L"Stamp welded";
 	}
 	else if (componentPtr->getDescription().contains(L"TIF")) {
@@ -315,8 +315,8 @@ void SplitBuildComponentData::parseType1Tee()
 	else if (componentPtr->getDescription().contains(L"TT-1")) {
 		type1 = L"TT-1";
 	}
-	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"([Tt]ee (?:[\w ]+)? (?:TS|ÒÑ)|Welded)")); matchStr != L"-" ||
-		searchMatch(StringUtilities::getRegex(L"ÎÑÒ 36-24-77")) != L"-") {
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"([Tt]ee (?:[\w ]+)? (?:TS|Ð¢Ð¡)|Welded)")); matchStr != L"-" ||
+		searchMatch(StringUtilities::getRegex(L"ÐžÐ¡Ð¢ 36-24-77")) != L"-") {
 		type1 = L"Welded";
 	}
 }
@@ -326,12 +326,12 @@ void SplitBuildComponentData::parseType1Tee()
 //	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}-\d{2}-\d)")); matchStr != L"-") {
 //		type1 = matchStr;
 //	}
-//	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2,4}(?:\.\d)?-\w{2}-ÀS?C?\d{1,2})")); matchStr != L"-")
+//	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2,4}(?:\.\d)?-\w{2}-ÐS?C?\d{1,2})")); matchStr != L"-")
 //	{
 //		size_t strBegin = matchStr.find_last_of(L'-') + 1;
 //		type1 = matchStr.substr(strBegin, matchStr.size() - strBegin);
 //	}
-//	else if (componentPtr->getDescription().contains(L"ÂÏ-Á2")) {
+//	else if (componentPtr->getDescription().contains(L"Ð’ÐŸ-Ð‘2")) {
 //		type1 = L"B2";
 //	}
 //	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Z-D?S\d{1,2}L?-\d{2,4}-\w(?:\d{3})?(?:-[^A\d]{1,2})?)")); matchStr != L"-")
@@ -342,7 +342,7 @@ void SplitBuildComponentData::parseType1Tee()
 //		}
 //		type1 = matchStr.substr(strBegin, matchStr.size() - strBegin);
 //	}
-//	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Support and guide ring DN\d{2,3}õ\d{2,3})")); matchStr != L"-")
+//	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Support and guide ring DN\d{2,3}Ñ…\d{2,3})")); matchStr != L"-")
 //	{
 //		size_t strBegin = matchStr.find_last_of(L"DN") - 1;
 //		type1 = matchStr.substr(strBegin, matchStr.size() - strBegin);
@@ -362,10 +362,10 @@ void SplitBuildComponentData::parseType1Tee()
 //	else if (componentPtr->getDescription().contains(L"SC-RK")) {
 //		type1 = L"SC-RK";
 //	}
-//	else if (componentPtr->getDescription().contains(L"TÑ-661.00.00-12")) {
-//		type1 = L"TÑ-661.00.00-12";
+//	else if (componentPtr->getDescription().contains(L"TÐ¡-661.00.00-12")) {
+//		type1 = L"TÐ¡-661.00.00-12";
 //	}
-//	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Ï \d{3}-\d{3,4}-\d \(Äó\d{4}\))")); matchStr != L"-") {
+//	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(ÐŸ \d{3}-\d{3,4}-\d \(Ð”Ñƒ\d{4}\))")); matchStr != L"-") {
 //		type1 = matchStr;
 //	}
 //}
@@ -411,13 +411,13 @@ void SplitBuildComponentData::parseType2ELBOW()
 	if (componentPtr->getDescription().contains(L"GIF")) {
 		type2 = L"GIF";
 	}
-	if (productStandard == L"ÃÎÑÒ 17375-2001" || productStandard == L"ASME B16.9" || productStandard == L"ÃÎÑÒ 30753-2001") {
+	if (productStandard == L"Ð“ÐžÐ¡Ð¢ 17375-2001" || productStandard == L"ASME B16.9" || productStandard == L"Ð“ÐžÐ¡Ð¢ 30753-2001") {
 		type2 = L"SMLS";
 		if (componentPtr->getDescription().contains(L"external PE insulation")) {
 			type2 += L"; external PE insulation";
 		}
 	}
-	if (componentPtr->getDescription().contains(L"Welded") || (componentPtr->getDescription().contains(L"Îïðîñíûé  ëèñò") && 
+	if (componentPtr->getDescription().contains(L"Welded") || (componentPtr->getDescription().contains(L"ÐžÐ¿Ñ€Ð¾ÑÐ½Ñ‹Ð¹  Ð»Ð¸ÑÑ‚") && 
 		searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2} \d{4}x\d{2})")) != L"-")) {
 		type2 = L"Welded";
 		if (componentPtr->getDescription().contains(L"external PE insulation")) {
@@ -425,10 +425,10 @@ void SplitBuildComponentData::parseType2ELBOW()
 		}
 	}
 	else if (productStandard == L"TU3600-010-78786272-2012") {
-		type2 = L"ÎÊ";
+		type2 = L"ÐžÐš";
 	}
 	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(OKShS \d{2}-1(?:\.\d)?DN-\d{2,4}x\d{1,2})")); matchStr != L"-") {
-		type2 = L"ÎÊØÑ ";
+		type2 = L"ÐžÐšÐ¨Ð¡ ";
 	}
 }
 
@@ -453,17 +453,17 @@ void SplitBuildComponentData::parseType2PIPE()
 	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(SDR\d{2}(?:\.\d)?)")); matchStr != L"-") {
 		type2 = matchStr;
 	}
-	else if (productStandard == L"ÃÎÑÒ 8734-75") {
+	else if (productStandard == L"Ð“ÐžÐ¡Ð¢ 8734-75") {
 		type2 = L"Seamless cold-deformed";
 	}
-	else if (productStandard == L"ÃÎÑÒ 8732-78" || productStandard == L"ÃÎÑÒ 9940-81") {
+	else if (productStandard == L"Ð“ÐžÐ¡Ð¢ 8732-78" || productStandard == L"Ð“ÐžÐ¡Ð¢ 9940-81") {
 		type2 = L"Seamless hot-deformed";
 	}
 	else if (componentPtr->getDescription().contains(L"SMLS")) {
 		type2 = L"SMLS";
 	}
-	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(ñâàðíàÿ|Pipe EFW)")); matchStr != L"-" || productStandard == L"EN 10217-7" ||
-		productStandard == L"ÃOCT 31447-2012" || productStandard == L"ÃÎÑÒ 10704-91" || productStandard == L"ÃÎÑÒ 31447-2012" || productStandard == L"ÒÓ 1381-001-62594197-2011") {
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(ÑÐ²Ð°Ñ€Ð½Ð°Ñ|Pipe EFW)")); matchStr != L"-" || productStandard == L"EN 10217-7" ||
+		productStandard == L"Ð“OCT 31447-2012" || productStandard == L"Ð“ÐžÐ¡Ð¢ 10704-91" || productStandard == L"Ð“ÐžÐ¡Ð¢ 31447-2012" || productStandard == L"Ð¢Ð£ 1381-001-62594197-2011") {
 		type2 = L"welded steel pipes";
 	}
 }
@@ -482,11 +482,11 @@ void SplitBuildComponentData::parseType2REDUCER_ECC()
 	else if (componentPtr->getDescription().contains(L"Reducer PET")) {
 		type2 = L"PT";
 	}
-	else if (productStandard == L"ÃÎÑÒ 17378-2001" || productStandard == L"ASME B16.9") {
+	else if (productStandard == L"Ð“ÐžÐ¡Ð¢ 17378-2001" || productStandard == L"ASME B16.9") {
 		type2 = L"SMLS";
 	}
-	else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(Welded|ñâàðíîé|ÏÝÑ)")) != L"-" || productStandard == L"ÎÑÒ 36-22-77" ||
-		(searchDescriptionMatch(StringUtilities::getRegex(LR"(Îïðîñíûé  ?ëèñò)")) != L"-" && searchDescriptionMatch(StringUtilities::getRegex(LR"(Reducer  ?Ý \d{4}x\d{2})")) != L"-")) {
+	else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(Welded|ÑÐ²Ð°Ñ€Ð½Ð¾Ð¹|ÐŸÐ­Ð¡)")) != L"-" || productStandard == L"ÐžÐ¡Ð¢ 36-22-77" ||
+		(searchDescriptionMatch(StringUtilities::getRegex(LR"(ÐžÐ¿Ñ€Ð¾ÑÐ½Ñ‹Ð¹  ?Ð»Ð¸ÑÑ‚)")) != L"-" && searchDescriptionMatch(StringUtilities::getRegex(LR"(Reducer  ?Ð­ \d{4}x\d{2})")) != L"-")) {
 		type2 = L"Welded";
 	}
 }
@@ -522,7 +522,7 @@ void SplitBuildComponentData::parseType2REDUCER_CON()
 	else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(Reducer P\*? K)")) != L"-" || componentPtr->getDescription().contains(L"SMLS")) {
 		type2 = L"SMLS";
 	}
-	if (componentPtr->getDescription().contains(L"ñâàðíîé") || productStandard == L"ÎÑÒ 34.10.753-97") {
+	if (componentPtr->getDescription().contains(L"ÑÐ²Ð°Ñ€Ð½Ð¾Ð¹") || productStandard == L"ÐžÐ¡Ð¢ 34.10.753-97") {
 		type2 = L"welded";
 	}
 }
@@ -532,7 +532,7 @@ void SplitBuildComponentData::parseType2CAP()
 	if (componentPtr->getDescription().contains(L"PVC-U")) {
 		type2 = L"PVC-U";
 	}
-	else if (componentPtr->getDescription().contains(L"ÏÂÄÔ")) {
+	else if (componentPtr->getDescription().contains(L"ÐŸÐ’Ð”Ð¤")) {
 		type2 = L"PVDF";
 	}
 }
@@ -546,8 +546,8 @@ void SplitBuildComponentData::parseProductStandard()
 		LR"(ISO \d{4,5})",
 		LR"(MSS SP-\d{2})",
 		LR"(N \d{4}-\d)",
-		LR"(ÀÒÊ \d{2}[\.-]\d{2,3}[\.-]\d{1,2}-\d{2})",
-		LR"(Ò-(?:\d{6}-ÒÌ|ÌÌ-\d{2})-\d{2}-\d{2}-\d{2,3})"
+		LR"(ÐÐ¢Ðš \d{2}[\.-]\d{2,3}[\.-]\d{1,2}-\d{2})",
+		LR"(Ð¢-(?:\d{6}-Ð¢Ðœ|ÐœÐœ-\d{2})-\d{2}-\d{2}-\d{2,3})"
 	};
 	for (auto patternStr : patternStrings)
 	{
@@ -566,19 +566,19 @@ void SplitBuildComponentData::parseProductStandard()
 	if (componentPtr->getDescription().contains(L"339447 VO"))
 	{
 		productStandardENG = L"339447 VO";
-		productStandard = productStandardENG.erase(productStandardENG.size() - 3, 2) + L"ÂÎ";
+		productStandard = productStandardENG.erase(productStandardENG.size() - 3, 2) + L"Ð’Ðž";
 	}
 	if (std::wstring matchStr = searchMatch(StringUtilities::getRegex(LR"(OCT \d{2}[\.-]\d{2,4}[\.|-]\d{2,3}-?\d?\d?)")); matchStr != L"-")
 	{
 		productStandard = matchStr;
 		productStandardENG = L"OST" + matchStr.erase(0, 3);
 	}
-	else if (std::wstring matchStr = searchMatch(StringUtilities::getRegex(LR"(ÃÎÑÒ Ð? ?\d{4,5}-\d{2,4})")); matchStr != L"-")
+	else if (std::wstring matchStr = searchMatch(StringUtilities::getRegex(LR"(Ð“ÐžÐ¡Ð¢ Ð ? ?\d{4,5}-\d{2,4})")); matchStr != L"-")
 	{
 		productStandard = matchStr;
 		productStandardENG = L"GOST" + matchStr.erase(0, 4);
 	}
-	else if (std::wstring matchStr = searchDocumentMatch(StringUtilities::getRegex(LR"(ÃÎÑÒ Ð? ?\d{4,5}-\d{2,4})")); matchStr != L"-")
+	else if (std::wstring matchStr = searchDocumentMatch(StringUtilities::getRegex(LR"(Ð“ÐžÐ¡Ð¢ Ð ? ?\d{4,5}-\d{2,4})")); matchStr != L"-")
 	{
 		productStandard = matchStr;
 		productStandardENG = L"TU" + matchStr.erase(0, 2);
@@ -587,25 +587,25 @@ void SplitBuildComponentData::parseProductStandard()
 
 void SplitBuildComponentData::parseSteelGrade()
 {
-	if (componentPtr->getDescription().contains(L"08Õ18Í10Ò")) {
-		steelGrade = L"08Õ18Í10Ò";
+	if (componentPtr->getDescription().contains(L"08Ð¥18Ð10Ð¢")) {
+		steelGrade = L"08Ð¥18Ð10Ð¢";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	if (componentPtr->getDescription().contains(L"08Õ18Í10Ò")) {
-		steelGrade = L"12Õ18Í10Ò";
+	if (componentPtr->getDescription().contains(L"08Ð¥18Ð10Ð¢")) {
+		steelGrade = L"12Ð¥18Ð10Ð¢";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	else if (componentPtr->getDescription().contains(L"09Ã2Ñ"))
+	else if (componentPtr->getDescription().contains(L"09Ð“2Ð¡"))
 	{
-		steelGrade = L"09Ã2Ñ";
+		steelGrade = L"09Ð“2Ð¡";
 		steelGradeENG = L"09G2S";
 	}
 	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(1.4\d01/1.4\d0\d)")); matchStr != L"-") {
 		steelGrade = matchStr;
 		steelGradeENG = matchStr;
 	}
-	else if (componentPtr->getDescription().contains(L"17Ã1Ñ-12")) {
-		steelGrade = L"17Ã1Ñ-12";
+	else if (componentPtr->getDescription().contains(L"17Ð“1Ð¡-12")) {
+		steelGrade = L"17Ð“1Ð¡-12";
 		steelGradeENG = L"17G1S-12";
 	}
 	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(
@@ -618,28 +618,28 @@ void SplitBuildComponentData::parseSteelGrade()
 		steelGrade = L"PP FRP";
 		steelGradeENG = L"PP FRP";
 	}
-	else if (componentPtr->getDescription().contains(L"ÍÏÂÕ") || componentPtr->getDescription().contains(L"PVC-U")) {
-		steelGrade = L"ÍÏÂÕ";
+	else if (componentPtr->getDescription().contains(L"ÐÐŸÐ’Ð¥") || componentPtr->getDescription().contains(L"PVC-U")) {
+		steelGrade = L"ÐÐŸÐ’Ð¥";
 		steelGradeENG = L"PVC-U";
 	}
-	else if (componentPtr->getDescription().contains(L"ÏÂÄÔ") || componentPtr->getDescription().contains(L"PVDF")) {
-		steelGrade = L"ÏÂÄÔ";
+	else if (componentPtr->getDescription().contains(L"ÐŸÐ’Ð”Ð¤") || componentPtr->getDescription().contains(L"PVDF")) {
+		steelGrade = L"ÐŸÐ’Ð”Ð¤";
 		steelGradeENG = L"PVDF";
 	}
-	else if (componentPtr->getDescription().contains(L"ÏÂÕ") || componentPtr->getDescription().contains(L"PVC")) {
-		steelGrade = L"ÏÂÕ";
+	else if (componentPtr->getDescription().contains(L"ÐŸÐ’Ð¥") || componentPtr->getDescription().contains(L"PVC")) {
+		steelGrade = L"ÐŸÐ’Ð¥";
 		steelGradeENG = L"PVC";
 	}
-	else if (componentPtr->getDescription().contains(L"Ñò3ïñ")) {
-		steelGrade = L"Cò3ïñ";
+	else if (componentPtr->getDescription().contains(L"Ð¡Ñ‚3Ð¿Ñ")) {
+		steelGrade = L"CÑ‚3Ð¿Ñ";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	else if (componentPtr->getDescription().contains(L"Ñò3ñï5")) {
-		steelGrade = L"Ñò3ñï5";
+	else if (componentPtr->getDescription().contains(L"Ð¡Ñ‚3ÑÐ¿5")) {
+		steelGrade = L"Ð¡Ñ‚3ÑÐ¿5";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"([Ññ]ò\.?(?:àëü )?20)")); matchStr != L"-") {
-		steelGrade = L"Ñòàëü 20";
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"([Ð¡Ñ]Ñ‚\.?(?:Ð°Ð»ÑŒ )?20)")); matchStr != L"-") {
+		steelGrade = L"Ð¡Ñ‚Ð°Ð»ÑŒ 20";
 		steelGradeENG = L"Steel 20";
 	}
 }
@@ -835,7 +835,7 @@ std::wstring SplitBuildComponentData::searchDescriptionMatch(const std::wregex& 
 	{
 		if(matchIndex > 0 && match.size() - pattern.mark_count() > 1)
 		{
-			assert(matchIndex > 0 && match.size() - pattern.mark_count() - 1 >= matchIndex && "Èíäåêñ ñîâïàäåíèÿ çàäàí íåâåðíî!");
+			assert(matchIndex > 0 && match.size() - pattern.mark_count() - 1 >= matchIndex && "Ð˜Ð½Ð´ÐµÐºÑ ÑÐ¾Ð²Ð¿Ð°Ð´ÐµÐ½Ð¸Ñ Ð·Ð°Ð´Ð°Ð½ Ð½ÐµÐ²ÐµÑ€Ð½Ð¾!");
 			return (match.begin() + matchIndex)->str();
 		} 
 		else if (matchIndex > 0 && match.size() - pattern.mark_count() == 1) {
