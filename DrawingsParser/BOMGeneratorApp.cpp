@@ -25,7 +25,7 @@ bool DrawingsParserApp::OnInit()
 	window->SetBackgroundColour(*wxWHITE);
 	window->Show(true);
 
-	std::string fileName = "16150-11-2200_031-AT-0001-ESB1B01BN-01_Sht_4" ".dwg";
+	std::string fileName = "16150-11-2200_031-COE-0001-ESB1B01BN-02_Sht_1" ".dwg";
 
 	//processingOneFile(fileName, LOAD_PARSE_WRITE);
 	//processingOneFile(fileName, LOAD);

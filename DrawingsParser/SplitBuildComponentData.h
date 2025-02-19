@@ -1,34 +1,35 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include <regex>
 #include <map>
+#include <string_view>
 
 class BuildComponent;
 
 class SplitBuildComponentData
 {
 public:
-	SplitBuildComponentData(const BuildComponent* componentPtr);
+	explicit SplitBuildComponentData(const BuildComponent* componentPtr);
 
-	const std::wstring& getElementName() const;
-	const std::wstring& getType1() const;
-	const std::wstring& getType2() const;
-	const std::wstring& getType3() const;
-	const std::wstring& getProductStandard() const;
-	const std::wstring& getProductStandardENG() const;
-	const std::wstring& getSteelGrade() const;
-	const std::wstring& getSteelGradeENG() const;
-	double getDiameter1() const;
-	double getDiameter2() const;
-	double getWallThickness1() const;
-	double getWallThickness2() const;
-	int getNominalDiameter1() const;
-	int getNominalDiameter2() const;
+	std::wstring_view getElementName() const;
+	std::wstring_view getType1() const;
+	std::wstring_view getType2() const;
+	std::wstring_view getType3() const;
+	std::wstring_view getProductStandard() const;
+	std::wstring_view getProductStandardENG() const;
+	std::wstring_view getSteelGrade() const;
+	std::wstring_view getSteelGradeENG() const;
+	std::wstring_view getDiameter1() const;
+	std::wstring_view getDiameter2() const;
+	std::wstring_view getWallThickness1() const;
+	std::wstring_view getWallThickness2() const;
+	std::wstring_view getNominalDiameter1() const;
+	std::wstring_view getNominalDiameter2() const;
 	double getPressureNominal() const;
 	int getPressureClass() const;
-	const std::wstring& getASMEThickness1() const;
-	const std::wstring& getASMEThickness2() const;
+	std::wstring_view getASMEThickness1() const;
+	std::wstring_view getASMEThickness2() const;
 
 private:
 	std::wstring elementName{ L"-" };
@@ -39,12 +40,12 @@ private:
 	std::wstring productStandardENG{ L"-" };
 	std::wstring steelGrade{ L"-" };
 	std::wstring steelGradeENG{ L"-" };
-	double diameter1{ 0.0 };
-	double diameter2{ 0.0 };
-	double wallThickness1{ 0.0 };
-	double wallThickness2{ 0.0 };
-	int nominalDiameter1{ 0 };
-	int nominalDiameter2{ 0 };
+	std::wstring diameter1{ L"-" };
+	std::wstring diameter2{ L"-" };
+	std::wstring wallThickness1{ L"-" };
+	std::wstring wallThickness2{ L"-" };
+	std::wstring nominalDiameter1{ L"-" };
+	std::wstring nominalDiameter2{ L"-" };
 	double pressureNominal{ 0 }; //PN
 	int pressureClass{ 0 }; //CL
 	std::wstring ASMEThickness1{ L"-" };

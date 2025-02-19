@@ -2,6 +2,7 @@
 #include "DrawingPageNAG.h"
 #include "BuildComponentNAG.h"
 #include "DrawingPage.h"
+#include "StringUtilities.h"
 
 #include <regex>
 #include <initializer_list>
@@ -256,7 +257,7 @@ bool TextParserNAG::readComponent()
 		}
 	}
 
-	if (std::regex_match(*(subStrBuffer.end() - 4), std::wregex(LR"(\d{1,4} ?x)"))) {
+	if (std::regex_match(*(subStrBuffer.end() - 4), StringUtilities::getRegex(LR"(\d{1,4} ?x)"))) {
 		descriptionSubStrCount--;
 	}
 
@@ -275,7 +276,7 @@ bool TextParserNAG::readComponent()
 
 	if (cases[0])
 	{
-		if (std::regex_match(*(subStrBuffer.end() - 4), std::wregex(LR"(\d{1,4} ?x)"))) {
+		if (std::regex_match(*(subStrBuffer.end() - 4), StringUtilities::getRegex(LR"(\d{1,4} ?x)"))) {
 			lastComponentPtr->trySetNominalDiameter((*(subStrBuffer.end() - 4) + L' ' + (*(subStrBuffer.end() - 3))));
 		}
 		else
@@ -312,7 +313,7 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 		moveToSubString(L"*********");
 		moveOnCountSubStr(2);
 	}
-	else if (std::regex_match(getFirstSubString(), std::wregex(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{8,9}-\d{2})"))) // Если первая строка - номер линии
+	else if (std::regex_match(getFirstSubString(), StringUtilities::getRegex(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{8,9}-\d{2})"))) // Если первая строка - номер линии
 	{
 		componentsEnded = true;
 		currentListEmpty = true;

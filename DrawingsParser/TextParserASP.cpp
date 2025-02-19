@@ -1,6 +1,7 @@
 ﻿#include "TextParserASP.h"
 #include "DrawingPageASP.h"
 #include "BuildComponentASP.h"
+#include "StringUtilities.h"
 
 #include <string>
 #include <vector>
@@ -50,8 +51,7 @@ bool TextParserASP::readComponentNumber()
 	}
 
 	currentTextPos = currentPositionInText;
-	std::wregex beginDescriptionPattern(LR"([A-Za-z0-9  -.]+\/[А-Яа-я0-9  -.]+)");
-	if (!std::regex_search(getNextSubString(currentTextPos), beginDescriptionPattern))
+	if (!std::regex_search(getNextSubString(currentTextPos), StringUtilities::getRegex(LR"([A-Za-z0-9  -.]+\/[А-Яа-я0-9  -.]+)")))
 	{
 		std::wstring schemeNumberStr = getNextSubString(currentTextPos);
 		std::wregex schemeNumberPattern(L"GCC-ASP-DDD");
@@ -458,7 +458,7 @@ void TextParserASP::parseCase1(std::wstring designTemperatureStr)
 
 	if (cipherDocumentStr.contains(L"-PT-"))
 	{
-		std::wstring generalNotesStr = getSubString(std::wregex(LR"(GCC-ASP-DDD-\d+-\d+-\d+-PT-LST-\d+)"));
+		std::wstring generalNotesStr = getSubString(StringUtilities::getRegex(LR"(GCC-ASP-DDD-\d+-\d+-\d+-PT-LST-\d+)"));
 		std::wstring schemeNumber = getNextSubString();
 
 		if (lastDrawingPagePtr->getSchemeNumber() == L"-") {
@@ -730,8 +730,7 @@ void TextParserASP::readDescriptionsFromEndText()
 		{
 			std::stack<std::wstring> descriptionStack;
 			currentSubStr = getPreviouslySubString();
-			std::wregex beginDescriptionPattern(LR"([A-Za-z0-9 -.]+\/[А-Яа-я0-9 -.]+)");
-			while (!std::regex_search(currentSubStr, beginDescriptionPattern))
+			while (!std::regex_search(currentSubStr, StringUtilities::getRegex(LR"([A-Za-z0-9 -.]+\/[А-Яа-я0-9 -.]+)")))
 			{
 				descriptionStack.push(currentSubStr);
 				currentSubStr = getPreviouslySubString();
@@ -765,7 +764,7 @@ void TextParserASP::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	//	x = x * 2;
 	//}
 
-	cipherDocumentStr = getSubString(std::wregex(LR"(GCC-ASP-DDD-\d+-\d+-\d+-\w+-ISO-\d+)"));
+	cipherDocumentStr = getSubString(StringUtilities::getRegex(LR"(GCC-ASP-DDD-\d+-\d+-\d+-\w+-ISO-\d+)"));
 
 	if (getFirstSubString().starts_with(L"*********")) 
 	{

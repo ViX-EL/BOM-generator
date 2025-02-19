@@ -4,6 +4,7 @@
 #include <string>
 #include <regex>
 #include <cassert>
+#include <string_view>
 
 bool trySetValue(const std::wstring& sourceValueStr, int& targetValue, const std::wregex& valuePattern, bool assertionCheck, const char* assertionMessage)
 {
@@ -82,29 +83,29 @@ int BuildComponent::getPositionNumber() const
 	return positionNumber;
 }
 
-const std::wstring& BuildComponent::getDescription() const
+std::wstring_view BuildComponent::getDescription() const
 {
-	return description != L"" ? description : L"-";
+	return std::wstring_view(description);
 }
 
-std::wstring BuildComponent::getNominalDiameter() const
+std::wstring_view BuildComponent::getNominalDiameter() const
 {
-	return nominalDiameter != L"" ? nominalDiameter : L"-";
+	return std::wstring_view(nominalDiameter);
 }
 
-std::wstring BuildComponent::getDocument() const
+std::wstring_view BuildComponent::getDocument() const
 {
-	return document != L"" ? document : L"-";
+	return std::wstring_view(document);
 }
 
-std::wstring BuildComponent::getAmount() const
+std::wstring_view BuildComponent::getAmount() const
 {
-	return amount != L"" ? amount : L"-";
+	return std::wstring_view(amount);
 }
 
-std::wstring BuildComponent::getPositionCode() const
+std::wstring_view BuildComponent::getPositionCode() const
 {
-	return positionCode != L"" ? positionCode : L"-";
+	return std::wstring_view(positionCode);
 }
 
 const std::wregex& BuildComponent::getPositionNumberPattern()

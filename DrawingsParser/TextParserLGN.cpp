@@ -1,9 +1,11 @@
 #include "TextParserLGN.h"
 #include "StringConvert.h"
+#include "StringUtilities.h"
 #include "BuildComponentLGN.h"
 #include "DrawingPageLGN.h"
-#include <functional>
+#include "StringUtilities.h"
 
+#include <functional>
 #include <regex>
 
 bool TextParserLGN::readComponentNumber()
@@ -131,10 +133,8 @@ bool TextParserLGN::isEndOfComponent(const std::wstring& stringAfterComponent, s
 	std::function checkEnd = [](const std::wstring& subStr) 
 	{
 		bool isEnd = subStr.starts_with(L"CUT PIPE LENGTH");
-		if (!isEnd)
-		{
-			std::wregex categoryPattern(LR"([A-Z ]+\/[¿-ﬂ ]+)");
-			isEnd = std::regex_match(subStr, categoryPattern);
+		if (!isEnd) {
+			isEnd = std::regex_match(subStr, StringUtilities::getRegex(LR"([A-Z ]+\/[¿-ﬂ ]+)"));
 		}
 		if (!isEnd) {
 			isEnd = subStr.starts_with(L"*******");
@@ -216,8 +216,7 @@ bool TextParserLGN::readList()
 
 	moveToSubString(L"Õ¿ œÀŒŸ¿ƒ ≈");
 	std::wstring currentSubStr;
-	std::wregex moveToPattern(LR"(GCC-LGN-DDD-\d+-\d+-\d+-\w+-\w+-\d+)");
-	while (!std::regex_match(currentSubStr, moveToPattern)) {
+	while (!std::regex_match(currentSubStr, StringUtilities::getRegex(LR"(GCC-LGN-DDD-\d+-\d+-\d+-\w+-\w+-\d+)"))) {
 		currentSubStr = getNextSubString();
 	}
 

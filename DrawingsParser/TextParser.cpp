@@ -8,6 +8,7 @@
 #include "TextParserPTE.h"
 #include "IMessagePrinter.h"
 #include "StringConvert.h"
+#include "StringUtilities.h"
 
 #include <wx/log.h> 
 #include <string>
@@ -25,7 +26,7 @@ TextParser::TextParser(const std::wstring& text, wchar_t separator,IMessagePrint
 
 void TextParser::parse(const std::wstring& fileName)
 {
-	std::wregex cipherDocumentPattern(LR"(GCC-\w{3}-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
+	std::wregex cipherDocumentPattern(StringUtilities::getRegex(LR"(GCC-\w{3}-DDD-\d+-\d+-\d+-\w+-\w+-\d+)"));
 
 	std::wstring currentDesignerStr;
 
@@ -94,6 +95,11 @@ void TextParser::parse(const std::wstring& fileName)
 		currentParser = parsers[index];
 		break;
 	default:
+		if (currentDesignerStr == L"")
+		{
+			printer->printError(L"В файле " + fileName + L" имя проектировщика не найдено!");
+			return;
+		}
 		printer->printError(L"Обработка файлов проектировщика " + currentDesignerStr + L" пока не поддерживается приложением!");
 		return;
 	}

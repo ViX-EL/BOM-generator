@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <string_view>
 
 class TableWriter
 {
@@ -31,6 +32,7 @@ private:
 
 	void writeHeders() const;
 	void writePagesFields();
+	void writeCell(uint16_t& row, uint16_t& column, std::wstring_view cellValueStr) const;
 	void writeCell(uint16_t& row, uint16_t& column, const std::wstring& cellValueStr) const;
 	void writeCell(uint16_t& row, uint16_t& column, int cellValue) const;
 	void writeCell(uint16_t& row, uint16_t& column, double cellValue) const;

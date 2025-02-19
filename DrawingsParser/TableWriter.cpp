@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <string_view>
 
 void TableWriter::writeHeders() const
 {
@@ -90,6 +91,12 @@ void TableWriter::writePagesFields()
 			wxLogMessage("[Запись] Конец записи листа %d файла %s", currentDrawingPage->getCurrentPage(), currentDrawingPage->getFileName());
 		}
 	}
+}
+
+void TableWriter::writeCell(uint16_t& row, uint16_t& column, std::wstring_view cellValueStr) const
+{
+	worksheet_write_string(worksheet, row, column, utf8_encode(cellValueStr).c_str(), NULL);
+	incrementCell(row, column);
 }
 
 void TableWriter::writeCell(uint16_t& row, uint16_t& column, const std::wstring& cellValueStr) const

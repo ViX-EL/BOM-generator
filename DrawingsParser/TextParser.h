@@ -25,7 +25,7 @@ private:
 	{
 		LGN, ASP, MEN, IOT, NAG, PTE
 	};
-	DesignerIndex designerIdx = DesignerIndex::LGN;
+	DesignerIndex designerIdx = static_cast<DesignerIndex>(-1);
 
 	const std::vector<std::wstring> designersNames {L"LGN", L"ASP", L"MEN", L"IOT", L"NAG", L"PTE"};
 

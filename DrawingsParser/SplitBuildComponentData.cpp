@@ -1,4 +1,4 @@
-#include "SplitBuildComponentData.h"
+﻿#include "SplitBuildComponentData.h"
 #include "BuildComponent.h"
 #include "StringUtilities.h"
 
@@ -10,72 +10,72 @@ SplitBuildComponentData::SplitBuildComponentData(const BuildComponent* component
 	parse();
 }
 
-const std::wstring& SplitBuildComponentData::getElementName() const
+std::wstring_view SplitBuildComponentData::getElementName() const
 {
 	return elementName;
 }
 
-const std::wstring& SplitBuildComponentData::getType1() const
+std::wstring_view SplitBuildComponentData::getType1() const
 {
 	return type1;
 }
 
-const std::wstring& SplitBuildComponentData::getType2() const
+std::wstring_view SplitBuildComponentData::getType2() const
 {
 	return type2;
 }
 
-const std::wstring& SplitBuildComponentData::getType3() const
+std::wstring_view SplitBuildComponentData::getType3() const
 {
 	return type3;
 }
 
-const std::wstring& SplitBuildComponentData::getProductStandard() const
+std::wstring_view SplitBuildComponentData::getProductStandard() const
 {
 	return productStandard;
 }
 
-const std::wstring& SplitBuildComponentData::getProductStandardENG() const
+std::wstring_view SplitBuildComponentData::getProductStandardENG() const
 {
 	return productStandardENG;
 }
 
-const std::wstring& SplitBuildComponentData::getSteelGrade() const
+std::wstring_view SplitBuildComponentData::getSteelGrade() const
 {
 	return steelGrade;
 }
 
-const std::wstring& SplitBuildComponentData::getSteelGradeENG() const
+std::wstring_view SplitBuildComponentData::getSteelGradeENG() const
 {
 	return steelGradeENG;
 }
 
-double SplitBuildComponentData::getDiameter1() const
+std::wstring_view SplitBuildComponentData::getDiameter1() const
 {
 	return diameter1;
 }
 
-double SplitBuildComponentData::getDiameter2() const
+std::wstring_view SplitBuildComponentData::getDiameter2() const
 {
 	return diameter2;
 }
 
-double SplitBuildComponentData::getWallThickness1() const
+std::wstring_view SplitBuildComponentData::getWallThickness1() const
 {
 	return wallThickness1;
 }
 
-double SplitBuildComponentData::getWallThickness2() const
+std::wstring_view SplitBuildComponentData::getWallThickness2() const
 {
 	return wallThickness2;
 }
 
-int SplitBuildComponentData::getNominalDiameter1() const
+std::wstring_view SplitBuildComponentData::getNominalDiameter1() const
 {
 	return nominalDiameter1;
 }
 
-int SplitBuildComponentData::getNominalDiameter2() const
+std::wstring_view SplitBuildComponentData::getNominalDiameter2() const
 {
 	return nominalDiameter2;
 }
@@ -90,12 +90,12 @@ int SplitBuildComponentData::getPressureClass() const
 	return pressureClass;
 }
 
-const std::wstring& SplitBuildComponentData::getASMEThickness1() const
+std::wstring_view SplitBuildComponentData::getASMEThickness1() const
 {
 	return ASMEThickness1;
 }
 
-const std::wstring& SplitBuildComponentData::getASMEThickness2() const
+std::wstring_view SplitBuildComponentData::getASMEThickness2() const
 {
 	return ASMEThickness2;
 }
@@ -103,7 +103,7 @@ const std::wstring& SplitBuildComponentData::getASMEThickness2() const
 void SplitBuildComponentData::parseElementName()
 {
 	for (const auto& [element, pattern] : elementNamePatterns) {
-		if (std::regex_search(componentPtr->getDescription(), pattern)) {
+		if (std::regex_search(componentPtr->getDescription().begin(), componentPtr->getDescription().end(), pattern)) {
 			elementName = element;
 			break;
 		}
@@ -120,7 +120,7 @@ void SplitBuildComponentData::parseElementName()
 void SplitBuildComponentData::parseType1()
 {
 	if (elementName == L"ELBOW") {
-		type1 = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}[- ](?:сварной )?(?:\d(\.\d)?DN-)?\d{2,4}(?:\.\d{1,2})?x\d{1,2}(?:\.\d{1,2})?|\d{2} d\d{2,3} PN16)"))
+		type1 = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}[- ](?:сварной )?(?:\d(?:\.\d)?DN-)?\d{2,4}(?:\.\d)?x\d{1,2}(?:\.\d)?|\d{2} d\d{2,3} PN16)"))
 			.substr(0, 2);
 	}
 	else if (elementName == L"BLIND FLANGE") {
@@ -293,7 +293,7 @@ void SplitBuildComponentData::parseType3()
 
 void SplitBuildComponentData::parseType2Tee()
 {
-	if (searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d{1,2})?x\d{1,3}(?:\.\d{1,2})?-\d{1,3}(?:\.\d{1,2})?x\d{1,3}(?:\.\d{1,2})?)")) != L"-") {
+	if (searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?-\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)")) != L"-") {
 		type2 = L"RED";
 	}
 }
@@ -665,7 +665,7 @@ void SplitBuildComponentData::parseDiameter1()
 			diameter1 = stod(matchStr.substr(beginSubStrIndex, matchStr.size() - beginSubStrIndex));
 		}
 	}
-	else*/ if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d{1,2})?x\d{1,4}(?:\.\d{1,2})?)")); matchStr != L"-")
+	else*/ if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)")); matchStr != L"-")
 	{
 		if (elementName == L"FLANGE") {
 			return;
@@ -675,11 +675,14 @@ void SplitBuildComponentData::parseDiameter1()
 			if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Pad \w \d{2,3})")); matchStr != L"-")
 			{
 				size_t beginSubStrIndex = matchStr.find_last_of(L' ');
-				diameter1 = stod(matchStr.substr(beginSubStrIndex, matchStr.size() - beginSubStrIndex));
+				diameter1 = matchStr.substr(beginSubStrIndex, matchStr.size() - beginSubStrIndex);
 				return;
 			}
 		}
-		diameter1 = stod(matchStr.substr(0, matchStr.find_first_of(L'x')));
+		diameter1 = matchStr.substr(0, matchStr.find_first_of(L'x'));
+		if (diameter1 == nominalDiameter1) {
+			diameter1 = L"-";
+		}
 	}
 }
 
@@ -687,11 +690,18 @@ void SplitBuildComponentData::parseDiameter2()
 {
 	if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC" || (elementName == L"TEE" && type2 == L"RED") || elementName == L"PAD")
 	{
-		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d{1,2})?x\d{1,4}(?:\.\d{1,2})?)"), 1); matchStr != L"-") {
+		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)"), 1); matchStr != L"-") {
 			size_t beginSubStrIndex = matchStr.find_first_of(L'x');
-			diameter2 = stod(matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex));
-			if (diameter2 == diameter1) {
-				diameter2 = 0;
+			diameter2 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+			if (diameter2 == diameter1 || diameter2 == nominalDiameter2) {
+				diameter2 = L"-";
+			}
+		}
+		else if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC")
+		{
+			if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(d{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?)")); matchStr != L"-")
+			{
+				diameter2 = matchStr.substr(matchStr.find_first_of(L'x') + 1, matchStr.find_last_of(L'x') - matchStr.find_first_of(L'x') - 1);
 			}
 		}
 	}
@@ -699,41 +709,58 @@ void SplitBuildComponentData::parseDiameter2()
 
 void SplitBuildComponentData::parseNominalDiameter1()
 {
-	std::wstring nominalDiameterStr = componentPtr->getNominalDiameter();
-	if (nominalDiameterStr.contains(L'x')) {
-		nominalDiameter1 = stoi(nominalDiameterStr.substr(0, nominalDiameterStr.find(L'x') + 1));
+	if (componentPtr->getNominalDiameter().contains(L'x')) {
+		nominalDiameter1 = componentPtr->getNominalDiameter().substr(0, componentPtr->getNominalDiameter().find(L'x'));
 	}
 	else {
-		nominalDiameter1 = stoi(nominalDiameterStr);
+		nominalDiameter1 = componentPtr->getNominalDiameter();
 	}
 }
 
 void SplitBuildComponentData::parseNominalDiameter2()
 {
-	std::wstring nominalDiameterStr = componentPtr->getNominalDiameter();
-	if (nominalDiameterStr.contains(L'x'))
+	if (componentPtr->getNominalDiameter().contains(L'x'))
 	{
-		size_t strBegin = nominalDiameterStr.find(L'x') + 1;
-		nominalDiameter2 = stoi(nominalDiameterStr.substr(strBegin, nominalDiameterStr.size() - strBegin));
+		size_t strBegin = componentPtr->getNominalDiameter().find(L'x') + 1;
+		nominalDiameter2 = componentPtr->getNominalDiameter().substr(strBegin, componentPtr->getNominalDiameter().size() - strBegin);
 	}
 }
 
 void SplitBuildComponentData::parseWallThickness1()
 {
-	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d{1,2})?x\d{1,4}(?:\.\d{1,2})?)")); matchStr != L"-")
+	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)")); matchStr != L"-")
 	{
 		size_t beginSubStrIndex = matchStr.find_first_of(L'x');
-		wallThickness1 = stod(matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex));
+		wallThickness1 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+	}
+	else if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC")
+	{
+		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(d{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?)")); matchStr != L"-")
+		{
+			size_t beginSubStrIndex = matchStr.find_last_of(L'x');
+			wallThickness1 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+		}
 	}
 }
 
 void SplitBuildComponentData::parseWallThickness2()
 {
-	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"((?:\d{1,4}(?:\.\d{1,2})?x\d{1,4}(?:\.\d{1,2})?-?){2})")); 
-		matchStr != L"-")
+	if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC" || (elementName == L"TEE" && type2 == L"RED"))
 	{
-		size_t beginSubStrIndex = matchStr.find_last_of(L'x');
-		wallThickness2 = stod(matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex));
+		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?-\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)"));
+			matchStr != L"-")
+		{
+			size_t beginSubStrIndex = matchStr.find_last_of(L'x');
+			wallThickness2 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+		}
+		else if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC")
+		{
+			if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(d{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?)")); matchStr != L"-")
+			{
+				size_t beginSubStrIndex = matchStr.find_last_of(L'x');
+				wallThickness1 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+			}
+		}
 	}
 }
 
@@ -742,7 +769,7 @@ void SplitBuildComponentData::parsePressureNominal()
 	if (elementName != L"BLIND FLANGE" && elementName != L"FLANGE" && elementName != L"SPECTACLE BLIND") {
 		return;
 	}
-	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,2}-\d{1,2}-\d{1,2}(?:[\.,]\d)?)")); matchStr != L"-")
+	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,2}-\d{1,2}-\d{1,2}[\.,]?\d?)")); matchStr != L"-")
 	{
 		size_t beginSubStrIndex{ 0 };
 		std::wstring pressureNominalStr;
@@ -802,7 +829,7 @@ void SplitBuildComponentData::parseASMEThickness1()
 
 void SplitBuildComponentData::parseASMEThickness2()
 {
-	if (ASMEThickness1 != L"-" && diameter2 != 0) {
+	if (ASMEThickness1 != L"-" && diameter2 != L"-") {
 		ASMEThickness2 = ASMEThickness1;
 	}
 }
@@ -815,10 +842,10 @@ void SplitBuildComponentData::parse()
 	parseType2();
 	parseType3();
 	parseSteelGrade();
-	parseDiameter1();
-	parseDiameter2();
 	parseNominalDiameter1();
 	parseNominalDiameter2();
+	parseDiameter1();
+	parseDiameter2();
 	parseWallThickness1();
 	parseWallThickness2();
 	parsePressureNominal();
@@ -830,27 +857,27 @@ void SplitBuildComponentData::parse()
 std::wstring SplitBuildComponentData::searchDescriptionMatch(const std::wregex& pattern, int matchIndex)
 {
 	std::match_results<std::wstring_view::const_iterator> match;
-	std::wstring_view descriptionStr(componentPtr->getDescription());
-	if (std::regex_search(descriptionStr.begin(), descriptionStr.end(), match, pattern))
+	auto start = componentPtr->getDescription().begin();
+	auto end = componentPtr->getDescription().end();
+	int matchCount = 0;
+	while (std::regex_search(start, end, match, pattern))
 	{
-		if(matchIndex > 0 && match.size() - pattern.mark_count() > 1)
-		{
-			assert(matchIndex > 0 && match.size() - pattern.mark_count() - 1 >= matchIndex && "Индекс совпадения задан неверно!");
-			return (match.begin() + matchIndex)->str();
-		} 
-		else if (matchIndex > 0 && match.size() - pattern.mark_count() == 1) {
-			return L"-";
+		matchCount++;
+		start = match[0].second;
+		if (matchCount - 1 == matchIndex) {
+			break;
 		}
-		return match.begin()->str();
 	}
-	return L"-";
+	if (match.size() == 0) {
+		return L"-";
+	}
+	return match.str();
 }
 
 std::wstring SplitBuildComponentData::searchDocumentMatch(const std::wregex& pattern)
 {
-	std::wsmatch match;
-	std::wstring documentStr = componentPtr->getDocument();
-	if (std::regex_search(documentStr, match, pattern)) {
+	std::match_results<std::wstring_view::const_iterator> match;
+	if (std::regex_search(componentPtr->getDocument().begin(), componentPtr->getDocument().end(), match, pattern)) {
 		return match.begin()->str();
 	}
 	return L"-";
