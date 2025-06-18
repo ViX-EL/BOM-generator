@@ -1,8 +1,8 @@
-#include "BuildComponentNAG.h"
+Ôªø#include "BuildComponentNAG.h"
 
 BuildComponentNAG::BuildComponentNAG(const std::wstring& positionNumberStr) : BuildComponent(positionNumberStr)
 {
-	descriptionPattern.assign(LR"([A-Za-z¿-ﬂ‡-ˇ0-9 .,Ö/"()=\-ñ\î_]{12,})");
-	nominalDiameterPattern.assign(LR"(\d{1,4} x( \d+)?|\d{1,4})");
+	descriptionPattern.assign(LR"([A-Za-z–ê-–Ø–∞-—è0-9 .,‚Ä¶/"()=\-‚Äì\‚Äù_]{12,})");
+	nominalDiameterPattern.assign(LR"(\d{1,4} ?x( ?\d+)?|\d{1,4})");
 	amountPattern.assign(LR"( {0,2}\d{1,3}(\.\d)?M?)");
 }

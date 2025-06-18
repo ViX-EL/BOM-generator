@@ -1,4 +1,7 @@
-#pragma once
+п»ї#pragma once
+
+#ifndef TextLoader_h__
+#define TextLoader_h__
 
 #include "IMessagePrinter.h"
 
@@ -19,11 +22,13 @@ protected:
 public:
 	explicit TextLoader(IMessagePrinter* printer);
 	virtual int loadFile(const std::string& filePath) = 0;
-	void printText(const std::wstring& label); //отладочная функция
+	void printText(const std::wstring& label); //РѕС‚Р»Р°РґРѕС‡РЅР°СЏ С„СѓРЅРєС†РёСЏ
 	wchar_t getSeparator() const;
 	void setSeparator(wchar_t separator);
 	const std::wstring& getText() const;
 	const std::wstring& getFilePath() const;
 	const std::wstring& getFileName() const;
 };
+
+#endif // TextLoader_h__
 

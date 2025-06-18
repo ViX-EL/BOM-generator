@@ -1,127 +1,129 @@
-#include "DrawingPageNAG.h"
+Ôªø#include "DrawingPageNAG.h"
 
 DrawingPageNAG::DrawingPageNAG(bool inputCheckOff) : DrawingPage(inputCheckOff)
 {
-	operatingTemperaturePattern.assign(LR"((-|\+)?\d{2,3}((\.{3}|Ö)\+?\d{2,3})?|AMBIENT \/ Œ –\. —–≈ƒ¿|ÕÂ ÌËÊÂ \d \/ No lower than \d)");
-	operatingPressurePattern.assign(LR"(-?\d(,|\.)\d{1,6}((\.{2,3}|Ö)\.? ?(\d(,|\.)\d{1,6})?)?( \(‡·Ò\.\))?|ATM \/ ¿“Ã\.|HYDR\. \/ √»ƒ–Œ—“\.|NO MORE \/ Õ≈ ¡ŒÀ≈≈ \d,\d{1,6}|HOLD)");
-	tracingPattern.assign(LR"(E|H|N|T|NO \/ Õ≈“)");
+	operatingTemperaturePattern.assign(LR"((-|\+)?\d{2,3}((\.{3}|‚Ä¶)\+?\d{2,3})?|AMBIENT ?\/ ?–û–ö–†\. ?–°–†–ï–î–ê|–ù–µ –Ω–∏–∂–µ \d \/ No lower than \d)", std::regex::icase);
+	operatingPressurePattern.assign(
+		LR"(-?\d(,|\.)\d{1,6}((\.{2,3}|‚Ä¶)\.? ?(\d(,|\.)\d{1,6})?)?( \(–∞–±—Å\.\))?|ATM \/ –ê–¢–ú\.|HYDR(?:\.|OSTATIC) \/ –ì–ò–î–†–û–°–¢–ê?–¢?\.|NO MORE \/ –ù–ï –ë–û–õ–ï–ï \d,\d{1,6}|HOLD)");
+	tracingPattern.assign(LR"(E|H|N|T|NO \/ –ù–ï–¢)");
 	pipelineClassPattern.assign(LR"([A-Z0-9]{8,9})");
 	technologicalEnvironmentPattern.assign(LR"([A-Za-z]{2,4})");
-	testEnvironmentPattern.assign(LR"((PLANT )?AIR ?/ ?(“≈’Õ»◊≈— »… )?¬Œ«ƒ”’|FW / œ–Œ“»¬ŒœŒ∆¿–Õ€… ¬ŒƒŒœ–Œ¬Œƒ|NO / Õ≈“|WATER / ¬Œƒ¿)");
-	paintingSystemPattern.assign(LR"(A|B|C|T|NO \/ Õ≈“)");
-	postWeldingHeatTreatmentPattern.assign(LR"(NO \/ Õ≈“)");
-	weldInspectionPattern.assign(LR"(\d{1,3}%?( œ¬ )?|\d ÏÂÚÓ‰‡ Ó·˙ÂÏÌÓ„Ó ÍÓÌÚÓÎˇ|NO \/ Õ≈“)");
-	testPressurePattern.assign(LR"(\d(,|\.)\d{1,3}|NO \/ Õ≈“)");
-	GOSTPipelineCategoryPattern.assign(LR"(\w{1,3}(-\w{1,2})?((,|\.)? [A-Za-z¿-ﬂ‡-ˇ]{1,2})?( \/ \w{1,3} \(\w{3} \d{3}\))?)");
+	testEnvironmentPattern.assign(LR"((PLANT )?AIR ?/ ?(–¢–ï–•–ù–ò–ß–ï–°–ö–ò–ô )?–í–û–ó–î–£–•|FW / –ü–†–û–¢–ò–í–û–ü–û–ñ–ê–†–ù–´–ô –í–û–î–û–ü–†–û–í–û–î|NO / –ù–ï–¢|WATER / –í–û–î–ê)");
+	paintingSystemPattern.assign(LR"(A|B|C|T|NO \/ –ù–ï–¢)");
+	postWeldingHeatTreatmentPattern.assign(LR"(NO \/ –ù–ï–¢)");
+	weldInspectionPattern.assign(LR"(\d{1,3}%? ?(?:[ 1-9–∞-—è–ê-–Ø\(\),+\.\/%]{2,19})?|\d –º–µ—Ç–æ–¥–∞ –æ–±—ä–µ–º–Ω–æ–≥–æ –∫–æ–Ω—Ç—Ä–æ–ª—è|NO \/ –ù–ï–¢)");
+	testPressurePattern.assign(LR"(\d(,|\.)\d{1,3}|NO \/ –ù–ï–¢)");
+	GOSTPipelineCategoryPattern.assign(LR"(\w{1,3}(?:-\w{1,2})?(?:(,|\.)? ?[\(\)0-9A-Za-z–ê-–Ø–∞-—è]{1,9})?(?: \([–ê-–Ø]{3} \d{3}\))?( \/ \w{1,3} \(\w{3} \d{3}\))?)");
 	designTemperaturePattern.assign(LR"(-?\d{1,3} ?( ?\/ ?|\.\.\.?)?\+?(\d{1,3})?)");
-	designPressurePattern.assign(LR"((FV|-?\d((,|\.)\d{1,9})?)?( ?\/ ?(\d(,|\.)\d{2}|FV)?)?|HYDR\. \/ √»ƒ–Œ—“\.)");
+	designPressurePattern.assign(LR"(HYDR(?:\.|OSTATIC) \/ –ì–ò–î–†–û–°–¢–ê?–¢?\.|(FV|-?\d((,|\.)\d{1,9})?)?( ?\/ ?(\d(,|\.)\d{2}|FV)?)?)");
 	cipherDocumentPattern.assign(LR"(GCC-NAG-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
 	diameterPipelinePattern.assign(LR"((DN)? ?\d{2,4}(( \/ |,) ?(DN)? ?\d{2,4})?)");
-	isolationPattern.assign(LR"(\d{2,3}( \d{2,3})?( \d{2,3})?( \d{2,3})?( \d{2,3})?|H|NO \/ Õ≈“)");
-	categoryPipelinesTRCUPattern.assign(LR"(NO \/ Õ≈“|\d|[0-9A-Z() /¿-ﬂ]{10,20})");
+	isolationPattern.assign(LR"(\d{2,3}( \d{2,3})?( \d{2,3})?( \d{2,3})?( \d{2,3})?|H|NO \/ –ù–ï–¢)");
+	categoryPipelinesTRCUPattern.assign(LR"(NO \/ –ù–ï–¢|\d|[0-9A-Z() /–ê-–Ø]{10,20})");
 	schemeNumberPattern.assign(LR"(GCC-NAG-DDD-\d{5}-\d{2}-\d{4}-\w{2}-\w{3}-\d{5}(, ?\d{4,5}){0,2})");
 	lineNumberPattern.assign(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{8,9}-\d{2})");
-	stressCalculationPattern.assign(LR"(NO \/ Õ≈“|YES \/ ƒ¿)");
+	stressCalculationPattern.assign(LR"(NO \/ –ù–ï–¢|YES \/ –î–ê)");
 	isometricDrawingPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}([ /0-9-]{2,5})?)");
 	fileNamePattern.assign(LR"(GCC-NAG-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+\.dwg)");
 }
 
-bool DrawingPageNAG::trySetOperatingTemperature(const std::wstring& operatingTemperatureStr, bool assertionCheck)
+bool DrawingPageNAG::trySetOperatingTemperature(const std::wstring& operatingTemperatureStr, ValuesCheker::Type checkType)
 {
-	if (operatingTemperatureStr == L"Ambient" || operatingTemperatureStr == L"AMBIENT / Œ –.—–≈ƒ¿" || operatingTemperatureStr == L"AMBIENT/ Œ –. —–≈ƒ¿") {
-		operatingTemperature = L"AMBIENT / Œ –.—–≈ƒ¿";
+	if (operatingTemperatureStr == L"Ambient" || operatingTemperatureStr == L"AMBIENT / –û–ö–†.–°–†–ï–î–ê" || operatingTemperatureStr == L"AMBIENT/ –û–ö–†. –°–†–ï–î–ê") {
+		operatingTemperature = L"AMBIENT / –û–ö–†.–°–†–ï–î–ê";
 		return true;
 	}
-	if (operatingTemperatureStr == L"ÕÂ ÌËÊÂ +5" || operatingTemperatureStr == L"ÕÂ ÌËÊÂ 5") {
-		operatingTemperature = L"ÕÂ ÌËÊÂ 5 / No lower than 5";
+	if (operatingTemperatureStr == L"–ù–µ –Ω–∏–∂–µ +5" || operatingTemperatureStr == L"–ù–µ –Ω–∏–∂–µ 5") {
+		operatingTemperature = L"–ù–µ –Ω–∏–∂–µ 5 / No lower than 5";
 		return true;
 	}
-	return DrawingPage::trySetOperatingTemperature(operatingTemperatureStr, assertionCheck);
+	return DrawingPage::trySetOperatingTemperature(operatingTemperatureStr, checkType);
 }
 
-bool DrawingPageNAG::trySetOperatingPressure(const std::wstring& operatingPressureStr, bool assertionCheck)
+bool DrawingPageNAG::trySetOperatingPressure(const std::wstring& operatingPressureStr, ValuesCheker::Type checkType)
 {
-	if (operatingPressureStr == L"¿“Ã." || operatingPressureStr == L"ATM / ¿“Ã" || operatingPressureStr == L"¿“Ã / ATM" || operatingPressureStr == L"Atm" || operatingPressureStr == L"¿ÚÏ.") 
+	if (operatingPressureStr == L"–ê–¢–ú." || operatingPressureStr == L"ATM / –ê–¢–ú" || operatingPressureStr == L"–ê–¢–ú / ATM" || operatingPressureStr == L"Atm" ||
+		operatingPressureStr == L"–ê—Ç–º." || operatingPressureStr == L"Atm/–ê—Ç–º.")
 	{
-		operatingPressure = L"ATM / ¿“Ã.";
+		operatingPressure = L"ATM / –ê–¢–ú.";
 		return true;
 	}
-	if (operatingPressureStr == L"HYDROSTATIC/ √»ƒ–Œ—“¿“»◊≈— Œ≈" || operatingPressureStr == L"HYDR. / √»ƒ–Œ—“") {
-		operatingPressure = L"HYDR. / √»ƒ–Œ—“.";
+	if (operatingPressureStr == L"HYDROSTATIC/ –ì–ò–î–†–û–°–¢–ê–¢–ò–ß–ï–°–ö–û–ï" || operatingPressureStr == L"HYDR. / –ì–ò–î–†–û–°–¢") {
+		operatingPressure = L"HYDR. / –ì–ò–î–†–û–°–¢.";
 		return true;
 	}
-	if (operatingPressureStr.starts_with(L"ÕÂ ·ÓÎÂÂ / No more")) {
+	if (operatingPressureStr.starts_with(L"–ù–µ –±–æ–ª–µ–µ / No more")) {
 		std::wstring newOperatingPressureStr = operatingPressureStr;
-		newOperatingPressureStr.replace(0, 17, L"NO MORE / Õ≈ ¡ŒÀ≈≈");
+		newOperatingPressureStr.replace(0, 17, L"NO MORE / –ù–ï –ë–û–õ–ï–ï");
 		operatingPressure = newOperatingPressureStr;
 		return true;
 	}
-	return DrawingPage::trySetOperatingPressure(operatingPressureStr, assertionCheck);
+	return DrawingPage::trySetOperatingPressure(operatingPressureStr, checkType);
 }
 
-bool DrawingPageNAG::trySetTracing(const std::wstring& tracingStr, bool assertionCheck)
+bool DrawingPageNAG::trySetTracing(const std::wstring& tracingStr, ValuesCheker::Type checkType)
 {
-	if (tracingStr == L"NO" || tracingStr == L"NO/Õ≈“") {
-		tracing = L"NO / Õ≈“";
+	if (tracingStr == L"NO" || tracingStr == L"NO/–ù–ï–¢") {
+		tracing = L"NO / –ù–ï–¢";
 		return true;
 	}
-	return DrawingPage::trySetTracing(tracingStr, assertionCheck);
+	return DrawingPage::trySetTracing(tracingStr, checkType);
 }
 
-bool DrawingPageNAG::trySetTestEnvironment(const std::wstring& testEnvironmentStr, bool assertionCheck)
+bool DrawingPageNAG::trySetTestEnvironment(const std::wstring& testEnvironmentStr, ValuesCheker::Type checkType)
 {
-	if (testEnvironmentStr == L"WATER/¬Œƒ¿") {
-		testEnvironment = L"WATER / ¬Œƒ¿";
+	if (testEnvironmentStr == L"WATER/–í–û–î–ê") {
+		testEnvironment = L"WATER / –í–û–î–ê";
 		return true;
 	}
-	return DrawingPage::trySetTestEnvironment(testEnvironmentStr, assertionCheck);
+	return DrawingPage::trySetTestEnvironment(testEnvironmentStr, checkType);
 }
 
-bool DrawingPageNAG::trySetPaintingSystem(const std::wstring& paintingSystemStr, bool assertionCheck)
+bool DrawingPageNAG::trySetPaintingSystem(const std::wstring& paintingSystemStr, ValuesCheker::Type checkType)
 {
-	if (paintingSystemStr == L"—") {
+	if (paintingSystemStr == L"–°") {
 		paintingSystem = L"C";
 		return true;
 	}
-	return DrawingPage::trySetPaintingSystem(paintingSystemStr, assertionCheck);
+	return DrawingPage::trySetPaintingSystem(paintingSystemStr, checkType);
 }
 
-bool DrawingPageNAG::trySetPostWeldingHeatTreatment(const std::wstring& postWeldingHeatTreatmentStr, bool assertionCheck)
+bool DrawingPageNAG::trySetPostWeldingHeatTreatment(const std::wstring& postWeldingHeatTreatmentStr, ValuesCheker::Type checkType)
 {
-	if (postWeldingHeatTreatmentStr == L"NO/Õ≈“") {
-		postWeldingHeatTreatment = L"NO / Õ≈“";
+	if (postWeldingHeatTreatmentStr == L"NO/–ù–ï–¢") {
+		postWeldingHeatTreatment = L"NO / –ù–ï–¢";
 		return true;
 	}
-	return DrawingPage::trySetPostWeldingHeatTreatment(postWeldingHeatTreatmentStr, assertionCheck);
+	return DrawingPage::trySetPostWeldingHeatTreatment(postWeldingHeatTreatmentStr, checkType);
 }
 
-bool DrawingPageNAG::trySetDesignPressure(const std::wstring& designPressureStr, bool assertionCheck)
+bool DrawingPageNAG::trySetDesignPressure(const std::wstring& designPressureStr, ValuesCheker::Type checkType)
 {
-	if (designPressureStr == L"HYDROSTATIC/ √»ƒ–Œ—“¿“»◊≈— Œ≈") {
-		designPressure = L"HYDR. / √»ƒ–Œ—“.";
+	if (designPressureStr == L"HYDROSTATIC/ –ì–ò–î–†–û–°–¢–ê–¢–ò–ß–ï–°–ö–û–ï") {
+		designPressure = L"HYDR. / –ì–ò–î–†–û–°–¢.";
 		return true;
 	}
-	return DrawingPage::trySetDesignPressure(designPressureStr, assertionCheck);
+	return DrawingPage::trySetDesignPressure(designPressureStr, checkType);
 }
 
-bool DrawingPageNAG::trySetIsolation(const std::wstring& sourceStr, bool assertionCheck)
+bool DrawingPageNAG::trySetIsolation(const std::wstring& sourceStr, ValuesCheker::Type checkType)
 {
-	if (sourceStr == L"NO" || sourceStr == L"NO/Õ≈“") {
-		isolation = L"NO / Õ≈“";
+	if (sourceStr == L"NO" || sourceStr == L"NO/–ù–ï–¢") {
+		isolation = L"NO / –ù–ï–¢";
 		return true;
 	}
-	return DrawingPage::trySetIsolation(sourceStr, assertionCheck);
+	return DrawingPage::trySetIsolation(sourceStr, checkType);
 }
 
-bool DrawingPageNAG::trySetStressCalculation(const std::wstring& stressCalculationStr, bool assertionCheck)
+bool DrawingPageNAG::trySetStressCalculation(const std::wstring& stressCalculationStr, ValuesCheker::Type checkType)
 {
-	if (stressCalculationStr == L"NO/Õ≈“") {
-		stressCalculation = L"NO / Õ≈“";
+	if (stressCalculationStr == L"NO/–ù–ï–¢") {
+		stressCalculation = L"NO / –ù–ï–¢";
 		return true;
 	}
-	if (stressCalculationStr == L"YES/ƒ¿" || stressCalculationStr == L"YES/ ƒ¿") {
-		stressCalculation = L"YES / ƒ¿";
+	if (stressCalculationStr == L"YES/–î–ê" || stressCalculationStr == L"YES/ –î–ê") {
+		stressCalculation = L"YES / –î–ê";
 		return true;
 	}
-	return DrawingPage::trySetStressCalculation(stressCalculationStr, assertionCheck);
+	return DrawingPage::trySetStressCalculation(stressCalculationStr, checkType);
 }

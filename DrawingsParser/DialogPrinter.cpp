@@ -1,4 +1,4 @@
-#include "DialogPrinter.h"
+ï»¿#include "DialogPrinter.h"
 
 #include "TextDialog.h"
 #include "StringConvert.h"
@@ -13,13 +13,13 @@ DialogPrinter::DialogPrinter()
 
 void DialogPrinter::printError(const std::wstring& message) const
 {
-	wxMessageBox(message, "Îøèáêà", wxOK | wxICON_ERROR);
+	wxMessageBox(message, "ÐžÑˆÐ¸Ð±ÐºÐ°", wxOK | wxICON_ERROR);
 }
 
 void DialogPrinter::printText(const std::wstring& text, const std::wstring& label)
 {
 	textDialog->SetLabel(label);
-	textDialog->setText(text);
+	textDialog->addText(text);
 	if (!textDialog->IsVisible()) {
 		textDialog->Show(true);
 	}

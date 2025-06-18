@@ -11,11 +11,9 @@
 *.sln.docstates
 
 Тексты из файлов/
-Изометрички для проверки/
-Проверенные изометрички/
 *.dwg
 *.dxf
-*.dll
+~AutoRecover.*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

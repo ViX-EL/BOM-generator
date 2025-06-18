@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#ifndef SplitBuildComponentData_h__
+#define SplitBuildComponentData_h__
+
 #include <string>
 #include <regex>
 #include <map>
@@ -30,6 +33,8 @@ public:
 	int getPressureClass() const;
 	std::wstring_view getASMEThickness1() const;
 	std::wstring_view getASMEThickness2() const;
+	void setSteelGrade(const std::wstring& steelGrade);
+	void parse();
 
 private:
 	std::wstring elementName{ L"-" };
@@ -54,25 +59,35 @@ private:
 	const BuildComponent* componentPtr{ nullptr };
 
 	static inline std::map<std::wstring, std::wregex> elementNamePatterns {
-		{L"SPECTACLE BLIND", std::wregex(L"^Spectacle blind")},
-		{L"CAP", std::wregex(L"cap|Blind P|Bottom", std::regex::icase)},
-		{L"Coupling", std::wregex(L"^Coupling")},
-		{L"BLIND FLANGE", std::wregex(LR"(Blind flange|Blind [\d,-]+|Flange Blind)")},
-		{L"Clip", std::wregex(L"^Clip")},
-		{L"ELBOW", std::wregex(L"Elbow", std::regex::icase)},
-		{L"FLANGE", std::wregex(LR"(Flange[^d])", std::regex::icase)},
-		{L"NOZZLE", std::wregex(L"Nozzle|Штуцер")},
-		{L"PAD", std::wregex(L"Pad")},
-		{L"PIPE", std::wregex(L"Pipe|Tube", std::regex::icase)},
-		{LR"(REDUCER CON)", std::wregex(LR"(Reducer/Переход (?:К|концентрический)|Reducer (?:P\*|П)? ?[КK]?T?(?:(?:\dx)+)?|Concentric Reducer)", std::regex::icase)},
-		{LR"(REDUCER ECC)", std::wregex(LR"(Reducer/Переход Э|Reducer (?:P?\*?|П?Э)? ?E?S?H?T?|Eccentric Reducer)", std::regex::icase)},
-		{L"Support", std::wregex(L"Support|Clamp")},
-		{L"MIMV", std::wregex(L"MIMV")},
-		{L"MIFV", std::wregex(L"MIFV")},
-		{L"TEE", std::wregex(L"Tee", std::regex::icase)},
-		{L"WELDOLET", std::wregex(L"WELDOLET")},
-		{L"Lap joint", std::wregex(L"^Lap joint")},
-		{L"Reducing coupling", std::wregex(L"^Reducing coupling")}
+		{L"Заглушка поворотная", std::wregex(L"^Заглушка поворотная|SPECTACLE BLIND|заглушка-кольцо|ПОВОРОТНАЯ ЗАГЛУШКА", std::regex::icase)},
+		{L"Заглушка", std::wregex(L"cap|Blind P|Bottom", std::regex::icase)},
+		{L"Муфта", std::wregex(L"Coupling", std::regex::icase)},
+		{L"Переходная муфта", std::wregex(L"^Reducing coupling|MIFV|MIMV")},
+		{L"Заглушка фланцевая", std::wregex(LR"(Blind flange|Blind [\d,-]+|Flange Blind)")},
+		{L"Крепление для труб", std::wregex(L"^Clip")},
+		{L"Отвод", std::wregex(L"Elbow", std::regex::icase)},
+		{L"Фланец", std::wregex(LR"(Flange[^d]|Фланец)", std::regex::icase)},
+		{L"Штуцер", std::wregex(L"Nozzle|Штуцер")},
+		{L"Накладка", std::wregex(L"Pad")},
+		{L"Труба", std::wregex(L"Pipe|Tube|Труба", std::regex::icase)},
+		{L"Концентрический переход", std::wregex(LR"((?:Reducer/)?Переход (?:К|концентрический)|Reducer (?:P\*|П)? ?[КK]?T?(?:(?:\dx)+)?|Concentric Reducer)", std::regex::icase)},
+		{L"Эксцентрический переход", std::wregex(LR"((?:Reducer/)?Переход (?:Э|ЭКСЦЕНТРИЧЕСКИЙ)|Reducer (?:P?\*?|П?Э)? ?E?S?H?T?|Eccentric Reducer)", std::regex::icase)},
+		{L"Опора", std::wregex(L"Support|Hanger|ОПОРА", std::regex::icase)},
+		{L"Тройник", std::wregex(L"Tee|Тройник", std::regex::icase)},
+		{L"Велдолет", std::wregex(L"WELDOLET")},
+		{L"Бурт", std::wregex(L"^Lap joint|Втулка")},
+		{L"Ответвление", std::wregex(L"Branch")},
+		{L"Прокладка", std::wregex(L"Gasket", std::regex::icase)},
+		{L"Шпилька", std::wregex(L"[Ss]tud", std::regex::icase)},
+		{L"Гайка", std::wregex(L"Nut")},
+		{L"Болт", std::wregex(L"Bolt")},
+		{L"Кожух", std::wregex(L"casing|Кожух")},
+		{L"Рукав", std::wregex(L"[Ss]leeve")},
+		{L"Шайба", std::wregex(L"[Ww]asher")},
+		{L"Камлок", std::wregex(L"камлок|Camlock")},
+		{L"Звеньевой уплотнитель", std::wregex(L"LINK-SEAL")},
+		{L"Кольцо", std::wregex(L"Кольцо|ring")},
+		{L"Ниппель", std::wregex(L"Ниппель|Nipple", std::regex::icase)}
 	};
 
 	void parseElementName();
@@ -81,14 +96,16 @@ private:
 	void parseType3();
 	void parseType2Tee();
 	void parseType1Tee();
-	void parseType2Support();
+	//void parseType2Support();
 	void parseType1BLIND_FLANGE();
+	void parseType2BLIND_FLANGE();
 	void parseType2ELBOW();
 	void parseType2FLANGE();
 	void parseType2PIPE();
 	void parseType2REDUCER_ECC();
 	void parseType2REDUCER_CON();
-	void parseType2CAP();
+	void parseType3REDUCER_ECC();
+	void parseType2Cap();
 	void parseType1SPECTACLE_BLIND();
 	void parseProductStandard();
 	void parseSteelGrade();
@@ -102,9 +119,10 @@ private:
 	void parsePressureClass();
 	void parseASMEThickness1();
 	void parseASMEThickness2();
-	void parse();
 	std::wstring searchDescriptionMatch(const std::wregex& pattern, int matchIndex = 0);
 	std::wstring searchDocumentMatch(const std::wregex& pattern);
 	std::wstring searchMatch(const std::wregex& pattern);
 };
+
+#endif // SplitBuildComponentData_h__
 

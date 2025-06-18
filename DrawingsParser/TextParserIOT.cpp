@@ -1,6 +1,7 @@
-#include "TextParserIOT.h"
+п»ї#include "TextParserIOT.h"
 #include "DrawingPageIOT.h"
 #include "BuildComponentIOT.h"
+#include "ValuesCheker.h"
 
 #include <regex>
 #include <string>
@@ -72,14 +73,14 @@ bool TextParserIOT::readComponentNumber()
 	}
 
 	std::wstring componentNumberStr(getNextSubString());
-	//Если не найден номер компонента
+	//Р•СЃР»Рё РЅРµ РЅР°Р№РґРµРЅ РЅРѕРјРµСЂ РєРѕРјРїРѕРЅРµРЅС‚Р°
 	if (!std::regex_match(componentNumberStr, BuildComponent::getPositionNumberPattern())) 
 	{
 		if (componentNumberStr.starts_with(L"CUT PIPE LENGTH") || componentNumberStr.starts_with(L"GCC-IOT-DDD")) {
 			componentsEnded = true;
 		}
 		else if (componentNumberStr.starts_with(L"ERECTION MATERIALS")) {
-			moveToNextSubString(L"КОЛ-ВО");
+			moveToNextSubString(L"РљРћР›-Р’Рћ");
 		}
 		return false;
 	}
@@ -95,10 +96,10 @@ bool TextParserIOT::readComponentNumber()
 
 void TextParserIOT::readTablePartData()
 {
-	moveToPreviouslySubString(L"Газохимический комплекс");
+	moveToPreviouslySubString(L"Р“Р°Р·РѕС…РёРјРёС‡РµСЃРєРёР№ РєРѕРјРїР»РµРєСЃ");
 	lastDrawingPagePtr->trySetPipelineClass(getSubString(lastDrawingPagePtr->getPipelineClassPattern(), true));
 	lastDrawingPagePtr->trySetDiameterPipeline(getPreviouslySubString());
-	if (!lastDrawingPagePtr->trySetIsolation(getPreviouslySubString(), false)) {
+	if (!lastDrawingPagePtr->trySetIsolation(getPreviouslySubString(), ValuesCheker::Type::NONE)) {
 		lastDrawingPagePtr->trySetIsolation(getSubString(lastDrawingPagePtr->getIsolationPattern(), true));
 	}
 	lastDrawingPagePtr->trySetTracing(getPreviouslySubString());
@@ -123,17 +124,17 @@ void TextParserIOT::readTablePartData()
 	moveToNextSubString();
 	std::wstring currentPageStr = getNextSubString();
 	std::wstring totalPagesStr = getNextSubString();
-	if (std::regex_match(totalPagesStr, lastDrawingPagePtr->getPagesPattern())) {
+	if (std::regex_match(totalPagesStr, lastDrawingPagePtr->getTotalPagesPattern())) {
 		lastDrawingPagePtr->trySetPages(currentPageStr, totalPagesStr);
 	}
 	else {
 		lastDrawingPagePtr->trySetPages(currentPageStr, currentPageStr);
 	}
-	std::wstring paintingSystemStr = getNextSubString(L"ТЕХНОЛОГИИ");
+	std::wstring paintingSystemStr = getNextSubString(L"РўР•РҐРќРћР›РћР“РР");
 	if (paintingSystemStr == L"") {
-		paintingSystemStr = getNextSubString(L"Беларусь");
+		paintingSystemStr = getNextSubString(L"Р‘РµР»Р°СЂСѓСЃСЊ");
 	}
-	if (lastDrawingPagePtr->trySetPaintingSystem(paintingSystemStr, false)) {
+	if (lastDrawingPagePtr->trySetPaintingSystem(paintingSystemStr, ValuesCheker::Type::NONE)) {
 		lastDrawingPagePtr->trySetTestEnvironment(getNextSubString());
 	}
 	else {
@@ -151,7 +152,10 @@ void TextParserIOT::readTablePartData()
 	}
 
 	if (fileNameStr == L"") {
-		lastDrawingPagePtr->trySetFileName(getSubString(lastDrawingPagePtr->getFileNamePattern()));
+		fileNameStr = getSubString(lastDrawingPagePtr->getFileNamePattern());
+		if (fileNameStr != L"") {
+			lastDrawingPagePtr->trySetFileName(fileNameStr);
+		}
 	}
 }
 
@@ -166,11 +170,11 @@ void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	drawingsPtr = &drawings;
 	reset();
 
-	if (getNextSubString(L"КОЛ-ВО") == L"") {
+	if (getNextSubString(L"РљРћР›-Р’Рћ") == L"") {
 		componentsEnded = true;
 	}
 
-	while (true) //Чтение всех компонентов
+	while (true) //Р§С‚РµРЅРёРµ РІСЃРµС… РєРѕРјРїРѕРЅРµРЅС‚РѕРІ
 	{
 		if (!readComponent())
 		{
@@ -183,5 +187,8 @@ void TextParserIOT::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	if (lastDrawingPagePtr != nullptr) {
 		readTablePartData();
 		lastDrawingPagePtr->parseSplitComponentsData();
+		if (lastDrawingPagePtr->getFileName() == L"-") {
+			lastDrawingPagePtr->trySetFileName(fileName);
+		}
 	}
 }

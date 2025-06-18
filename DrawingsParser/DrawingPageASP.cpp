@@ -1,7 +1,8 @@
-#include "DrawingPageASP.h"
-
+Ôªø#include "DrawingPageASP.h"
+#include "StringUtilities.h"
 #include "BuildComponent.h"
 #include "BuildComponentASP.h"
+#include "ValuesCheker.h"
 
 #include <memory>
 #include <regex>
@@ -9,97 +10,107 @@
 
 DrawingPageASP::DrawingPageASP(bool inputCheckOff) : DrawingPage(inputCheckOff)
 {
-	operatingTemperaturePattern.assign(LR"(-?\d+(\.\d+\/\d+)?|env\.\/ÓÍ\.Ò\.)");
-	operatingPressurePattern.assign(LR"(\d{1}(\.\d{1,2})?|0\.3EX-01|‡ÚÏ\.)");
-	tracingPattern.assign(LR"(NO ?\/ ?Õ≈“|N|E|˝ÎÂÍÚÓÓ·Ó„Â‚|unset\/ÌÂ ÛÒÚ.)");
-	pipelineClassPattern.assign(LR"([A-Z0-9]{9})");
-	technologicalEnvironmentPattern.assign(LR"([A-Z0-9]{2,4})");
-	testEnvironmentPattern.assign(LR"(WATER\/¬Œƒ¿|‚Ó‰‡\/water)");
-	paintingSystemPattern.assign(LR"(\w\d->?\w\d|NO \/ Õ≈“|—ËÒÚÂÏ‡ \w, ÔËÏ\. Ô\.1|¬1-¬2)");
-	postWeldingHeatTreatmentPattern.assign(LR"(NO ?\/ ?Õ≈“)");
-	weldInspectionPattern.assign(LR"(\d{1,3}(,\d)?%|ÓÔÂ‡ˆËÓÌÌ˚È|ÔÓÓÔÂ‡ˆËÓÌÌÓ)");
-	testPressurePattern.assign(LR"(\d\.\d{1,3}|‡ÚÏ\.)");
-	GOSTPipelineCategoryPattern.assign(LR"([A-Z¿-ﬂa-z‡-ˇ]{2,3}|NO \/ Õ≈“)");
-	designTemperaturePattern.assign(LR"(-?\d{1,3}(\/\d{1,3})?)");
-	designPressurePattern.assign(LR"(\d(\.\d{1,3})?)");
+	operatingTemperaturePattern.assign(LR"(-?\d+(?:\.\d+)?(?:\/\d+)?(?: ?- ?\d{1,3})?|env\.\/–æ–∫—Ä\.—Å—Ä\.|UNSET)");
+	operatingPressurePattern.assign(LR"(-?\d{1,2}(\.\d{1,6})?(?:(?:\/\d{1,2}(?:\.\d{1,4})?)?|(?: ?- ?\d{1,2}(\.\d{1,4})?))?|0\.3EX-01|–∞—Ç–º\.|ATM\. \/–ê–¢–ú\.|UNSET)");
+	tracingPattern.assign(LR"(NO ?\/ ?–ù–ï–¢|YES ?\/ ?–î–ê|[NTE]|—ç–ª–µ–∫—Ç—Ä–æ–æ–±–æ–≥—Ä–µ–≤|unset(?:\/–Ω–µ —É—Å—Ç\.)?)");
+	pipelineClassPattern.assign(LR"([A-Z0-9]{9}|–û—à–∏–±–∫–∞!)");
+	technologicalEnvironmentPattern.assign(LR"([A-Z0-9]{2,4}|–û—à–∏–±–∫–∞!)");
+	testEnvironmentPattern.assign(LR"(WATER ?\/ ?–í–û–î–ê|–≤–æ–¥–∞ ?\/ ?water|AIR ?\/ ?–í–û–ó–î–£–•|–û–®–ò–ë–ö–ê!)");
+	paintingSystemPattern.assign(LR"(\w\d->?\w\d|NO ?\/ ?–ù–ï–¢|–°–∏—Å—Ç–µ–º–∞ \w, –ø—Ä–∏–º\. –ø\.1|–í1-–í2)");
+	postWeldingHeatTreatmentPattern.assign(LR"(NO ?\/ ?–ù–ï–¢)");
+	weldInspectionPattern.assign(LR"(\d{1,3}(,\d)?%|–æ–ø–µ—Ä–∞—Ü–∏–æ–Ω–Ω—ã–π|–ø–æ–æ–ø–µ—Ä–∞—Ü–∏–æ–Ω–Ω–æ|unset)");
+	testPressurePattern.assign(LR"(\d\.\d{1,3}|–∞—Ç–º\.)");
+	GOSTPipelineCategoryPattern.assign(LR"([A-Z–ê-–Øa-z–∞-—è]{2,5}|NO \/ –ù–ï–¢)");
+	designTemperaturePattern.assign(LR"(-?\d{1,3}(\.\d{1,3})?( ?\/ ?\d{1,3})?)");
+	designPressurePattern.assign(LR"(\d(\.\d{1,3})?|ATM\.\/ –ê–¢–ú\.?|UNSET)");
 	cipherDocumentPattern.assign(LR"(GCC-ASP-DDD-\d+-\d+-\d+-\w+-ISO-\d+)");
-	diameterPipelinePattern.assign(LR"(DN\d{2,4})");
-	isolationPattern.assign(LR"(H|N|NO \/ Õ≈“|YES \/ ƒ¿)");
-	categoryPipelinesTRCUPattern.assign(LR"(NO \/ Õ≈“|„\. ?2, ?Í‡Ú\. ?1)");
-	schemeNumberPattern.assign(LR"((\/\d{3}-)?GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2}-\w{3}-\d{5} ?)");
-	lineNumberPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}-(\d{2}-)?(\d{3}-)?[A-Z0-9]{9}(_\d{1,2}\.\d{1,2})?(-\w)?(_new)?)");
-	stressCalculationPattern.assign(LR"(NO ?\/ ?Õ≈“|YES ?\/ ?ƒ¿)");
+	diameterPipelinePattern.assign(LR"(DN\d{2,4}|DNunset)");
+	isolationPattern.assign(LR"(NO ?\/ ?–ù–ï–¢|[HNR]|YES ?\/ ?–î–ê|unset)");
+	categoryPipelinesTRCUPattern.assign(LR"(NO \/ –ù–ï–¢|(?:GR\.\/–ì–†|–≥—Ä)\. ?(?:\d|UNSET), ?(?:–∫–∞—Ç\.|CAT\.\/–ö–ê–¢) ?(?:[\d-]|UNSET))");
+	schemeNumberPattern.assign(LR"((\/\d{3}-)?GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-\w{3}-\d{5} ?)");
+	lineNumberPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}(?:-\d{2}-)?(?:\d{3}-)?(?:\-?[A-Z0-9]{9})?(?:_\d{1,2}\.\d{1,2})?(?:-\w)?(?:_new)?|–û—à–∏–±–∫–∞!)");
+	stressCalculationPattern.assign(LR"(NO ?\/ ?–ù–ï–¢|YES ?\/ ?–î–ê)");
 	isometricDrawingPattern.assign(LR"(\d{3}-\w{2,4}-\d{4}([ /0-9-]{2,5})?)");
-	fileNamePattern.assign(LR"(\d{5}-\d{2}-\d{4}_\d{3}-\w{2,4}-\d{4}-[A-Z0-9]{9}-\d{2}_Sht__?\d{1,2}.dwg|GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+\.dwg)");
+	fileNamePattern.assign(
+		LR"(\d{5}-\d{2}-\d{4}_\d{3}-\w{2,4}-\d{4}-[A-Z0-9]{9}-\d{2}_Sht__?\d{1,2}.dwg|GCC-ASP-DDD-\d{5}-\d{2}-\d{4}-\w{2,4}-ISO-\d{5}[-_0-9A-Za-z]+(?:\(\d+\))?(?:\.dxf)?\.dwg)");
 }
 
-bool DrawingPageASP::trySetOperatingTemperature(const std::wstring& operatingTemperatureStr, bool assertionCheck)
+bool DrawingPageASP::trySetOperatingTemperature(const std::wstring& operatingTemperatureStr, ValuesCheker::Type checkType)
 {
-	if (operatingTemperatureStr == L"ÓÍ.ÒÂ‰˚") {
-		operatingTemperature = L"env./ÓÍ.Ò.";
+	if (operatingTemperatureStr == L"–æ–∫—Ä.—Å—Ä–µ–¥—ã" || operatingTemperatureStr.contains(L"AMB")) {
+		operatingTemperature = L"env./–æ–∫—Ä.—Å—Ä.";
 		return true;
 	}
-	return DrawingPage::trySetOperatingTemperature(operatingTemperatureStr, assertionCheck);
+	return DrawingPage::trySetOperatingTemperature(operatingTemperatureStr, checkType);
 }
 
-bool DrawingPageASP::trySetDesignPressure(const std::wstring& designPressureStr, bool assertionCheck)
+bool DrawingPageASP::trySetDesignTemperature(const std::wstring& sourceStr, ValuesCheker::Type checkType)
 {
-	if (designPressureStr == L"ÓÍ.ÒÂ‰˚") {
-		designPressure = L"env./ÓÍ.Ò.";
+	if (sourceStr == L"- / -") {
+		designTemperature = L"-";
 		return true;
 	}
-	return DrawingPage::trySetDesignPressure(designPressureStr, assertionCheck);
+	return DrawingPage::trySetDesignTemperature(sourceStr, checkType);
 }
 
-bool DrawingPageASP::trySetCategoryPipelinesTRCU(const std::wstring& categoryPipelinesTRCUStr, bool assertionCheck)
+bool DrawingPageASP::trySetDesignPressure(const std::wstring& designPressureStr, ValuesCheker::Type checkType)
+{
+	if (designPressureStr == L"–æ–∫—Ä.—Å—Ä–µ–¥—ã") {
+		designPressure = L"env./–æ–∫—Ä.—Å—Ä.";
+		return true;
+	}
+	return DrawingPage::trySetDesignPressure(designPressureStr, checkType);
+}
+
+bool DrawingPageASP::trySetCategoryPipelinesTRCU(const std::wstring& categoryPipelinesTRCUStr, ValuesCheker::Type checkType)
 {
 	if (categoryPipelinesTRCUStr == L"-/-") {
 		return true;
 	}
-	return DrawingPage::trySetCategoryPipelinesTRCU(categoryPipelinesTRCUStr, assertionCheck);
+	return DrawingPage::trySetCategoryPipelinesTRCU(categoryPipelinesTRCUStr, checkType);
 }
 
-bool DrawingPageASP::trySetCipherDocument(const std::wstring& sourceStr, bool assertionCheck)
+bool DrawingPageASP::trySetCipherDocument(const std::wstring& sourceStr, ValuesCheker::Type checkType)
 {
 	if (sourceStr == L"") {
 		return false;
 	}
-	return DrawingPage::trySetCipherDocument(sourceStr, assertionCheck);
+	return DrawingPage::trySetCipherDocument(sourceStr, checkType);
 }
 
-bool DrawingPageASP::trySetWeldInspection(const std::wstring& weldInspectionStr, bool assertionCheck)
+bool DrawingPageASP::trySetWeldInspection(const std::wstring& weldInspectionStr, ValuesCheker::Type checkType)
 {
 	if (weldInspectionStr.ends_with(L"%%%")) {
 		std::wstring newWeldInpectionStr = weldInspectionStr;
 		newWeldInpectionStr = newWeldInpectionStr.erase(newWeldInpectionStr.size() - 2, newWeldInpectionStr.size() - 1);
-		return DrawingPage::trySetWeldInspection(newWeldInpectionStr, assertionCheck);
+		return DrawingPage::trySetWeldInspection(newWeldInpectionStr, checkType);
 	}
-	return DrawingPage::trySetWeldInspection(weldInspectionStr, assertionCheck);
+	return DrawingPage::trySetWeldInspection(weldInspectionStr, checkType);
 }
 
-bool DrawingPageASP::trySetSchemeNumber(const std::wstring& sourceStr, bool assertionCheck)
+bool DrawingPageASP::trySetSchemeNumber(const std::wstring& sourceStr, ValuesCheker::Type checkType)
 {
 	if (sourceStr.size() != 0 && (sourceStr.starts_with(L' ') || sourceStr.ends_with(L' ')))
 	{
-		return DrawingPage::trySetSchemeNumber(truncate(sourceStr), assertionCheck);
+		return DrawingPage::trySetSchemeNumber(StringUtilities::truncate(sourceStr), checkType);
 	}
-	return DrawingPage::trySetSchemeNumber(sourceStr, assertionCheck);
+	return DrawingPage::trySetSchemeNumber(sourceStr, checkType);
 }
 
-bool DrawingPageASP::trySetLineNumber(const std::wstring& sourceStr, bool assertionCheck)
+bool DrawingPageASP::trySetLineNumber(const std::wstring& sourceStr, ValuesCheker::Type checkType)
 {
 	if (sourceStr.size() != 0 && (sourceStr.starts_with(L' ') || sourceStr.ends_with(L' ')))
 	{
-		return DrawingPage::trySetLineNumber(truncate(sourceStr), assertionCheck);
+		return DrawingPage::trySetLineNumber(StringUtilities::truncate(sourceStr), checkType);
 	}
-	return DrawingPage::trySetLineNumber(sourceStr, assertionCheck);
+	return DrawingPage::trySetLineNumber(sourceStr, checkType);
 }
 
-bool DrawingPageASP::trySetIsometricDrawing(const std::wstring& sourceStr, bool assertionCheck)
+bool DrawingPageASP::trySetIsometricDrawing(const std::wstring& sourceStr, ValuesCheker::Type checkType)
 {
 	if (sourceStr.size() != 0 && (sourceStr.starts_with(L' ') || sourceStr.ends_with(L' ')))
 	{
-		return DrawingPage::trySetIsometricDrawing(truncate(sourceStr), assertionCheck);
+		return DrawingPage::trySetIsometricDrawing(StringUtilities::truncate(sourceStr), checkType);
 	}
-	return DrawingPage::trySetIsometricDrawing(sourceStr, assertionCheck);
+	return DrawingPage::trySetIsometricDrawing(sourceStr, checkType);
 }

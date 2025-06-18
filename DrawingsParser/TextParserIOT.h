@@ -1,4 +1,7 @@
-#pragma once
+﻿#pragma once
+
+#ifndef TextParserIOT_h__
+#define TextParserIOT_h__
 
 #include "BaseTextParser.h"
 
@@ -17,3 +20,4 @@ public:
 	TextParserIOT(const std::wstring& text,wchar_t separator);
 };
 
+#endif // TextParserIOT_h__

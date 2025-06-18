@@ -1,4 +1,7 @@
-#pragma once
+п»ї#pragma once
+
+#ifndef MainWindow_h__
+#define MainWindow_h__
 
 #include <wx/wx.h>
 #include <wx/log.h> 
@@ -18,25 +21,38 @@ public:
 	~MainWindow();
 
 private:
-	void OnAbout(wxCommandEvent& event);
 
-	void selectPath(wxTextCtrl* textField);
-	bool isPathCorrect(wxTextCtrl* textField, const wxString& errMessage);
-	void getFileNames();
+	struct ParsingErrorInfo
+	{
+		wxString fileName;
+		wxString errorValue;
+	};
 
 	std::unique_ptr<wxLog> logger;
 
 	wxTextCtrl* inputFolderTextField;
 	wxTextCtrl* outputFolderTextField;
 	std::vector<wxString> filesNames;
-	wxString aboutStr{ "\nПрограмма читает множество dwg файлов изометрических чертежей "
-		"трубопроводов из входной папки и преобразует прочитанные данные в "
-		"одну xlsx (файл Excel) таблицу в выходной папке.\n\nДля создания Excel таблицы перечня "
-		"материалов трубопроводов выберите входную и выходную "
-		"папки и нажмите кнопку \"создать Excel таблицу\". Создание таблиц доступно для файлов"
-		"от проектировщиков \"LGN\", \"ASP\", \"IOT\", \"NAG\", \"PTE\". \n\nВо время обработки файлов могут "
-		"встречаться ошибки. Сообщайте об ошибках на почту - Dmitry22_s@cc7.cn или Teams - Dmitriy Zelenev, в письме указывайте тип "
-		"ошибки - файл не обрабатывается / ошибка в столбцах / другое, перечислите наименования "
-		"проблемных столбцов, если они есть, а так же сообщите имя файла и приложите снимок экрана с ошибкой."};
+
+	wxString aboutStr{ "\nРџСЂРѕРіСЂР°РјРјР° С‡РёС‚Р°РµС‚ РјРЅРѕР¶РµСЃС‚РІРѕ dwg С„Р°Р№Р»РѕРІ РёР·РѕРјРµС‚СЂРёС‡РµСЃРєРёС… С‡РµСЂС‚РµР¶РµР№ "
+		"С‚СЂСѓР±РѕРїСЂРѕРІРѕРґРѕРІ РёР· РІС…РѕРґРЅРѕР№ РїР°РїРєРё Рё РїСЂРµРѕР±СЂР°Р·СѓРµС‚ РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РІ "
+		"РѕРґРЅСѓ xlsx (С„Р°Р№Р» Excel) С‚Р°Р±Р»РёС†Сѓ РІ РІС‹С…РѕРґРЅРѕР№ РїР°РїРєРµ.\n\nР”Р»СЏ СЃРѕР·РґР°РЅРёСЏ Excel С‚Р°Р±Р»РёС†С‹ РїРµСЂРµС‡РЅСЏ "
+		"РјР°С‚РµСЂРёР°Р»РѕРІ С‚СЂСѓР±РѕРїСЂРѕРІРѕРґРѕРІ РІС‹Р±РµСЂРёС‚Рµ РІС…РѕРґРЅСѓСЋ Рё РІС‹С…РѕРґРЅСѓСЋ "
+		"РїР°РїРєРё Рё РЅР°Р¶РјРёС‚Рµ РєРЅРѕРїРєСѓ \"СЃРѕР·РґР°С‚СЊ Excel С‚Р°Р±Р»РёС†Сѓ\". РЎРѕР·РґР°РЅРёРµ С‚Р°Р±Р»РёС† РґРѕСЃС‚СѓРїРЅРѕ РґР»СЏ С„Р°Р№Р»РѕРІ"
+		"РѕС‚ РїСЂРѕРµРєС‚РёСЂРѕРІС‰РёРєРѕРІ \"LGN\", \"ASP\", \"IOT\", \"NAG\", \"PTE\". \n\nР’Рѕ РІСЂРµРјСЏ РѕР±СЂР°Р±РѕС‚РєРё С„Р°Р№Р»РѕРІ РјРѕРіСѓС‚ "
+		"РІСЃС‚СЂРµС‡Р°С‚СЊСЃСЏ РѕС€РёР±РєРё. РЎРѕРѕР±С‰Р°Р№С‚Рµ РѕР± РѕС€РёР±РєР°С… РЅР° РїРѕС‡С‚Сѓ - Dmitry22_s@cc7.cn РёР»Рё Teams - Dmitriy Zelenev, РІ РїРёСЃСЊРјРµ СѓРєР°Р·С‹РІР°Р№С‚Рµ С‚РёРї "
+		"РѕС€РёР±РєРё - С„Р°Р№Р» РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ / РѕС€РёР±РєР° РІ СЃС‚РѕР»Р±С†Р°С… / РґСЂСѓРіРѕРµ, РїРµСЂРµС‡РёСЃР»РёС‚Рµ РЅР°РёРјРµРЅРѕРІР°РЅРёСЏ "
+		"РїСЂРѕР±Р»РµРјРЅС‹С… СЃС‚РѕР»Р±С†РѕРІ, РµСЃР»Рё РѕРЅРё РµСЃС‚СЊ, Р° С‚Р°Рє Р¶Рµ СЃРѕРѕР±С‰РёС‚Рµ РёРјСЏ С„Р°Р№Р»Р° Рё РїСЂРёР»РѕР¶РёС‚Рµ СЃРЅРёРјРѕРє СЌРєСЂР°РЅР° СЃ РѕС€РёР±РєРѕР№." };
+
+	void OnAbout(wxCommandEvent& event);
+
+	void selectPath(wxTextCtrl* textField);
+	bool isPathCorrect(wxTextCtrl* textField, const wxString& errMessage);
+	void getFileNames();
+
+	void moveFile(const wxString& fileName, const std::wstring& destinationFolderName);
+	void saveErrorInfoToFile(const wxString& fileName, const std::wstring& destinationFolderName, ParsingErrorInfo errorInfo);
 };
+
+#endif // MainWindow_h__
 

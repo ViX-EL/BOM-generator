@@ -80,8 +80,8 @@
     <LibraryPath>C:\C++Libraries\PoDoFo\lib;C:\C++Libraries\zlib\lib;C:\C++Libraries\xlsxwriter\lib;C:\C++Libraries\libredwg-0.13.3-win64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExecutablePath>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;$(ExecutablePath)</ExecutablePath>
-    <LibraryPath>C:\C++Libraries\PoDoFo\lib;C:\C++Libraries\xlsxwriter\lib;C:\C++Libraries\libredwg-0.13.3-win64\lib;C:\C++Libraries\zlib\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>C:\C++Libraries\xlsxwriter\lib;C:\C++Libraries\libredwg-0.13.3-win64\lib;C:\C++Libraries\zlib\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,7 +113,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -129,13 +129,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\C++Libraries\PoDoFo\include;C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\C++Libraries\zlib\include;C:\C++Libraries\xlsxwriter\include;C:\C++Libraries\libredwg-0.13.3-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
@@ -144,32 +144,45 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>podofo.lib;libredwg.dll.a;xlsxwriter.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libredwg.dll.a;xlsxwriter.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BuildComponentAFT.cpp" />
     <ClCompile Include="BuildComponentASP.cpp" />
+    <ClCompile Include="BuildComponentFGG.cpp" />
+    <ClCompile Include="BuildComponentHMS.cpp" />
     <ClCompile Include="BuildComponentIOT.cpp" />
     <ClCompile Include="BuildComponentLGN.cpp" />
     <ClCompile Include="BuildComponentNAG.cpp" />
+    <ClCompile Include="BuildComponentOZN.cpp" />
+    <ClCompile Include="BuildComponentPTE.cpp" />
+    <ClCompile Include="BuildComponentSEC.cpp" />
+    <ClCompile Include="DrawingPageAFT.cpp" />
     <ClCompile Include="DrawingPageASP.cpp" />
     <ClCompile Include="BaseTextParser.cpp" />
     <ClCompile Include="BuildComponent.cpp" />
     <ClCompile Include="ConsolPrinter.cpp" />
     <ClCompile Include="BOMGeneratorApp.cpp" />
-    <ClCompile Include="DOCXPrinter.cpp" />
     <ClCompile Include="DrawingPage.cpp" />
+    <ClCompile Include="DrawingPageFGG.cpp" />
+    <ClCompile Include="DrawingPageHMS.cpp" />
     <ClCompile Include="DrawingPageIOT.cpp" />
     <ClCompile Include="DrawingPageLGN.cpp" />
     <ClCompile Include="DrawingPageNAG.cpp" />
+    <ClCompile Include="DrawingPageOZN.cpp" />
+    <ClCompile Include="DrawingPagePTE.cpp" />
+    <ClCompile Include="DrawingPageSEC.cpp" />
+    <ClCompile Include="DWGDotNetTextLoader.cpp" />
     <ClCompile Include="DWGTextLoader.cpp" />
-    <ClCompile Include="PDFTextLoader.cpp" />
     <ClCompile Include="SplitBuildComponentData.cpp" />
     <ClCompile Include="StringUtilityes.cpp" />
     <ClCompile Include="TextDialog.cpp" />
     <ClCompile Include="TextParserASP.cpp" />
     <ClCompile Include="StringConvert.cpp" />
     <ClCompile Include="StringConvert.h" />
+    <ClCompile Include="TextParserFGG.cpp" />
+    <ClCompile Include="TextParserHMS.cpp" />
     <ClCompile Include="TextParserIOT.cpp" />
     <ClCompile Include="TextParserLGN.cpp" />
     <ClCompile Include="MainWindow.cpp" />
@@ -177,32 +190,48 @@
     <ClCompile Include="TextLoader.cpp" />
     <ClCompile Include="TextParser.cpp" />
     <ClCompile Include="DialogPrinter.cpp" />
-    <ClCompile Include="TextParserMEN.cpp" />
     <ClCompile Include="TextParserNAG.cpp" />
+    <ClCompile Include="TextParserOZN.cpp" />
     <ClCompile Include="TextParserPTE.cpp" />
+    <ClCompile Include="TextParserSEC.cpp" />
+    <ClCompile Include="ValuesCheker.cpp" />
+    <ClCompile Include="WXLogPrinter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BuildComponentAFT.h" />
     <ClInclude Include="BuildComponentASP.h" />
+    <ClInclude Include="BuildComponentFGG.h" />
+    <ClInclude Include="BuildComponentHMS.h" />
     <ClInclude Include="BuildComponentIOT.h" />
     <ClInclude Include="BuildComponentLGN.h" />
     <ClInclude Include="BuildComponentNAG.h" />
+    <ClInclude Include="BuildComponentOZN.h" />
+    <ClInclude Include="BuildComponentPTE.h" />
+    <ClInclude Include="BuildComponentSEC.h" />
+    <ClInclude Include="DrawingPageAFT.h" />
     <ClInclude Include="DrawingPageASP.h" />
     <ClInclude Include="BaseTextParser.h" />
     <ClInclude Include="BuildComponent.h" />
     <ClInclude Include="ConsolPrinter.h" />
     <ClInclude Include="BOMGeneratorApp.h" />
-    <ClInclude Include="DOCXPrinter.h" />
     <ClInclude Include="DrawingPage.h" />
+    <ClInclude Include="DrawingPageFGG.h" />
+    <ClInclude Include="DrawingPageHMS.h" />
     <ClInclude Include="DrawingPageIOT.h" />
     <ClInclude Include="DrawingPageLGN.h" />
     <ClInclude Include="DrawingPageNAG.h" />
+    <ClInclude Include="DrawingPageOZN.h" />
+    <ClInclude Include="DrawingPagePTE.h" />
+    <ClInclude Include="DrawingPageSEC.h" />
+    <ClInclude Include="DWGDotNetTextLoader.h" />
     <ClInclude Include="DWGTextLoader.h" />
-    <ClInclude Include="PDFTextLoader.h" />
     <ClInclude Include="SplitBuildComponentData.h" />
     <ClInclude Include="StringUtilities.h" />
     <ClInclude Include="TextDialog.h" />
     <ClInclude Include="TextParserASP.h" />
     <ClInclude Include="IMessagePrinter.h" />
+    <ClInclude Include="TextParserFGG.h" />
+    <ClInclude Include="TextParserHMS.h" />
     <ClInclude Include="TextParserIOT.h" />
     <ClInclude Include="TextParserLGN.h" />
     <ClInclude Include="MainWindow.h" />
@@ -210,37 +239,13 @@
     <ClInclude Include="TextLoader.h" />
     <ClInclude Include="TextParser.h" />
     <ClInclude Include="DialogPrinter.h" />
-    <ClInclude Include="TextParserMEN.h" />
     <ClInclude Include="TextParserNAG.h" />
+    <ClInclude Include="TextParserOZN.h" />
     <ClInclude Include="TextParserPTE.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="TextParserSEC.h" />
+    <ClInclude Include="ValuesCheker.h" />
+    <ClInclude Include="WXLogPrinter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\boost.1.86.0\build\boost.targets" Condition="Exists('..\packages\boost.1.86.0\build\boost.targets')" />
-    <Import Project="..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets" Condition="Exists('..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets')" />
-    <Import Project="..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets" Condition="Exists('..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets')" />
-    <Import Project="..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets" Condition="Exists('..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets')" />
-    <Import Project="..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets" Condition="Exists('..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets')" />
-    <Import Project="..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets" Condition="Exists('..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets')" />
-    <Import Project="..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets" Condition="Exists('..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets')" />
-    <Import Project="..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets" Condition="Exists('..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets')" />
-    <Import Project="..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets" Condition="Exists('..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\boost.1.86.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.86.0\build\boost.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_date_time-vc143.1.86.0\build\boost_date_time-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_filesystem-vc143.1.86.0\build\boost_filesystem-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_log-vc143.1.86.0\build\boost_log-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_system-vc143.1.86.0\build\boost_system-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_thread-vc143.1.86.0\build\boost_thread-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_log_setup-vc143.1.86.0\build\boost_log_setup-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_chrono-vc143.1.86.0\build\boost_chrono-vc143.targets'))" />
-    <Error Condition="!Exists('..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_atomic-vc143.1.86.0\build\boost_atomic-vc143.targets'))" />
-  </Target>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

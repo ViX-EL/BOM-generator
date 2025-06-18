@@ -1,4 +1,4 @@
-#include "StringUtilities.h"
+Ôªø#include "StringUtilities.h"
 
 #include <string>
 #include <unordered_map>
@@ -14,22 +14,22 @@ std::wstring StringUtilities::replaceSimilarRuSimbols(const std::wstring& source
 		{
 			switch (simbol)
 			{
-			case L'—': simbol = L'C'; break;
-			case L'Ò': simbol = L'c'; break;
-			case L'≈': simbol = L'E'; break;
-			case L'Â': simbol = L'e'; break;
-			case L'“': simbol = L'T'; break;
-			case L'Û': simbol = L'y'; break;
-			case L'Œ': simbol = L'O'; break;
-			case L'Ó': simbol = L'o'; break;
-			case L'–': simbol = L'P'; break;
-			case L'': simbol = L'p'; break;
-			case L'¿': simbol = L'A'; break;
-			case L'‡': simbol = L'a'; break;
-			case L'’': simbol = L'X'; break;
-			case L'ı': simbol = L'x'; break;
-			case L'¬': simbol = L'B'; break;
-			case L'Ã': simbol = L'M'; break;
+			case L'–°': simbol = L'C'; break;
+			case L'—Å': simbol = L'c'; break;
+			case L'–ï': simbol = L'E'; break;
+			case L'–µ': simbol = L'e'; break;
+			case L'–¢': simbol = L'T'; break;
+			case L'—É': simbol = L'y'; break;
+			case L'–û': simbol = L'O'; break;
+			case L'–æ': simbol = L'o'; break;
+			case L'–†': simbol = L'P'; break;
+			case L'—Ä': simbol = L'p'; break;
+			case L'–ê': simbol = L'A'; break;
+			case L'–∞': simbol = L'a'; break;
+			case L'–•': simbol = L'X'; break;
+			case L'—Ö': simbol = L'x'; break;
+			case L'–í': simbol = L'B'; break;
+			case L'–ú': simbol = L'M'; break;
 			default:
 				break;
 			}
@@ -37,6 +37,32 @@ std::wstring StringUtilities::replaceSimilarRuSimbols(const std::wstring& source
 		newStr += simbol;
 	}
 	return newStr;
+}
+
+std::wstring StringUtilities::truncate(const std::wstring& sourceStr)
+{
+	size_t startIndex = 0;
+	for (wchar_t currentChar : sourceStr)
+	{
+		if (currentChar == L' ') {
+			startIndex++;
+		}
+		else {
+			break;
+		}
+	}
+
+	size_t endIndex = sourceStr.size();
+	for (size_t i = sourceStr.size() - 1; i > 0; i--)
+	{
+		if (sourceStr[i] == L' ') {
+			endIndex--;
+		}
+		else {
+			break;
+		}
+	}
+	return sourceStr.substr(startIndex, endIndex);
 }
 
 std::wstring StringUtilities::removeSpaces(const std::wstring& sourceStr)
@@ -54,24 +80,24 @@ std::wstring StringUtilities::removeSpaces(const std::wstring& sourceStr)
 std::wstring StringUtilities::transliterate(const std::wstring& russianText)
 {
 	std::unordered_map<wchar_t, std::wstring> charMap = {
-	{L'‡', L"a"}, {L'·', L"b"}, {L'‚', L"v"}, {L'„', L"g"},
-	{L'‰', L"d"}, {L'Â', L"e"}, {L'∏', L"yo"}, {L'Ê', L"zh"},
-	{L'Á', L"z"}, {L'Ë', L"i"}, {L'È', L"y"}, {L'Í', L"k"},
-	{L'Î', L"l"}, {L'Ï', L"m"}, {L'Ì', L"n"}, {L'Ó', L"o"},
-	{L'Ô', L"p"}, {L'', L"r"}, {L'Ò', L"s"}, {L'Ú', L"t"},
-	{L'Û', L"u"}, {L'Ù', L"f"}, {L'ı', L"kh"}, {L'ˆ', L"ts"},
-	{L'˜', L"ch"}, {L'¯', L"sh"}, {L'˘', L"shch"}, {L'˙', L"\""},
-	{L'˚', L"y"}, {L'¸', L"\'"}, {L'˝', L"e"}, {L'˛', L"yu"},
-	{L'ˇ', L"ya"},
-	{L'¿', L"A"}, {L'¡', L"B"}, {L'¬', L"V"}, {L'√', L"G"},
-	{L'ƒ', L"D"}, {L'≈', L"E"}, {L'®', L"Yo"}, {L'∆', L"Zh"},
-	{L'«', L"Z"}, {L'»', L"I"}, {L'…', L"Y"}, {L' ', L"K"},
-	{L'À', L"L"}, {L'Ã', L"M"}, {L'Õ', L"N"}, {L'Œ', L"O"},
-	{L'œ', L"P"}, {L'–', L"R"}, {L'—', L"S"}, {L'“', L"T"},
-	{L'”', L"U"}, {L'‘', L"F"}, {L'’', L"Kh"}, {L'÷', L"Ts"},
-	{L'◊', L"Ch"}, {L'ÿ', L"Sh"}, {L'Ÿ', L"Shch"}, {L'⁄', L"\""},
-	{L'€', L"Y"}, {L'‹', L"\'"}, {L'›', L"E"}, {L'ﬁ', L"Yu"},
-	{L'ﬂ', L"Ya"}
+	{L'–∞', L"a"}, {L'–±', L"b"}, {L'–≤', L"v"}, {L'–≥', L"g"},
+	{L'–¥', L"d"}, {L'–µ', L"e"}, {L'—ë', L"yo"}, {L'–∂', L"zh"},
+	{L'–∑', L"z"}, {L'–∏', L"i"}, {L'–π', L"y"}, {L'–∫', L"k"},
+	{L'–ª', L"l"}, {L'–º', L"m"}, {L'–Ω', L"n"}, {L'–æ', L"o"},
+	{L'–ø', L"p"}, {L'—Ä', L"r"}, {L'—Å', L"s"}, {L'—Ç', L"t"},
+	{L'—É', L"u"}, {L'—Ñ', L"f"}, {L'—Ö', L"kh"}, {L'—Ü', L"ts"},
+	{L'—á', L"ch"}, {L'—à', L"sh"}, {L'—â', L"shch"}, {L'—ä', L"\""},
+	{L'—ã', L"y"}, {L'—å', L"\'"}, {L'—ç', L"e"}, {L'—é', L"yu"},
+	{L'—è', L"ya"},
+	{L'–ê', L"A"}, {L'–ë', L"B"}, {L'–í', L"V"}, {L'–ì', L"G"},
+	{L'–î', L"D"}, {L'–ï', L"E"}, {L'–Å', L"Yo"}, {L'–ñ', L"Zh"},
+	{L'–ó', L"Z"}, {L'–ò', L"I"}, {L'–ô', L"Y"}, {L'–ö', L"K"},
+	{L'–õ', L"L"}, {L'–ú', L"M"}, {L'–ù', L"N"}, {L'–û', L"O"},
+	{L'–ü', L"P"}, {L'–†', L"R"}, {L'–°', L"S"}, {L'–¢', L"T"},
+	{L'–£', L"U"}, {L'–§', L"F"}, {L'–•', L"Kh"}, {L'–¶', L"Ts"},
+	{L'–ß', L"Ch"}, {L'–®', L"Sh"}, {L'–©', L"Shch"}, {L'–™', L"\""},
+	{L'–´', L"Y"}, {L'–¨', L"\'"}, {L'–≠', L"E"}, {L'–Æ', L"Yu"},
+	{L'–Ø', L"Ya"}
 	};
 
 	std::wstring result;
@@ -104,7 +130,7 @@ bool StringUtilities::isContainsCyrillicLetters(char* subString)
 	size_t size = strlen(subString);
 	for (size_t i = 0; i < size; i++)
 	{
-		if (subString[i] >= '¿' && subString[i] <= 'ˇ')
+		if (subString[i] >= '–ê' && subString[i] <= '—è')
 		{
 			return true;
 		}

@@ -7,7 +7,7 @@
 
 SplitBuildComponentData::SplitBuildComponentData(const BuildComponent* componentPtr) : componentPtr(componentPtr)
 {
-	parse();
+
 }
 
 std::wstring_view SplitBuildComponentData::getElementName() const
@@ -100,6 +100,11 @@ std::wstring_view SplitBuildComponentData::getASMEThickness2() const
 	return ASMEThickness2;
 }
 
+void SplitBuildComponentData::setSteelGrade(const std::wstring& steelGrade)
+{
+	this->steelGrade = steelGrade;
+}
+
 void SplitBuildComponentData::parseElementName()
 {
 	for (const auto& [element, pattern] : elementNamePatterns) {
@@ -108,49 +113,75 @@ void SplitBuildComponentData::parseElementName()
 			break;
 		}
 	}
-	if (elementName == L"FLANGE")
+	if (elementName == L"Фланец")
 	{
 		if(componentPtr->getDescription().contains(L"Тройник") || componentPtr->getDescription().contains(L"Задвижка") || componentPtr->getDescription().contains(L"Клапан") ||
 			componentPtr->getDescription().contains(L"Затвор") || componentPtr->getDescription().contains(L"Рукав") || componentPtr->getDescription().contains(L"CAMLOCK")) {
 			elementName = L"-";
 		}
 	}
+	else if (elementName.contains(L"Отвод"))
+	{
+		std::wstring degreeStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}[- ](?:сварной )?(?:\d(?:\.\d)?DN-)?\d{2,4}(?:\.\d)?x\d{1,2}(?:\.\d)?|\d{2} d\d{2,3} PN16)"));
+		if (degreeStr != L"-") {
+			elementName += L" " + degreeStr.substr(0, 2);
+		}
+		else {
+			std::match_results<std::wstring_view::const_iterator> match;
+			auto start = componentPtr->getDescription().begin();
+			auto end = componentPtr->getDescription().end();
+			int matchCount = 0;
+			if (std::regex_search(start, end, match, StringUtilities::getRegex(LR"(ELBOW (\d{2})\w{2} \w{2})")))
+			{
+				degreeStr = match[1].str();
+				elementName += L" " + degreeStr;
+			}
+		}
+	}
+	else if (elementName == L"Заглушка поворотная" && componentPtr->getDescription().contains(L"valve")) {
+		elementName = L"-";
+	}
+	else if (elementName == L"Гайка" && componentPtr->getDescription().contains(L"Stud")) {
+		elementName = L"Шпилька";
+	}
+	else if (elementName == L"Труба" && componentPtr->getDescription().contains(L"ОПОРА")) {
+		elementName = L"Опора";
+	}
 }
 
 void SplitBuildComponentData::parseType1()
 {
-	if (elementName == L"ELBOW") {
-		type1 = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2}[- ](?:сварной )?(?:\d(?:\.\d)?DN-)?\d{2,4}(?:\.\d)?x\d{1,2}(?:\.\d)?|\d{2} d\d{2,3} PN16)"))
-			.substr(0, 2);
+	if (elementName == L"-") {
+		return;
 	}
-	else if (elementName == L"BLIND FLANGE") {
+	else if (elementName == L"Заглушка фланцевая") {
 		parseType1BLIND_FLANGE();
 	}
-	else if (elementName == L"CAP") 
+	else if (elementName == L"Заглушка") 
 	{
 		if (componentPtr->getDescription().contains(L"Заглушка с внешней резьбой")) {
 			type1 = L"External Thread";
 		}
 	}
-	else if (elementName == L"Clip")
+	else if (elementName == L"Крепление для труб")
 	{
 		if (componentPtr->getDescription().contains(L"type F")) {
 			type1 = L"Type F";
 		}
 	}
-	else if (elementName == L"Coupling")
+	else if (elementName == L"Муфта")
 	{
 		if (componentPtr->getDescription().contains(L"MIF")) {
 			type1 = L"Type MIF";
 		}
 	}
-	else if (elementName == L"FLANGE")
+	else if (elementName == L"Фланец")
 	{
 		if (componentPtr->getDescription().contains(L"WN") || productStandard == L"ГОСТ 33259-2015" || productStandard == L"EN 1092-1"|| productStandard == L"ASME B16.(5|47)") {
 			type1 = L"WN";
 		}
 	}
-	else if (elementName == L"PIPE")
+	else if (elementName == L"Труба")
 	{
 		if (componentPtr->getDescription().contains(L"с наружной цилиндрической резьбой")) {
 			type1 = L"with external cylindrical thread";
@@ -165,10 +196,10 @@ void SplitBuildComponentData::parseType1()
 			type1 = L"with external PE insulation";
 		}
 	}
-	else if (elementName == L"SPECTACLE BLIND") {
+	else if (elementName == L"Заглушка поворотная") {
 		parseType1SPECTACLE_BLIND();
 	}
-	/*else if (elementName == L"Support") 
+	/*else if (elementName == L"Опора") 
 	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Опора \d{2} OCT)")); matchStr != L"-") {
 			type1 = matchStr.substr(6, 2);
@@ -217,68 +248,88 @@ void SplitBuildComponentData::parseType1()
 
 void SplitBuildComponentData::parseType2()
 {
-	if (elementName == L"CAP") {
-		parseType2CAP();
+	if (elementName == L"-") {
+		return;
 	}
-	else if (elementName == L"ELBOW") {
+	else if (elementName == L"Заглушка") {
+		parseType2Cap();
+	}
+	if (elementName == L"Заглушка фланцевая") {
+		
+	}
+	else if (elementName.contains(L"Отвод")) {
 		parseType2ELBOW();
 	}
-	else if (elementName == L"FLANGE") {
+	else if (elementName == L"Фланец") {
 		parseType2FLANGE();
 	}
-	else if (elementName == L"REDUCER CON") {
+	else if (elementName == L"Концентрический переход") {
 		parseType2REDUCER_CON();
 	}
-	else if (elementName == L"REDUCER ECC") {
+	else if (elementName == L"Эксцентрический переход") {
 		parseType2REDUCER_ECC();
 	}
-	else if (elementName == L"PIPE") {
+	else if (elementName == L"Труба") {
 		parseType2PIPE();
 	}
-	//else if (elementName == L"Support") {
+	//else if (elementName == L"Опора") {
 	//	parseType2Support();
 	//}
-	else if (elementName == L"TEE") {
+	else if (elementName == L"Тройник") {
 		parseType2Tee();
 	}
 }
 
 void SplitBuildComponentData::parseType3()
 {
-	if (elementName == L"Coupling")
+	if (elementName == L"-") {
+		return;
+	}
+	else if (elementName == L"Муфта")
 	{
 		if (componentPtr->getDescription().contains(L"PN16")) {
 			type3 = L"PN16";
 		}
 	}
-	else if (elementName == L"ELBOW")
+	else if (elementName.contains(L"Отвод"))
 	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(PN\d{2})")); matchStr != L"-") {
 			type3 = matchStr;
 		}
+		if (productStandard == L"GCC-NAG-DDD-12460-12-1500-TK-DSH-00003") {
+			type3 = L"2.5DN R=4000";
+
+		}
+		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(R=\d,\dDN, R=\d{4})")); matchStr != L"-") {
+			type3 = matchStr;
+		}
 		else if (productStandard == L"ГОСТ 17375-2001" || productStandard == L"EN 10253" || productStandard == L"ТУ 3600-010-78786272-2012" ||
 			searchDescriptionMatch(StringUtilities::getRegex(LR"(LR \d{2}-\d{1,2})"))!= L"-" || componentPtr->getDescription().contains(L"1.5DN")) {
-			type3 = L"R=1.5DN";
+			type3 = L"LR R=1.5D";
 		}
 		else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(SR \d{2}-\d{1,2})")) != L"-" || (componentPtr->getDescription().contains(L"Опросный") &&
 			searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2} \d{4}x\d{1,2})")) != L"-") || componentPtr->getDescription().contains(L"R=DN") ||
 			componentPtr->getDescription().contains(L"1DN")) {
-			type3 = L"R=DN";
+			type3 = L"SR R=DN";
+		}
+		else if (componentPtr->getDescription().contains(L"flanged on one side")) {
+			type3 = L"Flanged on one side";
 		}
 	}
-	else if (elementName == L"FLANGE")
+	else if (elementName == L"Фланец")
 	{
 		if (componentPtr->getDescription().contains(L"long")) {
 			type3 = L"LONG";
 		}
 	}
-	else if (elementName == L"MIFV" || elementName == L"MIMV" || elementName == L"Reducing coupling")
+	else if (elementName == L"MIFV" || elementName == L"MIMV" || elementName == L"Переходная муфта")
 	{
 		if  (componentPtr->getDescription().contains(L"PN16")) {
 			type3 = L"PN16";
 		}
 	}
-	else if (elementName == L"TEE") {
+	else if (elementName == L"Тройник")
+	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(PN\d{1,2})")); matchStr != L"-") {
 			type3 = matchStr;
 		}
@@ -288,6 +339,9 @@ void SplitBuildComponentData::parseType3()
 		else if (componentPtr->getDescription().contains(L"Type B")) {
 			type3 = L"Flange tee";
 		}
+	}
+	else if (elementName == L"Эксцентрический переход") {
+		parseType3REDUCER_ECC();
 	}
 }
 
@@ -372,7 +426,7 @@ void SplitBuildComponentData::parseType1Tee()
 
 void SplitBuildComponentData::parseType1BLIND_FLANGE()
 {
-	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,2}-\d{2}-\d{1,2}[,\.]?\d?)")); matchStr != L"-")
+	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,2}-\d{2,4}-\d{1,2}[,\.]?\d?)")); matchStr != L"-")
 	{
 		matchStr = matchStr.substr(0, matchStr.find_first_of(L'-'));
 		int typeNumber = stoi(matchStr);
@@ -394,8 +448,14 @@ void SplitBuildComponentData::parseType1BLIND_FLANGE()
 	}
 	else
 	{
-		if (searchDescriptionMatch(StringUtilities::getRegex(LR"(class #?\d{2,4} RF)"))!= L"-") {
+		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(PN \d{2} ([\d ]+) GEORG FISCHER)"), 3); matchStr != L"-") {
+			type1 = StringUtilities::removeSpaces(matchStr);
+		}
+		else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(class #?\d{2,4} RF)")) != L"-") {
 			type1 = L"TYPE-RF";
+		}
+		else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Flangespacer [\d\-/,]\-B\-)")); matchStr != L"-") {
+			type1 = L"TYPE-B";
 		}
 		else
 		{
@@ -403,6 +463,14 @@ void SplitBuildComponentData::parseType1BLIND_FLANGE()
 				type1 = L"TYPE-RTJ";
 			}
 		}
+	}
+}
+
+void SplitBuildComponentData::parseType2BLIND_FLANGE()
+{
+	if (componentPtr->getDescription().contains(L"spacer"))
+	{
+		type2 = L"Spacer";
 	}
 }
 
@@ -418,17 +486,24 @@ void SplitBuildComponentData::parseType2ELBOW()
 		}
 	}
 	if (componentPtr->getDescription().contains(L"Welded") || (componentPtr->getDescription().contains(L"Опросный  лист") && 
-		searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2} \d{4}x\d{2})")) != L"-")) {
+		searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{2} \d{4}x\d{2})")) != L"-") || searchDescriptionMatch(StringUtilities::getRegex(LR"(GCC-NAG-DDD[-\d]+TK-DSH)")) != L"-") {
 		type2 = L"Welded";
 		if (componentPtr->getDescription().contains(L"external PE insulation")) {
 			type2 += L"; external PE insulation";
 		}
 	}
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(SDR \d{1,2})")); matchStr != L"-") {
+		type2 = matchStr;
+	}
+	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(PN \d{2} ([\d ]+) GEORG FISCHER)"), 3); matchStr != L"-") {
+		type1 = StringUtilities::removeSpaces(matchStr);
+	}
 	else if (productStandard == L"TU3600-010-78786272-2012") {
 		type2 = L"ОК";
 	}
-	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(OKShS \d{2}-1(?:\.\d)?DN-\d{2,4}x\d{1,2})")); matchStr != L"-") {
-		type2 = L"ОКШС ";
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(OKShS \d{2}-1(?:\.\d)?DN-\d{2,4}x\d{1,2})")); matchStr != L"-" ||
+		componentPtr->getDescription().contains(L"Stamp-Welded")) {
+		type2 = L"Stamp Welded ";
 	}
 }
 
@@ -466,21 +541,24 @@ void SplitBuildComponentData::parseType2PIPE()
 		productStandard == L"ГOCT 31447-2012" || productStandard == L"ГОСТ 10704-91" || productStandard == L"ГОСТ 31447-2012" || productStandard == L"ТУ 1381-001-62594197-2011") {
 		type2 = L"welded steel pipes";
 	}
+	else if (componentPtr->getDescription().contains(L"наружной ПЭ")) {
+		type2 = L"welded with external PE insulation";
+	}
+	else if (componentPtr->getDescription().contains(L"наружной цилиндрической")) {
+		type2 = L"welded with external cylindrical thread";
+	}
 }
 
 void SplitBuildComponentData::parseType2REDUCER_ECC()
 {
-	if (searchDescriptionMatch(StringUtilities::getRegex(LR"(Non-?standard)")) != L"-") {
-		type2 = L"Non-standart; SMLS";
-	}
-	else if (componentPtr->getDescription().contains(L"Nonstandard welded")) {
-		type2 = L"Non-standart; Welded";
+	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(SDR \d{2})")); matchStr != L"-") {
+		type2 = matchStr;
 	}
 	else if (componentPtr->getDescription().contains(L"PESH")) {
-		type2 = L"PSh";
+		type2 = L"Shtamped";
 	}
 	else if (componentPtr->getDescription().contains(L"Reducer PET")) {
-		type2 = L"PT";
+		type2 = L"Chiseled PT";
 	}
 	else if (productStandard == L"ГОСТ 17378-2001" || productStandard == L"ASME B16.9") {
 		type2 = L"SMLS";
@@ -516,8 +594,11 @@ void SplitBuildComponentData::parseType1SPECTACLE_BLIND()
 
 void SplitBuildComponentData::parseType2REDUCER_CON()
 {
-	if (componentPtr->getDescription().contains(L"Reducer PKT-1")) {
-		type2 = L"PT-1";
+	if (componentPtr->getDescription().contains(L"PKT") || componentPtr->getDescription().contains(L"точеный")) {
+		type2 = L"Chiseled PT";
+	}
+	else if (componentPtr->getDescription().contains(L"ПКШ")) {
+		type2 = L"Shtamped";
 	}
 	else if (searchDescriptionMatch(StringUtilities::getRegex(LR"(Reducer P\*? K)")) != L"-" || componentPtr->getDescription().contains(L"SMLS")) {
 		type2 = L"SMLS";
@@ -527,7 +608,17 @@ void SplitBuildComponentData::parseType2REDUCER_CON()
 	}
 }
 
-void SplitBuildComponentData::parseType2CAP()
+void SplitBuildComponentData::parseType3REDUCER_ECC()
+{
+	if (searchDescriptionMatch(StringUtilities::getRegex(LR"(Non-?standar(?:d|t))")) != L"-") {
+		type3 = L"Non-standart";
+	}
+	else if (componentPtr->getDescription().contains(L"наружной")) {
+		type3 = L"With external PE insulation";
+	}
+}
+
+void SplitBuildComponentData::parseType2Cap()
 {
 	if (componentPtr->getDescription().contains(L"PVC-U")) {
 		type2 = L"PVC-U";
@@ -547,7 +638,7 @@ void SplitBuildComponentData::parseProductStandard()
 		LR"(MSS SP-\d{2})",
 		LR"(N \d{4}-\d)",
 		LR"(АТК \d{2}[\.-]\d{2,3}[\.-]\d{1,2}-\d{2})",
-		LR"(Т-(?:\d{6}-ТМ|ММ-\d{2})-\d{2}-\d{2}-\d{2,3})"
+		LR"(Т-(?:\d{6}-ТМ|ММ-\d{2})-\d{2}-\d{2}-\d{2,3})",
 	};
 	for (auto patternStr : patternStrings)
 	{
@@ -573,12 +664,17 @@ void SplitBuildComponentData::parseProductStandard()
 		productStandard = matchStr;
 		productStandardENG = L"OST" + matchStr.erase(0, 3);
 	}
+	else if (std::wstring matchStr = searchMatch(StringUtilities::getRegex(LR"(СК \d{4}-\d{2}-\d{3}\.\d{2})")); matchStr != L"-")
+	{
+		productStandard = matchStr;
+		productStandardENG = L"SK" + matchStr.erase(0, 2);
+	}
 	else if (std::wstring matchStr = searchMatch(StringUtilities::getRegex(LR"(ГОСТ Р? ?\d{4,5}-\d{2,4})")); matchStr != L"-")
 	{
 		productStandard = matchStr;
 		productStandardENG = L"GOST" + matchStr.erase(0, 4);
 	}
-	else if (std::wstring matchStr = searchDocumentMatch(StringUtilities::getRegex(LR"(ГОСТ Р? ?\d{4,5}-\d{2,4})")); matchStr != L"-")
+	else if (std::wstring matchStr = searchMatch(StringUtilities::getRegex(LR"(ТУ \d{4}-\d{3}-\d{8}-\d{4})")); matchStr != L"-")
 	{
 		productStandard = matchStr;
 		productStandardENG = L"TU" + matchStr.erase(0, 2);
@@ -587,29 +683,41 @@ void SplitBuildComponentData::parseProductStandard()
 
 void SplitBuildComponentData::parseSteelGrade()
 {
-	if (componentPtr->getDescription().contains(L"08Х18Н10Т")) {
+	if (steelGrade != L"-") {
+		return;
+	}
+
+	if (componentPtr->getDescription().contains(L"08Х18Н10Т"))
+	{
 		steelGrade = L"08Х18Н10Т";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	if (componentPtr->getDescription().contains(L"08Х18Н10Т")) {
+	else if (componentPtr->getDescription().contains(L"12Х18Н10Т"))
+	{
 		steelGrade = L"12Х18Н10Т";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	else if (componentPtr->getDescription().contains(L"09Г2С"))
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(S?A-516 Gr70)")); matchStr != L"-")
 	{
-		steelGrade = L"09Г2С";
-		steelGradeENG = L"09G2S";
+		steelGrade = matchStr;
+		steelGradeENG = matchStr;
+	}
+	else if (componentPtr->getDescription().contains(L"PE 100"))
+	{
+		steelGrade = L"ПЭ 100";
+		steelGradeENG = L"PE 100";
 	}
 	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(1.4\d01/1.4\d0\d)")); matchStr != L"-") {
 		steelGrade = matchStr;
 		steelGradeENG = matchStr;
 	}
-	else if (componentPtr->getDescription().contains(L"17Г1С-12")) {
+	else if (componentPtr->getDescription().contains(L"17Г1С-12"))
+	{
 		steelGrade = L"17Г1С-12";
 		steelGradeENG = L"17G1S-12";
 	}
 	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(
-		LR"(ASTM A\d{3} (?:GR |Gr\.)?(?:F\d{2,3})?(?:LF\d)?(?:CC\d{2})?(?: CL\.?\d{1,2})?(?:WPL?\d{1,2})?(?:TP\d{3})?\d?(?:P\d{2})?)")); matchStr != L"-")
+		LR"((?:ASTM )?A\d{3} (?:GR\.? |Gr\.)?(?:F\d{2,3})?(?:LF\d)?(?:CC\d{2})?(?: CL\.?\d{1,2})?(?:WPL?\d{1,2})?(?:TP\d{3})?(\d{1,2}\w?)?(?:P\d{2})?)")); matchStr != L"-")
 	{
 		steelGrade = matchStr;
 		steelGradeENG = matchStr;
@@ -618,27 +726,37 @@ void SplitBuildComponentData::parseSteelGrade()
 		steelGrade = L"PP FRP";
 		steelGradeENG = L"PP FRP";
 	}
-	else if (componentPtr->getDescription().contains(L"НПВХ") || componentPtr->getDescription().contains(L"PVC-U")) {
+	else if (componentPtr->getDescription().contains(L"PE-RT")) {
+		steelGrade = L"PE-RT";
+		steelGradeENG = L"PE-RT";
+	}
+	else if (componentPtr->getDescription().contains(L"НПВХ") || componentPtr->getDescription().contains(L"PVC-U"))
+	{
 		steelGrade = L"НПВХ";
 		steelGradeENG = L"PVC-U";
 	}
-	else if (componentPtr->getDescription().contains(L"ПВДФ") || componentPtr->getDescription().contains(L"PVDF")) {
+	else if (componentPtr->getDescription().contains(L"ПВДФ") || componentPtr->getDescription().contains(L"PVDF"))
+	{
 		steelGrade = L"ПВДФ";
 		steelGradeENG = L"PVDF";
 	}
-	else if (componentPtr->getDescription().contains(L"ПВХ") || componentPtr->getDescription().contains(L"PVC")) {
+	else if (componentPtr->getDescription().contains(L"ПВХ") || componentPtr->getDescription().contains(L"PVC"))
+	{
 		steelGrade = L"ПВХ";
 		steelGradeENG = L"PVC";
 	}
-	else if (componentPtr->getDescription().contains(L"Ст3пс")) {
+	else if (componentPtr->getDescription().contains(L"Ст3пс"))
+	{
 		steelGrade = L"Cт3пс";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	else if (componentPtr->getDescription().contains(L"Ст3сп5")) {
+	else if (componentPtr->getDescription().contains(L"Ст3сп5"))
+	{
 		steelGrade = L"Ст3сп5";
 		steelGradeENG = StringUtilities::transliterate(steelGrade);
 	}
-	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"([Сс]т\.?(?:аль )?20)")); matchStr != L"-") {
+	else if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"([Сс]т\.?(?:аль )?20)")); matchStr != L"-")
+	{
 		steelGrade = L"Сталь 20";
 		steelGradeENG = L"Steel 20";
 	}
@@ -646,7 +764,7 @@ void SplitBuildComponentData::parseSteelGrade()
 
 void SplitBuildComponentData::parseDiameter1()
 {
-/*	if (elementName == L"Support")
+/*	if (elementName == L"Опора")
 	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Support \d{2,4}(?:\.\d{1,2})?)")); matchStr != L"-") {
 			diameter1 = stod(matchStr.erase(0, 7));
@@ -667,10 +785,10 @@ void SplitBuildComponentData::parseDiameter1()
 	}
 	else*/ if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)")); matchStr != L"-")
 	{
-		if (elementName == L"FLANGE") {
+		if (elementName == L"Фланец") {
 			return;
 		}
-		if (elementName == L"PAD") 
+		if (elementName == L"Накладка") 
 		{
 			if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(Pad \w \d{2,3})")); matchStr != L"-")
 			{
@@ -688,16 +806,19 @@ void SplitBuildComponentData::parseDiameter1()
 
 void SplitBuildComponentData::parseDiameter2()
 {
-	if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC" || (elementName == L"TEE" && type2 == L"RED") || elementName == L"PAD")
+	if (elementName == L"-") {
+		return;
+	}
+	else if (elementName == L"Концентрический переход" || elementName == L"Эксцентрический переход" || (elementName == L"Тройник" && type2 == L"RED") || elementName == L"Накладка")
 	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)"), 1); matchStr != L"-") {
-			size_t beginSubStrIndex = matchStr.find_first_of(L'x');
-			diameter2 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+			size_t endSubStrIndex = matchStr.find_first_of(L'x');
+			diameter2 = matchStr.substr(0, endSubStrIndex);
 			if (diameter2 == diameter1 || diameter2 == nominalDiameter2) {
 				diameter2 = L"-";
 			}
 		}
-		else if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC")
+		else if (elementName == L"Концентрический переход" || elementName == L"Эксцентрический переход")
 		{
 			if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(d{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?)")); matchStr != L"-")
 			{
@@ -733,19 +854,23 @@ void SplitBuildComponentData::parseWallThickness1()
 		size_t beginSubStrIndex = matchStr.find_first_of(L'x');
 		wallThickness1 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
 	}
-	else if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC")
+	else if (elementName == L"Концентрический переход" || elementName == L"Эксцентрический переход")
 	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(d{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?)")); matchStr != L"-")
 		{
 			size_t beginSubStrIndex = matchStr.find_last_of(L'x');
 			wallThickness1 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
+			wallThickness2 = wallThickness1;
 		}
 	}
 }
 
 void SplitBuildComponentData::parseWallThickness2()
 {
-	if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC" || (elementName == L"TEE" && type2 == L"RED"))
+	if (elementName == L"-") {
+		return;
+	}
+	else if (elementName == L"Концентрический переход" || elementName == L"Эксцентрический переход" || (elementName == L"Тройник" && type2 == L"RED"))
 	{
 		if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?-\d{1,4}(?:\.\d)?x\d{1,4}(?:\.\d)?)"));
 			matchStr != L"-")
@@ -753,27 +878,19 @@ void SplitBuildComponentData::parseWallThickness2()
 			size_t beginSubStrIndex = matchStr.find_last_of(L'x');
 			wallThickness2 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
 		}
-		else if (elementName == L"REDUCER CON" || elementName == L"REDUCER ECC")
-		{
-			if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(d{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?xd{1,4}(?:\.\d)?)")); matchStr != L"-")
-			{
-				size_t beginSubStrIndex = matchStr.find_last_of(L'x');
-				wallThickness1 = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);
-			}
-		}
 	}
 }
 
 void SplitBuildComponentData::parsePressureNominal()
 {
-	if (elementName != L"BLIND FLANGE" && elementName != L"FLANGE" && elementName != L"SPECTACLE BLIND") {
+	if (elementName != L"Заглушка фланцевая" && elementName != L"Фланец" && elementName != L"Заглушка поворотная") {
 		return;
 	}
 	if (std::wstring matchStr = searchDescriptionMatch(StringUtilities::getRegex(LR"(\d{1,2}-\d{1,2}-\d{1,2}[\.,]?\d?)")); matchStr != L"-")
 	{
 		size_t beginSubStrIndex{ 0 };
 		std::wstring pressureNominalStr;
-		if (elementName != L"BLIND FLANGE")
+		if (elementName != L"Заглушка фланцевая")
 		{
 			beginSubStrIndex = matchStr.find_last_of(L'-');
 			pressureNominalStr = matchStr.substr(beginSubStrIndex + 1, matchStr.size() - beginSubStrIndex);

@@ -1,4 +1,7 @@
-#pragma once
+﻿#pragma once
+
+#ifndef BuildComponentIOT_h__
+#define BuildComponentIOT_h__
 
 #include "BuildComponent.h"
 
@@ -11,3 +14,4 @@ private:
 	void initPatterns();
 };
 
+#endif // BuildComponentIOT_h__

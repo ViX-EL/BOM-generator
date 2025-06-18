@@ -25,10 +25,12 @@ bool DrawingsParserApp::OnInit()
 	window->SetBackgroundColour(*wxWHITE);
 	window->Show(true);
 
-	std::string fileName = "16150-11-2200_031-COE-0001-ESB1B01BN-02_Sht_1" ".dwg";
+	//setlocale(LC_ALL, "Russian");
+
+	std::string fileName = "12600-13-3312-570-P12-0037-ACB2B05SN61-03" ".dwg";
 
 	//processingOneFile(fileName, LOAD_PARSE_WRITE);
-	//processingOneFile(fileName, LOAD);
+	processingOneFile(fileName, LOAD);
 
 	return true;
 }
@@ -40,17 +42,35 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 	}
 
 	DWGTextLoader textLoader(new DialogPrinter);
+	DWGDotNetTextLoader dotNetTextLoader(new DialogPrinter);
+	TextLoader* textLoaderPtr = nullptr;
 	if (state & LOAD || state & LOAD_PARSE || state & LOAD_PARSE_WRITE)
 	{
-		textLoader.loadFile(fileName);
-		if (state & LOAD) {
-			textLoader.printText(textLoader.getFileName());
+		try 
+		{
+			std::regex designerPattern(R"(^GCC\-(\w{3})\-DDD\-)");
+			std::smatch match;
+			if (std::regex_search(fileName, match, designerPattern) && match[1] == "FGG") {
+				textLoaderPtr = &dotNetTextLoader;
+			}
+			else {
+				textLoaderPtr = &textLoader;
+			}
+			textLoaderPtr->loadFile(fileName);
+			if (state & LOAD)
+			{
+				textLoaderPtr->printText(textLoaderPtr->getFileName());
+			}
+		}
+		catch (std::exception& ex)
+		{
+			wxLogMessage("[Чтение] Ошибка чтения файла %s :\n%s", fileName, ex.what());
 		}
 	}
 
-	TextParser parser(textLoader.getText(), textLoader.getSeparator(), new DialogPrinter);
+	TextParser parser(textLoader.getSeparator(), new DialogPrinter);
 	if (state & LOAD_PARSE || state & LOAD_PARSE_WRITE) {
-		parser.parse(textLoader.getFileName());
+		parser.parse(*textLoaderPtr);
 	}
 
 	if (state & LOAD_PARSE_WRITE) 
@@ -61,9 +81,9 @@ void DrawingsParserApp::processingOneFile(std::string& fileName, unsigned int st
 			tableWriter.createNewTableFile(L".\\");
 			tableWriter.writeTable();
 		}
-		else {
-			wxLogMessage("[Запись] Нет записываемых листов в файле %s", fileName);
-		}
+		//else {
+		//	wxLogMessage("[Запись] Нет записываемых листов в файле %s", fileName);
+		//}
 	}
 }
 

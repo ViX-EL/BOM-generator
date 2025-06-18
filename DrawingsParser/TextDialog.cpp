@@ -1,4 +1,4 @@
-#include "TextDialog.h"
+ï»¿#include "TextDialog.h"
 
 #include <wx/clipbrd.h>
 
@@ -12,7 +12,7 @@ TextDialog::TextDialog(const wxString& title) : wxFrame(NULL, -1, title, wxDefau
 	wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 	panelButtons->SetSizer(hbox);
 
-	wxButton* copyBtn = new wxButton(panelButtons, -1, wxT("Êîïèðîâàòü òåêñò"));
+	wxButton* copyBtn = new wxButton(panelButtons, -1, wxT("ÐšÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ñ‚ÐµÐºÑÑ‚"));
 	hbox->Add(copyBtn, 1, wxALL | wxALIGN_LEFT, 5);
 
 	textBox = new wxTextCtrl(panelMain, -1, wxT(""), wxPoint(-1, -1), wxSize(-1, -1), wxTE_MULTILINE);
@@ -34,11 +34,16 @@ void TextDialog::setText(const std::wstring& text)
 	textBox->SetLabelText(text);
 }
 
+void TextDialog::addText(const std::wstring& text)
+{
+	textBox->AppendText(text);
+}
+
 void TextDialog::OnCopyClick(wxCommandEvent& event)
 {
 	if (wxTheClipboard->Open()) 
 	{
-		wxTheClipboard->SetData(new wxTextDataObject(textBox->GetLabelText()));
+		wxTheClipboard->SetData(new wxTextDataObject(textBox->GetValue()));
 		wxTheClipboard->Close();
 	}
 }

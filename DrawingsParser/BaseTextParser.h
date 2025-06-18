@@ -4,7 +4,9 @@
 #define BASETEXTPARSER_H
 
 #include "DrawingPage.h"
+#include "BuildComponent.h"
 
+#include <cassert>
 #include <string>
 #include <vector>
 #include <utility>
@@ -40,8 +42,8 @@ protected:
 	virtual bool readComponent() = 0;
 
 	std::pair<size_t, size_t> moveToNextSubString();
-	std::pair<size_t, size_t> moveToNextSubString(size_t& positionInText) const;
-	std::pair<size_t, size_t> moveToPreviouslySubString(size_t& positionInText) const;
+	std::pair<size_t, size_t> moveToNextSubStringFromPosition(size_t& positionInText) const;
+	std::pair<size_t, size_t> moveToPreviouslySubStringFromPosition(size_t& positionInText) const;
 	std::pair<size_t, size_t> moveToNextSubString(const std::wstring& subString, bool reverseFind = false);
 	std::pair<size_t, size_t> moveToPreviouslySubString();
 	std::pair<size_t, size_t> moveToPreviouslySubString(const std::wstring& subString, bool reverseFind = false);
@@ -56,21 +58,21 @@ protected:
 	std::wstring getSubString(const std::wregex& pattern, bool reverseFind = false);
 	std::wstring getSubString(const std::wregex& pattern, const std::wregex& stopPattern, bool reverseFind = false);
 	std::wstring getNextSubString();
-	std::wstring getNextSubString(size_t& positionInText) const;
+	std::wstring getNextSubStringFromPosition(size_t& positionInText) const;
 	std::wstring getNextSubString(const std::wstring& subString, bool reverseFind = false);
 	std::wstring getPreviouslySubString(const std::wstring& subString, bool reverseFind = false);
-	std::wstring getPreviouslySubString(size_t& positionInText) const;
+	std::wstring getPreviouslySubStringFromPosition(size_t& positionInText) const;
 	std::wstring getPreviouslySubString();
 	std::wstring getLastSubString();
 	std::wstring getFirstSubString();
-	void moveOnCountSubStr(size_t count, bool reverse = false);
-	std::pair<size_t, size_t> moveOnCountSubStr(size_t& positionInText, int count, bool reverse) const;
+	std::pair<size_t, size_t> moveOnCountSubStr(size_t count, bool reverse = false);
+	std::pair<size_t, size_t> moveOnCountSubStrFromPosition(size_t& positionInText, int count, bool reverse = false) const;
 
-	bool tryMoveToNextSubString(size_t& positionInText) const;
-	bool tryMoveToPreviouslySubString(size_t& positionInText) const;
-	bool tryMoveOnCountSubStr(size_t& positionInText, int count, bool reverse) const;
+	bool tryMoveToNextSubStringFromPosition(size_t& positionInText) const;
+	bool tryMoveToPreviouslySubStringFromPosition(size_t& positionInText) const;
+	bool tryMoveOnCountSubStrFromPosition(size_t& positionInText, int count, bool reverse) const;
 
-	bool searchForMatchesInFollowing(const std::wregex& pattern, int subStrsCount);
+	bool searchForMatchesInFollowing(const std::wregex& pattern, int subStrsCount) const;
 
 	virtual void reset();
 	template<typename T>
@@ -86,7 +88,9 @@ protected:
 template<typename T>
 inline bool BaseTextParser::createDrawing(bool inputCheckOff)
 {
-	if (lastDrawingPagePtr == nullptr) {
+	if (lastDrawingPagePtr == nullptr) 
+	{
+		assert(drawingsPtr != nullptr && "drawingsPtr is nullptr!");
 		drawingsPtr->emplace_back();
 		currentDrawingPtr = &drawingsPtr->back();
 		tryAddPage<T>(inputCheckOff);

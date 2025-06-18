@@ -1,8 +1,13 @@
-#pragma once
+п»ї#pragma once
+
+#ifndef DrawingPage_h__
+#define DrawingPage_h__
+
+#include "BuildComponent.h"
+#include "ValuesCheker.h"
 
 #include <vector>
 #include <string>
-#include "BuildComponent.h"
 #include <memory>
 #include <cassert>
 
@@ -11,32 +16,33 @@ class DrawingPage
 protected:
 	std::vector<std::shared_ptr<BuildComponent>> components;
 	int totalPages = 0;
-	int currentPage = 0;
+	std::wstring currentPage = L"-";
 	bool inputCheckOff = false;
 	std::wstring operatingTemperature;
 	std::wstring operatingPressure;
-	std::wstring tracing; // Спутниковый обогрев
+	std::wstring tracing; // РЎРїСѓС‚РЅРёРєРѕРІС‹Р№ РѕР±РѕРіСЂРµРІ
 	std::wstring pipelineClass;
 	std::wstring technologicalEnvironment;
 	std::wstring testEnvironment;
 	std::wstring paintingSystem;
-	std::wstring postWeldingHeatTreatment; // Послесвар. Термообраб.
+	std::wstring postWeldingHeatTreatment; // РџРѕСЃР»РµСЃРІР°СЂ. РўРµСЂРјРѕРѕР±СЂР°Р±.
 	std::wstring weldInspection;
 	std::wstring testPressure;
 	std::wstring GOSTPipelineCategory;
-	std::wstring designTemperature; // Рассчётная температура
-	std::wstring designPressure; // Рассчётное давление
+	std::wstring designTemperature; // Р Р°СЃСЃС‡С‘С‚РЅР°СЏ С‚РµРјРїРµСЂР°С‚СѓСЂР°
+	std::wstring designPressure; // Р Р°СЃСЃС‡С‘С‚РЅРѕРµ РґР°РІР»РµРЅРёРµ
 	std::wstring cipherDocument;
 	std::wstring diameterPipeline;
 	std::wstring isolation;
-	std::wstring categoryPipelinesTRCU; // Категория трубопр. ТР ТС
+	std::wstring categoryPipelinesTRCU; // РљР°С‚РµРіРѕСЂРёСЏ С‚СЂСѓР±РѕРїСЂ. РўР  РўРЎ
 	std::wstring schemeNumber;
 	std::wstring lineNumber;
-	std::wstring stressCalculation; // Расчёт напряжений
+	std::wstring stressCalculation; // Р Р°СЃС‡С‘С‚ РЅР°РїСЂСЏР¶РµРЅРёР№
 	std::wstring isometricDrawing;
 	std::wstring fileName;
 
-	std::wregex pagesPattern;
+	std::wregex totalPagesPattern;
+	std::wregex currentPagePattern;
 	std::wregex operatingTemperaturePattern;
 	std::wregex operatingPressurePattern;
 	std::wregex tracingPattern;
@@ -60,42 +66,41 @@ protected:
 	std::wregex isometricDrawingPattern;
 	std::wregex fileNamePattern;
 
-	std::wstring truncate(const std::wstring& sourceStr);
 	explicit DrawingPage(bool inputCheckOff = false);
 public:
 	template <typename T>
 	bool tryAddComponent(const std::wstring& componentNumberStr);
 	template <typename T>
 	bool tryAddComponent(int componentNumber);
-	bool trySetPages(const std::wstring& currentPageStr, const std::wstring& totalPagesStr, bool assertionCheck = true);
-	virtual bool trySetOperatingTemperature(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetOperatingPressure(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetTracing(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetPipelineClass(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetTechnologicalEnvironment(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetTestEnvironment(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetPaintingSystem(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetPostWeldingHeatTreatment(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetWeldInspection(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetTestPressure(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetGOSTPipelineCategory(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetDesignTemperature(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetDesignPressure(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetCipherDocument(const std::wstring& sourceStr, bool assertionCheck = true);
-	bool trySetDiameterPipeline(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetIsolation(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetCategoryPipelinesTRCU(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetSchemeNumber(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetLineNumber(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetStressCalculation(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetIsometricDrawing(const std::wstring& sourceStr, bool assertionCheck = true);
-	virtual bool trySetFileName(const std::wstring& sourceStr, bool assertionCheck = true);
+	bool trySetPages(const std::wstring& currentPageStr, const std::wstring& totalPagesStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetOperatingTemperature(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetOperatingPressure(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetTracing(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetPipelineClass(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetTechnologicalEnvironment(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetTestEnvironment(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetPaintingSystem(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetPostWeldingHeatTreatment(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetWeldInspection(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetTestPressure(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetGOSTPipelineCategory(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetDesignTemperature(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetDesignPressure(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetCipherDocument(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetDiameterPipeline(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetIsolation(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetCategoryPipelinesTRCU(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetSchemeNumber(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetLineNumber(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetStressCalculation(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetIsometricDrawing(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetFileName(const std::wstring& sourceStr,  ValuesCheker::Type checkType = ValuesCheker::getType());
 
 	size_t getComponentsCount();
 	BuildComponent& getComponent(size_t index);
 	BuildComponent& getLastComponent();
 	int getTotalPages() const;
-	int getCurrentPage() const;
+	std::wstring getCurrentPage() const;
 
 	std::wstring getOperatingTemperature() const;
 	std::wstring getOperatingPressure() const;
@@ -142,7 +147,8 @@ public:
 	const std::wregex& getStressCalculationPattern();
 	const std::wregex& getIsometricDrawingPattern();
 	const std::wregex& getFileNamePattern();
-	const std::wregex& getPagesPattern();
+	const std::wregex& getTotalPagesPattern();
+	const std::wregex& getCurrentPagePattern();
 
 	void parseSplitComponentsData();
 };
@@ -161,7 +167,9 @@ inline bool DrawingPage::tryAddComponent(const std::wstring& componentNumberStr)
 template<typename T>
 inline bool DrawingPage::tryAddComponent(int componentNumber)
 {
-	assert(componentNumber > 0 && "Номер компонента должен быть больше 0!");
+	assert(componentNumber > 0 && "РќРѕРјРµСЂ РєРѕРјРїРѕРЅРµРЅС‚Р° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 0!");
 	components.emplace_back(std::make_shared<T>(componentNumber));
 	return true;
 }
+
+#endif // DrawingPage_h__

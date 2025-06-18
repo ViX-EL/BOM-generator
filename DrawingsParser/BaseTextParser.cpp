@@ -1,6 +1,6 @@
 ﻿#include "BaseTextParser.h"
 
-#include<limits>
+#include <limits>
 #include <utility>
 #include <regex>
 
@@ -164,7 +164,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToNextSubString()
 	return std::pair(beginIdx, endIdx);
 }
 
-std::pair<size_t, size_t> BaseTextParser::moveToNextSubString(size_t& positionInText) const
+std::pair<size_t, size_t> BaseTextParser::moveToNextSubStringFromPosition(size_t& positionInText) const
 {
 	size_t beginIdx = text->find_first_of(separator, positionInText) + 1;
 	size_t endIdx = text->find_first_of(separator, beginIdx);
@@ -175,7 +175,7 @@ std::pair<size_t, size_t> BaseTextParser::moveToNextSubString(size_t& positionIn
 	return std::pair(beginIdx, endIdx);
 }
 
-std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString(size_t& positionInText) const
+std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubStringFromPosition(size_t& positionInText) const
 {
 	size_t endIdx = text->rfind(separator, positionInText);
 	size_t beginIdx = text->rfind(separator, endIdx - 1) + 1;
@@ -197,9 +197,9 @@ std::pair<size_t, size_t> BaseTextParser::moveToPreviouslySubString()
 	return std::pair(beginIdx, endIdx);
 }
 
-bool BaseTextParser::tryMoveToNextSubString(size_t& positionInText) const
+bool BaseTextParser::tryMoveToNextSubStringFromPosition(size_t& positionInText) const
 {
-	std::pair<size_t, size_t> subStrBegiEnd = moveToNextSubString(positionInText);
+	std::pair<size_t, size_t> subStrBegiEnd = moveToNextSubStringFromPosition(positionInText);
 	if (subStrBegiEnd.second != std::string::npos) {
 		return true;
 	}
@@ -208,9 +208,9 @@ bool BaseTextParser::tryMoveToNextSubString(size_t& positionInText) const
 	}
 }
 
-bool BaseTextParser::tryMoveToPreviouslySubString(size_t& positionInText) const
+bool BaseTextParser::tryMoveToPreviouslySubStringFromPosition(size_t& positionInText) const
 {
-	std::pair<size_t, size_t> subStrBegiEnd = moveToPreviouslySubString(positionInText);
+	std::pair<size_t, size_t> subStrBegiEnd = moveToPreviouslySubStringFromPosition(positionInText);
 	if (subStrBegiEnd.first != std::string::npos) {
 		return true;
 	}
@@ -219,13 +219,13 @@ bool BaseTextParser::tryMoveToPreviouslySubString(size_t& positionInText) const
 	}
 }
 
-bool BaseTextParser::tryMoveOnCountSubStr(size_t& positionInText, int count, bool reverse) const
+bool BaseTextParser::tryMoveOnCountSubStrFromPosition(size_t& positionInText, int count, bool reverse) const
 {
 	bool subStrExist = false;
 	if (reverse)
 	{
 		for (int i = 0; i < count; i++) {
-			subStrExist = tryMoveToPreviouslySubString(positionInText);
+			subStrExist = tryMoveToPreviouslySubStringFromPosition(positionInText);
 			if (!subStrExist) {
 				break;
 			}
@@ -234,7 +234,7 @@ bool BaseTextParser::tryMoveOnCountSubStr(size_t& positionInText, int count, boo
 	else
 	{
 		for (int i = 0; i < count; i++) {
-			subStrExist = tryMoveToNextSubString(positionInText);
+			subStrExist = tryMoveToNextSubStringFromPosition(positionInText);
 			if (!subStrExist) {
 				break;
 			}
@@ -243,25 +243,25 @@ bool BaseTextParser::tryMoveOnCountSubStr(size_t& positionInText, int count, boo
 	return subStrExist;
 }
 
-bool BaseTextParser::searchForMatchesInFollowing(const std::wregex& pattern, int subStrsCount)
+bool BaseTextParser::searchForMatchesInFollowing(const std::wregex& pattern, int subStrsCount) const
 {
 	size_t positionInText = currentPositionInText;
 	for (int i = 0; i < subStrsCount; i++) {
-		if (std::regex_search(getNextSubString(positionInText), pattern)) {
+		if (std::regex_search(getNextSubStringFromPosition(positionInText), pattern)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-std::wstring BaseTextParser::getNextSubString(size_t& positionInText) const
+std::wstring BaseTextParser::getNextSubStringFromPosition(size_t& positionInText) const
 {
-	return returnSubString(moveToNextSubString(positionInText));
+	return returnSubString(moveToNextSubStringFromPosition(positionInText));
 }
 
-std::wstring BaseTextParser::getPreviouslySubString(size_t& positionInText) const
+std::wstring BaseTextParser::getPreviouslySubStringFromPosition(size_t& positionInText) const
 {
-	return returnSubString(moveToPreviouslySubString(positionInText));
+	return returnSubString(moveToPreviouslySubStringFromPosition(positionInText));
 }
 
 std::wstring BaseTextParser::getPreviouslySubString()
@@ -279,35 +279,37 @@ std::wstring BaseTextParser::getFirstSubString()
 	return returnSubString(moveToFirstSubString());
 }
 
-void BaseTextParser::moveOnCountSubStr(size_t count, bool reverse)
+std::pair<size_t, size_t> BaseTextParser::moveOnCountSubStr(size_t count, bool reverse)
 {
+	std::pair<size_t, size_t> subStrBegiEnd;
 	if (reverse)
 	{
 		for (size_t i = 0; i < count; i++) {
-			moveToPreviouslySubString();
+			subStrBegiEnd = moveToPreviouslySubString();
 		}
 	}
 	else
 	{
 		for (size_t i = 0; i < count; i++) {
-			moveToNextSubString();
+			subStrBegiEnd = moveToNextSubString();
 		}
 	}
+	return subStrBegiEnd;
 }
 
-std::pair<size_t, size_t> BaseTextParser::moveOnCountSubStr(size_t& positionInText, int count, bool reverse) const
+std::pair<size_t, size_t> BaseTextParser::moveOnCountSubStrFromPosition(size_t& positionInText, int count, bool reverse) const
 {
 	std::pair<size_t, size_t> subStrBegiEnd;
 	if (reverse)
 	{
 		for (int i = 0; i < count; i++) {
-			subStrBegiEnd = moveToPreviouslySubString(positionInText);
+			subStrBegiEnd = moveToPreviouslySubStringFromPosition(positionInText);
 		}
 	}
 	else
 	{
 		for (int i = 0; i < count; i++) {
-			subStrBegiEnd = moveToNextSubString(positionInText);
+			subStrBegiEnd = moveToNextSubStringFromPosition(positionInText);
 		}
 	}
 	return subStrBegiEnd;
@@ -319,6 +321,7 @@ void BaseTextParser::reset()
 	componentsEnded = false;
 	lastDrawingPagePtr = nullptr;
 	lastComponentPtr = nullptr;
+	currentDrawingPtr = nullptr;
 }
 
 BaseTextParser::BaseTextParser(const std::wstring& text,  wchar_t separator) : text(&text), separator(separator)

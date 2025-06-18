@@ -1,8 +1,12 @@
 ﻿#include "TextParserASP.h"
 #include "DrawingPageASP.h"
 #include "BuildComponentASP.h"
+#include "BuildComponentAFT.h"
+#include "DrawingPageAFT.h"
 #include "StringUtilities.h"
+#include "ValuesCheker.h"
 
+#include <initializer_list>
 #include <string>
 #include <vector>
 #include <regex>
@@ -21,7 +25,7 @@ bool TextParserASP::readComponentNumber()
 	}
 
 	size_t currentTextPos = currentPositionInText;
-	if (!tryMoveToNextSubString(currentTextPos))
+	if (!tryMoveToNextSubStringFromPosition(currentTextPos))
 	{
 		componentsEnded = true;
 		return false;
@@ -30,11 +34,11 @@ bool TextParserASP::readComponentNumber()
 	currentTextPos = currentPositionInText;
 	if (withoutWeldedPipe || cipherDocumentStr.contains(L"-PT-") && lastDrawingPagePtr != nullptr)
 	{
-		std::wstring currentPageStr = getNextSubString(currentTextPos);
-		std::wstring totalPagesStr = getNextSubString(currentTextPos);
-		if (lastDrawingPagePtr->trySetPages(currentPageStr, totalPagesStr, false))
+		std::wstring currentPageStr = getNextSubStringFromPosition(currentTextPos);
+		std::wstring totalPagesStr = getNextSubStringFromPosition(currentTextPos);
+		if (lastDrawingPagePtr->trySetPages(currentPageStr, totalPagesStr, ValuesCheker::Type::NONE))
 		{
-			std::wstring schemeNumberStr = getNextSubString(currentTextPos);
+			std::wstring schemeNumberStr = getNextSubStringFromPosition(currentTextPos);
 			if (std::regex_match(schemeNumberStr, lastDrawingPagePtr->getSchemeNumberPattern()))
 			{
 				lastDrawingPagePtr->trySetSchemeNumber(schemeNumberStr);
@@ -51,15 +55,20 @@ bool TextParserASP::readComponentNumber()
 	}
 
 	currentTextPos = currentPositionInText;
-	if (!std::regex_search(getNextSubString(currentTextPos), StringUtilities::getRegex(LR"([A-Za-z0-9  -.]+\/[А-Яа-я0-9  -.]+)")))
+	std::wstring nextSubStr = getNextSubStringFromPosition(currentTextPos);
+	if (!std::regex_search(nextSubStr, StringUtilities::getRegex(LR"([A-Za-z0-9  -.]+\/[А-Яа-я0-9  -.]+)")))
 	{
-		std::wstring schemeNumberStr = getNextSubString(currentTextPos);
+		std::wstring schemeNumberStr = getNextSubStringFromPosition(currentTextPos);
 		std::wregex schemeNumberPattern(L"GCC-ASP-DDD");
 		if (std::regex_search(schemeNumberStr, schemeNumberPattern) || schemeNumberStr.starts_with(L"          "))
 		{
 			componentsEnded = true;
 			return false;
 		}
+	}
+
+	if (nextSubStr.starts_with(L"LEGEND/УСЛОВНЫЕ")) {
+		return false;
 	}
 
 	bool cutPipeLengthFinded = false;
@@ -93,17 +102,24 @@ bool TextParserASP::readComponentNumber()
 		}
 		return false;
 	}
-	else 
+	else
 	{
-		createDrawing<DrawingPageASP>();
-
-		tryAddComponent<BuildComponentASP>(componentNumberStr);
+		if (designer == L"AFT")
+		{
+			createDrawing<DrawingPageAFT>();
+			tryAddComponent<BuildComponentAFT>(componentNumberStr);
+		}
+		else
+		{
+			createDrawing<DrawingPageASP>();
+			tryAddComponent<BuildComponentASP>(componentNumberStr);
+		}
 
 		int componentNumber = stoi(componentNumberStr);
 		if (componentNumber == 1)
 		{
 			currentTextPos = currentPositionInText;
-			std::wstring pipeStr = getPreviouslySubString(currentTextPos);
+			std::wstring pipeStr = getPreviouslySubStringFromPosition(currentTextPos);
 			if (!pipeStr.contains(L"PIPE")) {
 				withoutWeldedPipe = true;
 			}
@@ -166,8 +182,8 @@ bool TextParserASP::readComponent()
 	if (!(subStrBuffer.end() - 1)->starts_with(L' ') && !(subStrBuffer.end() - 2)->starts_with(L' ') && !cases[1]) {
 		size_t currentPos = currentPositionInText;
 		std::vector<std::wstring> buffer;
-		buffer.emplace_back(getNextSubString(currentPos));
-		buffer.emplace_back(getNextSubString(currentPos));
+		buffer.emplace_back(getNextSubStringFromPosition(currentPos));
+		buffer.emplace_back(getNextSubStringFromPosition(currentPos));
 		if ((buffer.end() - 1)->starts_with(L"CUT PIPE")) 
 		{
 			subStrBuffer.emplace_back(getNextSubString());
@@ -320,7 +336,7 @@ void TextParserASP::readComponensFromEndText()
 bool TextParserASP::readFirstPipeInEndText(std::wstring& currentSubStr)
 {
 	size_t currentTextPos = currentPositionInText;
-	std::wstring prevSubStr(getPreviouslySubString(currentTextPos));
+	std::wstring prevSubStr(getPreviouslySubStringFromPosition(currentTextPos));
 	if (currentSubStr == L"FITTINGS/ ФИТИНГИ" && prevSubStr == L"PIPE/ ТРУБА")
 	{
 		if (lastDrawingPagePtr == nullptr) {
@@ -386,11 +402,12 @@ void TextParserASP::readTablePartData()
 	}
 }
 
-void TextParserASP::trySet(const std::wstring& nextSubStr, const std::wstring& unwantedSubStr, bool(DrawingPage::* trySetFunction)(const std::wstring&, bool))
+void TextParserASP::trySet(const std::wstring& nextSubStr, const std::wstring& unwantedSubStr, bool(DrawingPage::* trySetFunction)(const std::wstring&, ValuesCheker::Type),
+	ValuesCheker::Type chekType)
 {
 	std::wstring subStr(getPreviouslySubString(nextSubStr, true));
 	if (!subStr.starts_with(unwantedSubStr)) {
-		(*lastDrawingPagePtr.*trySetFunction)(subStr, true);
+		(*lastDrawingPagePtr.*trySetFunction)(subStr, chekType);
 	}
 }
 
@@ -398,8 +415,10 @@ void TextParserASP::parseCase1(std::wstring designTemperatureStr)
 {
 	lastDrawingPagePtr->trySetDesignTemperature(designTemperatureStr);
 	lastDrawingPagePtr->trySetDesignPressure(getNextSubString(L"РАСЧЕТ. ДАВЛЕНИЕ", true));
-	lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString(L"РАБОЧАЯ ТЕМП.", true));
-	lastDrawingPagePtr->trySetOperatingPressure(getNextSubString(L"РАБОЧЕЕ ДАВЛЕНИЕ", true));
+	trySet(L"DESIGN PRESSURE", L"РАБОЧАЯ", &DrawingPage::trySetOperatingTemperature);
+	//lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString(L"РАБОЧАЯ ТЕМП.", true));
+	trySet(L"OPER. TEMPERATURE", L"РАБОЧЕЕ ДАВЛЕНИЕ", &DrawingPage::trySetOperatingPressure);
+	//lastDrawingPagePtr->trySetOperatingPressure(getNextSubString(L"РАБОЧЕЕ ДАВЛЕНИЕ", true));
 
 	std::wstring isometricDrawingStr = getSubString(L"Изометрический чертеж", true);
 	if (isometricDrawingStr == L"") {
@@ -423,11 +442,16 @@ void TextParserASP::parseCase1(std::wstring designTemperatureStr)
 	lastDrawingPagePtr->trySetDiameterPipeline(getPreviouslySubString(L"PIPE CLASS", true));
 	trySet(L"PIPE DIAM", L"КАТЕГОРИЯ", &DrawingPage::trySetGOSTPipelineCategory);
 	lastDrawingPagePtr->trySetCategoryPipelinesTRCU(getPreviouslySubString(L"PIPE CATEGORY", true));
-	trySet(L"PIPE CATEGORY SN", L"ТЕХНОЛОГИЧЕСКАЯ", &DrawingPage::trySetTechnologicalEnvironment);
+	if (designer != L"AFT") {
+		trySet(L"PIPE CATEGORY SN", L"ТЕХНОЛОГИЧЕСКАЯ", &DrawingPage::trySetTechnologicalEnvironment);
+	}
+	else {
+		trySet(L"PIPE CATEGORY TR", L"ТЕХНОЛОГИЧЕСКАЯ", &DrawingPage::trySetTechnologicalEnvironment);
+	}
 	lastDrawingPagePtr->trySetIsolation(getPreviouslySubString(L"FLUID SERVICE", true));
 	trySet(L"INSULATION", L"СПУТНИКОВЫЙ", &DrawingPage::trySetTracing);
 	trySet(L"TRACING", L"СИСТЕМА", &DrawingPage::trySetPaintingSystem);
-	lastDrawingPagePtr->trySetStressCalculation(getPreviouslySubString(L"PAINTING SYSTEM", true));
+	trySet(L"PAINTING", L"РАСЧЕТ", &DrawingPage::trySetStressCalculation);
 	trySet(L"CRITICAL LINE", L"ПОСЛЕСВАР", &DrawingPage::trySetPostWeldingHeatTreatment);
 	trySet(L"POST WELD", L"КОНТРОЛЬ", &DrawingPage::trySetWeldInspection);
 	trySet(L"WELD INSPECTION", L"СРЕДА", &DrawingPage::trySetTestEnvironment);
@@ -440,14 +464,14 @@ void TextParserASP::parseCase1(std::wstring designTemperatureStr)
 
 	std::wstring PageTotalStr = getPreviouslySubString(L"LEGEND", true);
 	std::wstring currentPageStr = getPreviouslySubString();
-	if (!lastDrawingPagePtr->trySetPages(currentPageStr, PageTotalStr, false))
+	if (!lastDrawingPagePtr->trySetPages(currentPageStr, PageTotalStr, ValuesCheker::Type::NONE))
 	{
 		if (std::regex_search(PageTotalStr, lastDrawingPagePtr->getSchemeNumberPattern()))
 		{
 			lastDrawingPagePtr->trySetSchemeNumber(PageTotalStr);
 			PageTotalStr = currentPageStr;
 			currentPageStr = getPreviouslySubString();
-			if (!lastDrawingPagePtr->trySetPages(currentPageStr, PageTotalStr, false)) {
+			if (!lastDrawingPagePtr->trySetPages(currentPageStr, PageTotalStr, ValuesCheker::Type::NONE)) {
 				lastDrawingPagePtr->trySetPages(L"1", L"1");
 			}
 		}
@@ -533,11 +557,16 @@ void TextParserASP::parseCase2()
 		lastDrawingPagePtr->trySetDesignPressure(designPressure);
 		lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubString());
 		lastDrawingPagePtr->trySetOperatingPressure(getPreviouslySubString());
-		lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubString());
+		if (!lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubString(), ValuesCheker::Type::NONE))
+		{
+			lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString());
+			lastDrawingPagePtr->trySetOperatingPressure(getNextSubString());
+			moveToPreviouslySubString();
+		}
 		lastDrawingPagePtr->trySetSchemeNumber(getPreviouslySubString());
 		lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
 		testPressureStr = getPreviouslySubString();
-		lastDrawingPagePtr->trySetTestPressure(testPressureStr, false);
+		lastDrawingPagePtr->trySetTestPressure(testPressureStr, ValuesCheker::Type::NONE);
 	}
 
 	if (std::regex_match(testPressureStr, lastDrawingPagePtr->getTestPressurePattern())) {
@@ -552,7 +581,7 @@ void TextParserASP::parseCase2()
 
 	lastDrawingPagePtr->trySetStressCalculation(getPreviouslySubString());
 	std::wstring paintingSystemStr{ getPreviouslySubString() };
-	if (!lastDrawingPagePtr->trySetPaintingSystem(paintingSystemStr, false)) {
+	if (!lastDrawingPagePtr->trySetPaintingSystem(paintingSystemStr, ValuesCheker::Type::NONE)) {
 		lastDrawingPagePtr->trySetTracing(paintingSystemStr);
 	}
 	else {
@@ -592,7 +621,7 @@ void TextParserASP::parseCase3()
 	else {
 		if (!std::regex_match(testEnvironmentStr, lastDrawingPagePtr->getLineNumberPattern())) 
 		{
-			if (!lastDrawingPagePtr->trySetTestEnvironment(testEnvironmentStr, false))
+			if (!lastDrawingPagePtr->trySetTestEnvironment(testEnvironmentStr, ValuesCheker::Type::NONE))
 			{
 				withoutWeldedPipe = false;
 				readTablePartData();
@@ -632,28 +661,28 @@ void TextParserASP::parseCase3()
 	}
 	moveToNextSubString(L"Issued for");
 	size_t currPos = currentPositionInText;
-	moveOnCountSubStr(currPos, 3, true);
-	std::wstring operatingPressureStr(getPreviouslySubString(currPos));
+	moveOnCountSubStrFromPosition(currPos, 3, true);
+	std::wstring operatingPressureStr(getPreviouslySubStringFromPosition(currPos));
 	if (std::regex_match(operatingPressureStr, lastDrawingPagePtr->getOperatingPressurePattern()) || operatingPressureStr == L"-")
 	{
 		if (operatingPressureStr == L"-")
 		{
 			lastDrawingPagePtr->trySetTestPressure(operatingPressureStr);
-			lastDrawingPagePtr->trySetDesignPressure(getPreviouslySubString(currPos));
-			std::wstring designTemperatureStr = getPreviouslySubString(currPos);
+			lastDrawingPagePtr->trySetDesignPressure(getPreviouslySubStringFromPosition(currPos));
+			std::wstring designTemperatureStr = getPreviouslySubStringFromPosition(currPos);
 			if (designTemperatureStr == L"-") {
 				lastDrawingPagePtr->trySetDesignTemperature(designTemperatureStr);
-				lastDrawingPagePtr->trySetOperatingPressure(getPreviouslySubString(currPos));
+				lastDrawingPagePtr->trySetOperatingPressure(getPreviouslySubStringFromPosition(currPos));
 			}
 			else {
 				lastDrawingPagePtr->trySetOperatingPressure(designTemperatureStr);
 			}
-			lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubString(currPos));
+			lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubStringFromPosition(currPos));
 			if (designTemperatureStr != L"-") {
-				lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubString(currPos));
+				lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubStringFromPosition(currPos));
 			}
 			std::wstring technologicalEnvironmentStr;
-			while (tryMoveToNextSubString(currPos) && !std::regex_match(technologicalEnvironmentStr, lastDrawingPagePtr->getTechnologicalEnvironmentPattern()))
+			while (tryMoveToNextSubStringFromPosition(currPos) && !std::regex_match(technologicalEnvironmentStr, lastDrawingPagePtr->getTechnologicalEnvironmentPattern()))
 			{
 				technologicalEnvironmentStr = getNextSubString();
 			}
@@ -664,10 +693,10 @@ void TextParserASP::parseCase3()
 		else
 		{
 			lastDrawingPagePtr->trySetOperatingPressure(operatingPressureStr);
-			lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubString(currPos));
-			lastDrawingPagePtr->trySetTestPressure(getPreviouslySubString(currPos));
-			lastDrawingPagePtr->trySetDesignPressure(getPreviouslySubString(currPos));
-			lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubString(currPos));
+			lastDrawingPagePtr->trySetOperatingTemperature(getPreviouslySubStringFromPosition(currPos));
+			lastDrawingPagePtr->trySetTestPressure(getPreviouslySubStringFromPosition(currPos));
+			lastDrawingPagePtr->trySetDesignPressure(getPreviouslySubStringFromPosition(currPos));
+			lastDrawingPagePtr->trySetDesignTemperature(getPreviouslySubStringFromPosition(currPos));
 			lastDrawingPagePtr->trySetTechnologicalEnvironment(getLastSubString());
 		}
 
@@ -676,7 +705,7 @@ void TextParserASP::parseCase3()
 	}
 	moveOnCountSubStr(2);
 	currPos = currentPositionInText;
-	if (tryMoveOnCountSubStr(currPos, 6, false)) 
+	if (tryMoveOnCountSubStrFromPosition(currPos, 6, false))
 	{
 		lastDrawingPagePtr->trySetDesignPressure(getNextSubString());
 		lastDrawingPagePtr->trySetDesignTemperature(getNextSubString());
@@ -688,7 +717,7 @@ void TextParserASP::parseCase3()
 	else
 	{
 		currPos = currentPositionInText;
-		if (tryMoveToNextSubString(currPos)) 
+		if (tryMoveToNextSubStringFromPosition(currPos))
 		{
 			lastDrawingPagePtr->trySetTechnologicalEnvironment(getNextSubString());
 			moveOnCountSubStr(6, true);
@@ -720,7 +749,7 @@ void TextParserASP::readDescriptionsFromEndText()
 		currentSubStr = getSubString(lastDrawingPagePtr->getTestEnvironmentPattern(), true);
 	}
 	size_t currPos = currentPositionInText;
-	std::wstring weldInspectionStr = getPreviouslySubString(currPos);
+	std::wstring weldInspectionStr = getPreviouslySubStringFromPosition(currPos);
 	if (std::regex_match(weldInspectionStr, lastDrawingPagePtr->getWeldInspectionPattern()) || weldInspectionStr == L"-") {
 		currentSubStr = getLastSubString();
 	}
@@ -758,13 +787,22 @@ void TextParserASP::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	drawingsPtr = &drawings;
 	reset();
 
+	cipherDocumentStr = getSubString(StringUtilities::getRegex(LR"(GCC-\w{3}-DDD-\d+-\d+-\d+-\w+-ISO-\d+)"));
+	if (cipherDocumentStr == L"")
+	{
+		currentPositionInText = 0;
+		designer = getSubString(StringUtilities::getRegex(LR"(GCC-\w{3}-DDD-\d+-\d+-\d+-\w+-\w{3}-\d+)"));
+		designer = designer.substr(designer.find_first_of(L"-") + 1, 3);
+	} 
+	else {
+		designer = cipherDocumentStr.substr(cipherDocumentStr.find_first_of(L"-") + 1, 3);
+	}
+
 	//if (fileName.contains(L"16150-11-2200_005-IA-0711-GCB2B01BN-02_Sht_1"))
 	//{
 	//	int x = 2;
 	//	x = x * 2;
 	//}
-
-	cipherDocumentStr = getSubString(StringUtilities::getRegex(LR"(GCC-ASP-DDD-\d+-\d+-\d+-\w+-ISO-\d+)"));
 
 	if (getFirstSubString().starts_with(L"*********")) 
 	{
@@ -794,7 +832,7 @@ void TextParserASP::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 
 		lastDrawingPagePtr->parseSplitComponentsData();
 	}
-}
+ }
 
 void TextParserASP::reset()
 {

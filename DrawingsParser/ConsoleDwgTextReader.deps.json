@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "ConsoleDwgTextReader/1.0.0": {
+        "dependencies": {
+          "ACadSharp": "1.1.6"
+        },
+        "runtime": {
+          "ConsoleDwgTextReader.dll": {}
+        }
+      },
+      "ACadSharp/1.1.6": {
+        "runtime": {
+          "lib/net7.0/ACadSharp.dll": {
+            "assemblyVersion": "1.1.6.0",
+            "fileVersion": "1.1.6.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ConsoleDwgTextReader/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ACadSharp/1.1.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gU8rAxjoiEaXvuhww0cZFRFdSPvV1qwcAq5eyvDHfbo0I9x3Bvvip2IUDKkDMSgpzBHmW+v1fO6kSW60E73+5w==",
+      "path": "acadsharp/1.1.6",
+      "hashPath": "acadsharp.1.1.6.nupkg.sha512"
+    }
+  }
+}

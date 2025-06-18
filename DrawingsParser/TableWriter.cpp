@@ -1,4 +1,4 @@
-#include "TableWriter.h"
+Ôªø#include "TableWriter.h"
 
 #include "xlsxwriter.h"
 
@@ -6,7 +6,6 @@
 #include "IMessagePrinter.h"
 
 #include <wx/log.h>
-#include <boost/log/trivial.hpp>
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -88,7 +87,8 @@ void TableWriter::writePagesFields()
 				writeCell(currentRow, currentColumn, currentDrawingPage->getStressCalculation());
 			}
 
-			wxLogMessage("[«‡ÔËÒ¸]  ÓÌÂˆ Á‡ÔËÒË ÎËÒÚ‡ %d Ù‡ÈÎ‡ %s", currentDrawingPage->getCurrentPage(), currentDrawingPage->getFileName());
+			wxLogMessage(L"[–ó–∞–ø–∏—Å—å] –ö–æ–Ω–µ—Ü –∑–∞–ø–∏—Å–∏ –ª–∏—Å—Ç–∞ %s —Ñ–∞–π–ª–∞ %s", currentDrawingPage->getCurrentPage(), currentDrawingPage->getFileName());
+			//printer->printText(L"–ö–æ–Ω–µ—Ü –∑–∞–ø–∏—Å–∏ –ª–∏—Å—Ç–∞ " + std::to_wstring(currentDrawingPage->getCurrentPage()) + L" —Ñ–∞–π–ª–∞ " + currentDrawingPage->getFileName(), L"[–ó–∞–ø–∏—Å—å]");
 		}
 	}
 }
@@ -169,7 +169,7 @@ void TableWriter::changeFileNameIfAlreadyExists(const std::wstring& tableDirecto
 	}
 	catch (const std::exception& ex)
 	{
-		printer->printError(L"Œ¯Ë·Í‡ ÒÓÁ‰‡ÌËˇ Ù‡ÈÎ‡ Ú‡·ÎËˆ˚: " + utf8_decode(ex.what()));
+		printer->printError(L"–û—à–∏–±–∫–∞ —Å–æ–∑–¥–∞–Ω–∏—è —Ñ–∞–π–ª–∞ —Ç–∞–±–ª–∏—Ü—ã: " + utf8_decode(ex.what()));
 	}
 }
 
@@ -193,7 +193,7 @@ void TableWriter::writeTable()
 		workbook_close(workbook);
 	}
 	catch (const std::exception& ex) {
-		printer->printError(L"Œ¯Ë·Í‡ Á‡ÔÓÎÌÂÌËˇ Ù‡ÈÎ‡ Ú‡·ÎËˆ˚: " + utf8_decode(ex.what()) + L" \n¬ Ù‡ÈÎÂ " + currentFileName);
+		printer->printError(L"–û—à–∏–±–∫–∞ –∑–∞–ø–æ–ª–Ω–µ–Ω–∏—è —Ñ–∞–π–ª–∞ —Ç–∞–±–ª–∏—Ü—ã: " + utf8_decode(ex.what()) + L" \n–í —Ñ–∞–π–ª–µ " + currentFileName);
 	}
 }
 

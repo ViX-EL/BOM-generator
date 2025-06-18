@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#ifndef TableWriter_h__
+#define TableWriter_h__
+
 #include "BaseTextParser.h"
 
 #include "xlsxwriter.h"
@@ -45,4 +48,6 @@ public:
 	void createNewTableFile(const std::wstring& tableDirectoryName);
 	const std::wstring& getFileName() const;
 };
+
+#endif // TableWriter_h__
 

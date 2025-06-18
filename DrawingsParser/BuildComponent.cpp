@@ -1,46 +1,10 @@
-#include "BuildComponent.h"
+п»ї#include "BuildComponent.h"
 #include "StringUtilities.h"
 
 #include <string>
 #include <regex>
 #include <cassert>
 #include <string_view>
-
-bool trySetValue(const std::wstring& sourceValueStr, int& targetValue, const std::wregex& valuePattern, bool assertionCheck, const char* assertionMessage)
-{
-	bool isMatch = std::regex_match(sourceValueStr, valuePattern);
-	if (assertionCheck) {
-		assert(isMatch && assertionMessage);
-	}
-	if (isMatch)
-	{
-		targetValue = stoi(sourceValueStr);
-		return true;
-	}
-	return false;
-}
-
-bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck, const char* assertionMessage, bool inputCheckOff)
-{
-	if (inputCheckOff) 
-	{
-		targetValue = sourceValueStr;
-		return true;
-	}
-	else
-	{
-		bool isMatch = std::regex_match(sourceValueStr, valuePattern);
-		if (assertionCheck) {
-			assert(isMatch && assertionMessage);
-		}
-		if (isMatch)
-		{
-			targetValue = sourceValueStr;
-			return true;
-		}
-		return false;
-	}
-}
 
 BuildComponent::BuildComponent(const std::wstring& positionNumberStr)
 {
@@ -52,30 +16,33 @@ BuildComponent::BuildComponent(int positionNumber)
 	this->positionNumber = positionNumber;
 }
 
-bool BuildComponent::trySetDescription(const std::wstring& descriptionStr, bool assertionCheck)
+bool BuildComponent::trySetDescription(const std::wstring& descriptionStr, ValuesCheker::Type checkType)
 {
-	return trySetValue(descriptionStr, description, descriptionPattern, assertionCheck, "Недопустимое значение для описания компонента!");
+	return ValuesCheker::ValuesCheker::trySetValue(descriptionStr, description, descriptionPattern, false, checkType, "РќРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РѕРїРёСЃР°РЅРёСЏ РєРѕРјРїРѕРЅРµРЅС‚Р°!");
 }
 
-bool BuildComponent::trySetNominalDiameter(const std::wstring& nominalDiameterStr, bool assertionCheck)
+bool BuildComponent::trySetNominalDiameter(const std::wstring& nominalDiameterStr, ValuesCheker::Type checkType)
 {
-	return trySetValue(StringUtilities::removeSpaces(nominalDiameterStr), nominalDiameter, nominalDiameterPattern, assertionCheck, 
-		"Недопустимое значение для условного диаметра компонента!");
+	std::wstring newNominalDiameterStr = nominalDiameterStr;
+	if (*(nominalDiameterStr.end() - 1) != L'N') {
+		newNominalDiameterStr = StringUtilities::removeSpaces(nominalDiameterStr);
+	}
+	return ValuesCheker::trySetValue(newNominalDiameterStr, nominalDiameter, nominalDiameterPattern, false, checkType, "РќРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ СѓСЃР»РѕРІРЅРѕРіРѕ РґРёР°РјРµС‚СЂР° РєРѕРјРїРѕРЅРµРЅС‚Р°!");
 }
 
-bool BuildComponent::trySetAmount(const std::wstring& amountStr, bool assertionCheck)
+bool BuildComponent::trySetAmount(const std::wstring& amountStr, ValuesCheker::Type checkType)
 {
-	return trySetValue(amountStr, amount, amountPattern, assertionCheck, "Недопустимое значение для количества компонента!");
+	return ValuesCheker::trySetValue(amountStr, amount, amountPattern, false, checkType, "РќРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РєРѕР»РёС‡РµСЃС‚РІР° РєРѕРјРїРѕРЅРµРЅС‚Р°!");
 }
 
-bool BuildComponent::trySetPositionCode(const std::wstring& positionCodeStr, bool assertionCheck)
+bool BuildComponent::trySetPositionCode(const std::wstring& positionCodeStr, ValuesCheker::Type checkType)
 {
-	return trySetValue(positionCodeStr, positionCode, positionCodePattern, assertionCheck, "Недопустимое значение для кода позиции компонента!");
+	return ValuesCheker::trySetValue(positionCodeStr, positionCode, positionCodePattern, false, checkType, "РќРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РєРѕРґР° РїРѕР·РёС†РёРё РєРѕРјРїРѕРЅРµРЅС‚Р°!");
 }
 
-bool BuildComponent::trySetDocument(const std::wstring& documentStr, bool assertionCheck)
+bool BuildComponent::trySetDocument(const std::wstring& documentStr, ValuesCheker::Type checkType)
 {
-	return trySetValue(documentStr, document, documentPattern, assertionCheck, "Недопустимое значение для документа компонента!");
+	return ValuesCheker::trySetValue(documentStr, document, documentPattern, false, checkType, "РќРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РґРѕРєСѓРјРµРЅС‚Р° РєРѕРјРїРѕРЅРµРЅС‚Р°!");
 }
 
 int BuildComponent::getPositionNumber() const
@@ -115,10 +82,23 @@ const std::wregex& BuildComponent::getPositionNumberPattern()
 
 void BuildComponent::parseSplitData()
 {
-	splitData = std::make_shared<SplitBuildComponentData>(this);
+	createEmptySplitData();
+	splitData->parse();
+}
+
+void BuildComponent::createEmptySplitData()
+{
+	if (splitData == nullptr) {
+		splitData = std::make_shared<SplitBuildComponentData>(this);
+	}
 }
 
 std::shared_ptr<SplitBuildComponentData> BuildComponent::getSplitData()
 {
-	return splitData;
+	if (splitData != nullptr) {
+		return splitData;
+	}
+	else {
+		throw std::exception("Р Р°Р·Р±РёС‚С‹С… РґР°РЅРЅС‹С… РєРѕРјРїРѕРЅРµРЅС‚Р° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚!");
+	}
 }

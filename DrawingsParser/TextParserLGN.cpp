@@ -1,9 +1,9 @@
-#include "TextParserLGN.h"
+ï»¿#include "TextParserLGN.h"
 #include "StringConvert.h"
 #include "StringUtilities.h"
 #include "BuildComponentLGN.h"
 #include "DrawingPageLGN.h"
-#include "StringUtilities.h"
+#include "ValuesCheker.h"
 
 #include <functional>
 #include <regex>
@@ -84,19 +84,19 @@ void TextParserLGN::readDocument()
 	std::vector<std::wstring> subStringsBuffer;
 	size_t position = currentPositionInText;
 	for (int i{ 0 }; i < 3; i++) {
-		subStringsBuffer.emplace_back(getNextSubString(position));
+		subStringsBuffer.emplace_back(getNextSubStringFromPosition(position));
 	}
 	std::wstring documentStr = *(subStringsBuffer.begin());
 
-	if (subStringsBuffer[0] == L"–" || std::regex_match(subStringsBuffer[0], lastComponentPtr->getAmountPattern()) || subStringsBuffer[0] == L"None") 
+	if (subStringsBuffer[0] == L"â€“" || std::regex_match(subStringsBuffer[0], lastComponentPtr->getAmountPattern()) || subStringsBuffer[0] == L"None") 
 	{
-		if (subStringsBuffer[0] == L"–" || subStringsBuffer[0] == L"None") {
+		if (subStringsBuffer[0] == L"â€“" || subStringsBuffer[0] == L"None") {
 			moveToNextSubString();
 		}
 		return;
 	}
 
-	// Ïîäñ÷¸ò êîëè÷åñòâà ïîäñòðîê, êîòîðûå ñîñòàâëÿþò ñòðîêó äîêóìåíòà êîìïîíåíòà
+	// ÐŸÐ¾Ð´ÑÑ‡Ñ‘Ñ‚ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð° Ð¿Ð¾Ð´ÑÑ‚Ñ€Ð¾Ðº, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ ÑÐ¾ÑÑ‚Ð°Ð²Ð»ÑÑŽÑ‚ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð° ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ð°
 	size_t documentSubStrCount{ 1 };
 	while (true)
 	{
@@ -122,7 +122,7 @@ void TextParserLGN::readDocument()
 		else 
 		{
 			documentStr = documentStr + *(subStringsBuffer.begin() + documentSubStrCount);
-			subStringsBuffer.push_back(getNextSubString(position));
+			subStringsBuffer.push_back(getNextSubStringFromPosition(position));
 			documentSubStrCount++;
 		}
 	}
@@ -134,7 +134,7 @@ bool TextParserLGN::isEndOfComponent(const std::wstring& stringAfterComponent, s
 	{
 		bool isEnd = subStr.starts_with(L"CUT PIPE LENGTH");
 		if (!isEnd) {
-			isEnd = std::regex_match(subStr, StringUtilities::getRegex(LR"([A-Z ]+\/[À-ß ]+)"));
+			isEnd = std::regex_match(subStr, StringUtilities::getRegex(LR"([A-Z ]+\/[Ð-Ð¯ ]+)"));
 		}
 		if (!isEnd) {
 			isEnd = subStr.starts_with(L"*******");
@@ -145,10 +145,11 @@ bool TextParserLGN::isEndOfComponent(const std::wstring& stringAfterComponent, s
 	bool isEnd = std::regex_match(stringAfterComponent, BuildComponent::getPositionNumberPattern());
 	if (isEnd)
 	{
-		std::wstring secondStringAfterComponent = getNextSubString(positionInText);
+		std::wstring secondStringAfterComponent = getNextSubStringFromPosition(positionInText);
 		isEnd = std::regex_match(secondStringAfterComponent, lastComponentPtr->getDescriptionPattern()) && !checkEnd(secondStringAfterComponent);
 		if (!isEnd) {
-			isEnd = std::regex_match(stringAfterComponent, lastDrawingPagePtr->getPagesPattern()) && std::regex_match(secondStringAfterComponent, lastDrawingPagePtr->getPagesPattern());
+			isEnd = std::regex_match(stringAfterComponent, lastDrawingPagePtr->getCurrentPagePattern()) &&
+				std::regex_match(secondStringAfterComponent, lastDrawingPagePtr->getTotalPagesPattern());
 		}
 		return isEnd;
 	}
@@ -168,14 +169,14 @@ bool TextParserLGN::findCountStr()
 			moveToPreviouslySubString();
 		}
 		else {
-			findedCountStr = getNextSubString(L"ÊÎË-ÂÎ");
+			findedCountStr = getNextSubString(L"ÐšÐžÐ›-Ð’Ðž");
 		}
 	}
 	else {
-		findedCountStr = getNextSubString(L"ÊÎË-ÂÎ");
+		findedCountStr = getNextSubString(L"ÐšÐžÐ›-Ð’Ðž");
 	}
 
-	if (findedCountStr.empty()) { // Åñëè íå íàéäåíî
+	if (findedCountStr.empty()) { // Ð•ÑÐ»Ð¸ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾
 		return false;
 	}
 
@@ -191,7 +192,7 @@ bool TextParserLGN::readList()
 		return false;
 	}
 
-	while (true) //×òåíèå âñåõ êîìïîíåíòîâ
+	while (true) //Ð§Ñ‚ÐµÐ½Ð¸Ðµ Ð²ÑÐµÑ… ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ð¾Ð²
 	{
 		if (!readComponent())
 		{
@@ -207,14 +208,14 @@ bool TextParserLGN::readList()
 		lastDrawingPagePtr->trySetPages(L"1", L"1");
 	}
 	else {
-		std::wstring thisDocumentStr = getSubString(L"Íàñòîÿùèé äîêóìåíò");
+		std::wstring thisDocumentStr = getSubString(L"ÐÐ°ÑÑ‚Ð¾ÑÑ‰Ð¸Ð¹ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚");
 		moveOnCountSubStr(2, true);
 		std::wstring pagesStr = getPreviouslySubString();
 		std::wstring pageStr = getPreviouslySubString();
 		lastDrawingPagePtr->trySetPages(pageStr, pagesStr);
 	}
 
-	moveToSubString(L"ÍÀ ÏËÎÙÀÄÊÅ");
+	moveToSubString(L"ÐÐ ÐŸÐ›ÐžÐ©ÐÐ”ÐšÐ•");
 	std::wstring currentSubStr;
 	while (!std::regex_match(currentSubStr, StringUtilities::getRegex(LR"(GCC-LGN-DDD-\d+-\d+-\d+-\w+-\w+-\d+)"))) {
 		currentSubStr = getNextSubString();
@@ -226,13 +227,13 @@ bool TextParserLGN::readList()
 	lastDrawingPagePtr->trySetTestPressure(getNextSubString());
 	std::wstring weldInspection = getNextSubString();
 	std::wstring postWeldingHeatTreatmentStr;
-	if (!lastDrawingPagePtr->trySetWeldInspection(weldInspection, false)) {
+	if (!lastDrawingPagePtr->trySetWeldInspection(weldInspection, ValuesCheker::Type::NONE)) {
 		postWeldingHeatTreatmentStr = weldInspection;
 	}
 	else {
 		postWeldingHeatTreatmentStr = getNextSubString();
 	}
-	if (!lastDrawingPagePtr->trySetPostWeldingHeatTreatment(postWeldingHeatTreatmentStr, false)) {
+	if (!lastDrawingPagePtr->trySetPostWeldingHeatTreatment(postWeldingHeatTreatmentStr, ValuesCheker::Type::NONE)) {
 		lastDrawingPagePtr->trySetPaintingSystem(postWeldingHeatTreatmentStr);
 	}
 	else {
@@ -240,7 +241,7 @@ bool TextParserLGN::readList()
 	}
 
 	std::wstring testEnvironmentStr = getNextSubString();
-	if (testEnvironmentStr == L"Âîçäóõ/Àçîò") {
+	if (testEnvironmentStr == L"Ð’Ð¾Ð·Ð´ÑƒÑ…/ÐÐ·Ð¾Ñ‚") {
 		lastDrawingPagePtr->trySetTestEnvironment(testEnvironmentStr + L' ' + getNextSubString());
 	}
 	else {
@@ -252,16 +253,17 @@ bool TextParserLGN::readList()
 	moveOnCountSubStr(2);
 	lastDrawingPagePtr->trySetTracing(getNextSubString());
 	std::wstring operatingPressureStr = getNextSubString();
-	if (!lastDrawingPagePtr->trySetOperatingPressure(operatingPressureStr, false)) {
-		lastDrawingPagePtr->trySetOperatingTemperature(operatingPressureStr);
+	if (!lastDrawingPagePtr->trySetOperatingPressure(operatingPressureStr, ValuesCheker::Type::NONE)) {
+		lastDrawingPagePtr->trySetOperatingTemperature(operatingPressureStr, ValuesCheker::Type::NONE);
 	}
-	else {
-		lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString());
+	else
+	{
+		lastDrawingPagePtr->trySetOperatingTemperature(getNextSubString(), ValuesCheker::Type::NONE);
 	}
 
-	std::wstring cipherDocumentStr(getPreviouslySubString(L"Ãàçîõèìè÷åñêèé êîìïëåêñ"));
+	std::wstring cipherDocumentStr(getPreviouslySubString(L"Ð“Ð°Ð·Ð¾Ñ…Ð¸Ð¼Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ ÐºÐ¾Ð¼Ð¿Ð»ÐµÐºÑ"));
 	if (std::regex_match(cipherDocumentStr, lastDrawingPagePtr->getCipherDocumentPattern())) {
-		lastDrawingPagePtr->trySetCipherDocument(getPreviouslySubString(L"Ãàçîõèìè÷åñêèé êîìïëåêñ"));
+		lastDrawingPagePtr->trySetCipherDocument(getPreviouslySubString(L"Ð“Ð°Ð·Ð¾Ñ…Ð¸Ð¼Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ ÐºÐ¾Ð¼Ð¿Ð»ÐµÐºÑ"));
 	}
 	else {
 		lastDrawingPagePtr->trySetCipherDocument(getSubString(lastDrawingPagePtr->getCipherDocumentPattern()));
@@ -271,10 +273,10 @@ bool TextParserLGN::readList()
 	lastDrawingPagePtr->trySetCategoryPipelinesTRCU(getNextSubString());
 	moveToNextSubString();
 
-	lastDrawingPagePtr->trySetIsometricDrawing(getNextSubString(L"Èçîìåòðè÷åñêèé ÷åðòåæ"));
+	lastDrawingPagePtr->trySetIsometricDrawing(getNextSubString(L"Ð˜Ð·Ð¾Ð¼ÐµÑ‚Ñ€Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ‡ÐµÑ€Ñ‚ÐµÐ¶"));
 	moveToPreviouslySubString();
 	std::wstring stressCalculationStr = getPreviouslySubString();
-	if (!lastDrawingPagePtr->trySetStressCalculation(stressCalculationStr, false)) {
+	if (!lastDrawingPagePtr->trySetStressCalculation(stressCalculationStr, ValuesCheker::Type::NONE)) {
 		lastDrawingPagePtr->trySetLineNumber(stressCalculationStr);
 	}
 	else {
@@ -282,16 +284,32 @@ bool TextParserLGN::readList()
 	}
 
 	std::wstring schemeNumber(getPreviouslySubString());
-	if (!schemeNumber.starts_with(L"* (See note /")) {
-		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber);
+	if (!schemeNumber.starts_with(L"* (See note /")) 
+	{
+		size_t pagesNumber = currentDrawingPtr->pages.size();
+		if(!lastDrawingPagePtr->trySetSchemeNumber(schemeNumber, ValuesCheker::Type::NONE))
+		{
+			if (pagesNumber > 1)
+			{
+				schemeNumber = currentDrawingPtr->pages[pagesNumber - 2]->getSchemeNumber();
+				lastDrawingPagePtr->trySetSchemeNumber(schemeNumber, ValuesCheker::Type::NONE);
+			}
+			if (lastDrawingPagePtr->getSchemeNumber() == L"-")
+			{
+				size_t currentPosition = currentPositionInText;
+				schemeNumber = getSubString(lastDrawingPagePtr->getSchemeNumberPattern());
+				lastDrawingPagePtr->trySetSchemeNumber(schemeNumber, ValuesCheker::Type::NONE);
+				currentPositionInText = currentPosition;
+			}
+		}
 	}
 
-	lastDrawingPagePtr->trySetFileName(getSubString(L"Èìÿ ôàéëà"));
+	lastDrawingPagePtr->trySetFileName(getSubString(L"Ð˜Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð°"));
 	if (schemeNumber.starts_with(L"* (See note /")) {
 		moveOnCountSubStr(3);
 		schemeNumber = getNextSubString();
 		schemeNumber.erase(0, 3);
-		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber, false);
+		lastDrawingPagePtr->trySetSchemeNumber(schemeNumber, ValuesCheker::Type::NONE);
 	}
 	return true;
 }
@@ -332,6 +350,8 @@ void TextParserLGN::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	bool success{ false };
 	do {
 		success = readList();
-		lastDrawingPagePtr->parseSplitComponentsData();
+		if (lastDrawingPagePtr != nullptr) {
+			lastDrawingPagePtr->parseSplitComponentsData();
+		}
 	} while (success);
 }

@@ -1,4 +1,7 @@
-#pragma once
+﻿#pragma once
+
+#ifndef DialogPrinter_h__
+#define DialogPrinter_h__
 
 #include "IMessagePrinter.h"
 #include "TextDialog.h"
@@ -13,4 +16,6 @@ public:
 	void printError(const std::wstring& message) const override;
 	void printText(const std::wstring& message, const std::wstring& label) override;
 };
+
+#endif // DialogPrinter_h__
 

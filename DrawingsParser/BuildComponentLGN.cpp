@@ -1,17 +1,18 @@
-#include "BuildComponentLGN.h"
+Ôªø#include "BuildComponentLGN.h"
+#include "ValuesCheker.h"
 
 BuildComponentLGN::BuildComponentLGN(const std::wstring& positionNumberStr) : BuildComponent(positionNumberStr)
 {
-	descriptionPattern.assign(LR"([A-Za-z¿-ﬂ‡-ˇ0-9 -=./)(®∏"]{12,})");
+	descriptionPattern.assign(LR"([A-Za-z–ê-–Ø–∞-—è0-9 -=./)(–Å—ë"]{12,})");
 	nominalDiameterPattern.assign(LR"(\d{1,4} ?x( ?\d+)?|\d{1,4})");
 	amountPattern.assign(LR"( {0,2}\d{1,3}M?| {0,2}\d{1,3}\.\d{1,4}M)");
-	documentPattern.assign(LR"([0-9a-zA-Z"\-\/ .;,()®∏¿-ﬂa-ˇ]+)");
+	documentPattern.assign(LR"([0-9a-zA-Z"\-\/ .;,()–Å—ë–ê-–Øa-—è]+)");
 }
 
-bool BuildComponentLGN::trySetAmount(const std::wstring& amountStr, bool assertionCheck)
+bool BuildComponentLGN::trySetAmount(const std::wstring& amountStr, ValuesCheker::Type checkType)
 {
 	if (amountStr == L"None") {
 		return true;
 	}
-	return BuildComponent::trySetAmount(amountStr, assertionCheck);
+	return BuildComponent::trySetAmount(amountStr, checkType);
 }

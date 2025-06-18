@@ -1,10 +1,13 @@
-#include "TextParserNAG.h"
+п»ї#include "TextParserNAG.h"
 #include "DrawingPageNAG.h"
 #include "BuildComponentNAG.h"
 #include "DrawingPage.h"
 #include "StringUtilities.h"
+#include "TextParser.h"
+#include "ValuesCheker.h"
 
 #include <regex>
+#include <functional>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -17,7 +20,7 @@ bool TextParserNAG::readComponentNumber()
 	}
 
 	std::wstring componentNumberStr(getNextSubString());
-	//Если не найден номер компонента
+	//Р•СЃР»Рё РЅРµ РЅР°Р№РґРµРЅ РЅРѕРјРµСЂ РєРѕРјРїРѕРЅРµРЅС‚Р°
 	bool isLineNumber = false;
 	if (lastDrawingPagePtr != nullptr) {
 		isLineNumber = std::regex_match(componentNumberStr, lastDrawingPagePtr->getLineNumberPattern());
@@ -30,7 +33,7 @@ bool TextParserNAG::readComponentNumber()
 			{
 				componentsEnded = true;
 				std::wstring formatStr = getPreviouslySubString(L"LEGEND");
-				if (formatStr.starts_with(L"Формат")) {
+				if (formatStr.starts_with(L"Р¤РѕСЂРјР°С‚")) {
 					moveOnCountSubStr(2, true);
 				}
 				else {
@@ -38,7 +41,7 @@ bool TextParserNAG::readComponentNumber()
 				}
 
 				std::wstring pagesCountStr(getPreviouslySubString());
-				if (std::regex_match(pagesCountStr, lastDrawingPagePtr->getPagesPattern()))
+				if (std::regex_match(pagesCountStr, lastDrawingPagePtr->getTotalPagesPattern()))
 				{
 					lastDrawingPagePtr->trySetPages(getPreviouslySubString(), pagesCountStr);
 					lastDrawingPagePtr->trySetLineNumber(getPreviouslySubString());
@@ -53,12 +56,12 @@ bool TextParserNAG::readComponentNumber()
 			}
 		}
 		else if (componentNumberStr.starts_with(L"ERECTION MATERIALS")) {
-			moveToSubString(L"КОЛ-ВО");
+			moveToSubString(L"РљРћР›-Р’Рћ");
 		}
 		else if (isLineNumber) {
 			lastDrawingPagePtr->trySetLineNumber(componentNumberStr);
 			std::wstring pageStr(getNextSubString());
-			if (std::regex_match(pageStr, lastDrawingPagePtr->getPagesPattern())) {
+			if (std::regex_match(pageStr, lastDrawingPagePtr->getCurrentPagePattern())) {
 				lastDrawingPagePtr->trySetPages(pageStr, getNextSubString());
 			}
 			componentsEnded = true;
@@ -67,16 +70,15 @@ bool TextParserNAG::readComponentNumber()
 	}
 	else
 	{
-		if (lastDrawingPagePtr == nullptr)
-		{
-			createDrawing<DrawingPageNAG>();
-		}
+
+		createDrawing<DrawingPageNAG>();
 		tryAddComponent<BuildComponentNAG>(componentNumberStr);
 		return true;
 	}
 }
 
-void TextParserNAG::writeValueOfTwoSubStr(bool(DrawingPage::* trySetFunction)(const std::wstring&, bool), std::initializer_list<std::wstring> ifEqualStrList, const std::wstring& firstStr)
+void TextParserNAG::writeValueOfTwoSubStr(bool(DrawingPage::* trySetFunction)(const std::wstring&, ValuesCheker::Type), std::initializer_list<std::wstring> ifEqualStrList,
+	const std::wstring& firstStr, ValuesCheker::Type checkType)
 {
 	std::wstring subStr;
 	if (firstStr == L"") {
@@ -92,7 +94,7 @@ void TextParserNAG::writeValueOfTwoSubStr(bool(DrawingPage::* trySetFunction)(co
 			break;
 		}
 	}
-	(*lastDrawingPagePtr.*trySetFunction)(subStr, true);
+	(*lastDrawingPagePtr.*trySetFunction)(subStr, checkType);
 }
 
 void TextParserNAG::reset()
@@ -103,7 +105,7 @@ void TextParserNAG::reset()
 
 void TextParserNAG::readTablePartData()
 {
-	std::wstring schemeNumber(getNextSubString(L"ЛИСТОВ"));
+	std::wstring schemeNumber(getNextSubString(L"Р›РРЎРўРћР’"));
 	bool cipherWasFoundEarlier = false;
 	if (std::regex_match(schemeNumber, lastDrawingPagePtr->getCipherDocumentPattern()))
 	{
@@ -111,10 +113,10 @@ void TextParserNAG::readTablePartData()
 		lastDrawingPagePtr->trySetCipherDocument(schemeNumber);
 		moveToNextSubString();
 		lastDrawingPagePtr->trySetIsometricDrawing(getNextSubString());
-		std::wstring totalPagesStr = getPreviouslySubString(L"Формат", true);
+		std::wstring totalPagesStr = getPreviouslySubString(L"Р¤РѕСЂРјР°С‚", true);
 		std::wstring currentPageStr = getPreviouslySubString();
 		lastDrawingPagePtr->trySetPages(currentPageStr, totalPagesStr);
-		schemeNumber = getNextSubString(L"КЛАСС ТРУБОПРОВОДА", true);
+		schemeNumber = getNextSubString(L"РљР›РђРЎРЎ РўР РЈР‘РћРџР РћР’РћР”Рђ", true);
 	}
 
 	bool isFlareFarming = false;
@@ -124,7 +126,7 @@ void TextParserNAG::readTablePartData()
 	}
 	else
 	{
-		std::wregex flareFarmingPattern(L"Факельное хозяйство");
+		std::wregex flareFarmingPattern(L"Р¤Р°РєРµР»СЊРЅРѕРµ С…РѕР·СЏР№СЃС‚РІРѕ");
 		if (std::regex_search(*text, flareFarmingPattern) && !std::regex_match(schemeNumber, lastDrawingPagePtr->getDesignPressurePattern())) {
 			isFlareFarming = true;
 		}
@@ -148,16 +150,16 @@ void TextParserNAG::readTablePartData()
 	{
 		lastDrawingPagePtr->trySetDesignTemperature(getNextSubString());
 		writeValueOfTwoSubStr(&DrawingPage::trySetOperatingPressure, { L"HYDROSTATIC/" });
-		writeValueOfTwoSubStr(&DrawingPage::trySetOperatingTemperature, { L"Не ниже 5 /" });
+		writeValueOfTwoSubStr(&DrawingPage::trySetOperatingTemperature, { L"РќРµ РЅРёР¶Рµ 5 /" });
 		lastDrawingPagePtr->trySetTestPressure(getNextSubString());
 		writeValueOfTwoSubStr(&DrawingPage::trySetTestEnvironment, { L"PLANT AIR /", L"FW /" });
-		writeValueOfTwoSubStr(&DrawingPage::trySetWeldInspection, { L"2 метода объем" });
+		writeValueOfTwoSubStr(&DrawingPage::trySetWeldInspection, { L"2 РјРµС‚РѕРґР° РѕР±СЉРµРј" });
 		lastDrawingPagePtr->trySetPostWeldingHeatTreatment(getNextSubString());
 		lastDrawingPagePtr->trySetStressCalculation(getNextSubString());
 		lastDrawingPagePtr->trySetPaintingSystem(getNextSubString());
 		lastDrawingPagePtr->trySetTracing(getNextSubString());
 		std::wstring isolation(getNextSubString());
-		if (!lastDrawingPagePtr->trySetIsolation(isolation, false)) {
+		if (!lastDrawingPagePtr->trySetIsolation(isolation, ValuesCheker::Type::NONE)) {
 			lastDrawingPagePtr->trySetTechnologicalEnvironment(isolation);
 		}
 		else {
@@ -183,26 +185,25 @@ TextParserNAG::TextParserNAG(const std::wstring& text, wchar_t separator) : Base
 
 bool TextParserNAG::isEndOfComponent(const std::wstring& stringAfterComponent) const
 {
-	std::function checkEnd = [this](const std::wstring& subStr)
-		{
-			bool isEnd = subStr.starts_with(L"CUT PIPE LENGTH");
-			if (!isEnd) {
-				isEnd = subStr.starts_with(L"*******");
-			}
-			if (!isEnd) {
-				isEnd = subStr.starts_with(L"ERECTION MATERIALS");
-			}
-			if (!isEnd) {
-				isEnd = regex_match(subStr, lastDrawingPagePtr->getLineNumberPattern());
-			}
-			return isEnd;
-		};
+	std::function checkEnd = [this](const std::wstring& subStr) {
+		bool isEnd = subStr.starts_with(L"CUT PIPE LENGTH");
+		if (!isEnd) {
+			isEnd = subStr.starts_with(L"*******");
+		}
+		if (!isEnd) {
+			isEnd = subStr.starts_with(L"ERECTION MATERIALS");
+		}
+		if (!isEnd) {
+			isEnd = regex_match(subStr, lastDrawingPagePtr->getLineNumberPattern());
+		}
+		return isEnd;
+	};
 
 	bool isEnd = std::regex_match(stringAfterComponent, BuildComponent::getPositionNumberPattern());
 	if (isEnd)
 	{
 		size_t positionInText = currentPositionInText;
-		std::wstring secondStringAfterComponent = getNextSubString(positionInText);
+		std::wstring secondStringAfterComponent = getNextSubStringFromPosition(positionInText);
 		isEnd = std::regex_match(secondStringAfterComponent, lastComponentPtr->getDescriptionPattern()) && !checkEnd(secondStringAfterComponent);
 		return isEnd;
 	}
@@ -248,8 +249,8 @@ bool TextParserNAG::readComponent()
 	if (!(subStrBuffer.end() - 2)->starts_with(L' ') && !(subStrBuffer.end() - 3)->starts_with(L' ') && !cases[1]) {
 		size_t currentPos = currentPositionInText;
 		std::vector<std::wstring> buffer;
-		buffer.emplace_back(getNextSubString(currentPos));
-		buffer.emplace_back(getNextSubString(currentPos));
+		buffer.emplace_back(getNextSubStringFromPosition(currentPos));
+		buffer.emplace_back(getNextSubStringFromPosition(currentPos));
 		if ((buffer.end() - 1)->starts_with(L"CUT PIPE"))
 		{
 			subStrBuffer.emplace_back(getNextSubString());
@@ -281,7 +282,7 @@ bool TextParserNAG::readComponent()
 		}
 		else
 		{
-				lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
+			lastComponentPtr->trySetNominalDiameter(*(subStrBuffer.end() - 3));
 		}
 		lastComponentPtr->trySetAmount(*(subStrBuffer.end() - 2));
 	}
@@ -306,14 +307,14 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	reset();
 
 	if (text->find(L"FABRICATION MATERIALS", currentPositionInText) != std::wstring::npos || text->find(L"ERECTION MATERIALS", currentPositionInText) != std::wstring::npos) {
-		moveToSubString(L"КОЛ-ВО");
+		moveToSubString(L"РљРћР›-Р’Рћ");
 	}
 	else if (text->find(L"*********", currentPositionInText) != std::wstring::npos)
 	{
 		moveToSubString(L"*********");
 		moveOnCountSubStr(2);
 	}
-	else if (std::regex_match(getFirstSubString(), StringUtilities::getRegex(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{8,9}-\d{2})"))) // Если первая строка - номер линии
+	else if (std::regex_match(getFirstSubString(), StringUtilities::getRegex(LR"(\d{5}-\w{2}-\d{4}\/\d{3}-\w{2,4}-\d{4}-[0-9A-Z]{8,9}-\d{2})"))) // Р•СЃР»Рё РїРµСЂРІР°СЏ СЃС‚СЂРѕРєР° - РЅРѕРјРµСЂ Р»РёРЅРёРё
 	{
 		componentsEnded = true;
 		currentListEmpty = true;
@@ -322,7 +323,7 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 		currentPositionInText = 0;
 	}
 
-	while (true) //Чтение всех компонентов
+	while (true) //Р§С‚РµРЅРёРµ РІСЃРµС… РєРѕРјРїРѕРЅРµРЅС‚РѕРІ
 	{
 		if (!readComponent())
 		{
@@ -342,6 +343,6 @@ void TextParserNAG::parse(const std::wstring& fileName, std::vector<Drawing>& dr
 	}
 	else {
 		currentListEmpty = false;
-		wxLogMessage("[Запись] Отсутствуют записываемые листы в файле %s", fileName);
+		wxLogMessage("[Р—Р°РїРёСЃСЊ] РћС‚СЃСѓС‚СЃС‚РІСѓСЋС‚ Р·Р°РїРёСЃС‹РІР°РµРјС‹Рµ Р»РёСЃС‚С‹ РІ С„Р°Р№Р»Рµ %s", fileName);
 	}
 }

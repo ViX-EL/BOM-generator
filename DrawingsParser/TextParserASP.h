@@ -5,6 +5,7 @@
 
 #include "BaseTextParser.h"
 #include "DrawingPageASP.h"
+#include "ValuesCheker.h"
 
 #include <string>
 #include <memory>
@@ -17,6 +18,7 @@ private:
 	bool pageStartWithContFrom = false;
 
 	std::wstring cipherDocumentStr;
+	std::wstring designer;
 
 	void readComponensFromEndText();
 	bool readComponentNumber() override;
@@ -28,7 +30,8 @@ private:
 	void parseCase1(std::wstring designTemperatureStr);
 	void parseCase2();
 	void parseCase3();
-	void trySet(const std::wstring& nextSubStr, const std::wstring& unwantedSubStr, bool(DrawingPage::* trySetFunction)(const std::wstring&, bool));
+	void trySet(const std::wstring& nextSubStr, const std::wstring& unwantedSubStr, bool(DrawingPage::* trySetFunction)(const std::wstring&, ValuesCheker::Type),
+		ValuesCheker::Type chekType = ValuesCheker::getType());
 
 public:
 	TextParserASP(const std::wstring& text, wchar_t separator);

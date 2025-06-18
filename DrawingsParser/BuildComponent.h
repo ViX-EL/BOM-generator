@@ -1,15 +1,15 @@
-#pragma once
+﻿#pragma once
+
+#ifndef BuildComponent_h__
+#define BuildComponent_h__
 
 #include "SplitBuildComponentData.h"
+#include "ValuesCheker.h"
 
 #include <string>
 #include <regex>
 #include <memory>
 #include <string_view>
-
-bool trySetValue(const std::wstring& sourceValueStr, int& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "");
-bool trySetValue(const std::wstring& sourceValueStr, std::wstring& targetValue, const std::wregex& valuePattern, bool assertionCheck = true, const char* assertionMessage = "", 
-	bool inputCheckOff = false);
 
 class BuildComponent
 {
@@ -34,11 +34,11 @@ protected:
 	explicit BuildComponent(int positionNumber);
 
 public:
-	bool trySetDescription(const std::wstring& descriptionStr, bool assertionCheck = true);
-	bool trySetNominalDiameter(const std::wstring& nominalDiameterStr, bool assertionCheck = true);
-	virtual bool trySetAmount(const std::wstring& amountStr, bool assertionCheck = true);
-	bool trySetDocument(const std::wstring& documentStr, bool assertionCheck = true);
-	virtual bool trySetPositionCode(const std::wstring& positionCodeStr, bool assertionCheck = true);
+	bool trySetDescription(const std::wstring& descriptionStr, ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetNominalDiameter(const std::wstring& nominalDiameterStr, ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetAmount(const std::wstring& amountStr, ValuesCheker::Type checkType = ValuesCheker::getType());
+	bool trySetDocument(const std::wstring& documentStr, ValuesCheker::Type checkType = ValuesCheker::getType());
+	virtual bool trySetPositionCode(const std::wstring& positionCodeStr, ValuesCheker::Type checkType = ValuesCheker::getType());
 
 	int getPositionNumber() const;
 	std::wstring_view getDescription() const;
@@ -55,6 +55,9 @@ public:
 	const std::wregex& getPositionCodePattern() { return positionCodePattern; }
 
 	void parseSplitData();
+	void createEmptySplitData();
 	std::shared_ptr<SplitBuildComponentData> getSplitData();
 };
+
+#endif // BuildComponent_h__
 

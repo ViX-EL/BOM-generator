@@ -1,4 +1,7 @@
-#pragma once
+ï»¿#pragma once
+
+#ifndef BOMGeneratorApp_h__
+#define BOMGeneratorApp_h__
 
 #include <string>
 
@@ -18,7 +21,9 @@ private:
 		LOAD_PARSE_WRITE = 1 << 2     // 0100
 	};
 
-	//Ôóíêöèÿ äëÿ òåñòèðîâàíèÿ îòäåëüíûõ ôàéëîâ
+	//Ð¤ÑƒÐ½ÐºÑ†Ð¸Ñ Ð´Ð»Ñ Ñ‚ÐµÑÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ñ‹Ñ… Ñ„Ð°Ð¹Ð»Ð¾Ð²
 	void processingOneFile(std::string& fileName, unsigned int state);
 };
+
+#endif // BOMGeneratorApp_h__
 
